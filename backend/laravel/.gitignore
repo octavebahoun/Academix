@@ -1,0 +1,74 @@
+# ==========================================
+# LARAVEL BACKEND GITIGNORE
+# ==========================================
+
+# Dependencies
+/node_modules
+/vendor
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+.env.backup
+.env.production
+
+# Build Assets
+/public/build
+/public/hot
+/public/storage
+
+# Storage & Cache
+/storage/*.key
+/storage/pail
+/bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+
+# IDE & Editors
+.phpactor.json
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+*.sublime-*
+
+# Testing
+.phpunit.result.cache
+/.phpunit.cache
+/coverage
+
+# Composer
+/auth.json
+
+# Homestead & Vagrant
+Homestead.json
+Homestead.yaml
+.vagrant/
+
+# OS Specific
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Mix & Vite
+/public/mix-manifest.json
+/public/hot
+
+# Temporary Files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Laravel Specific
+/.phpstorm.meta.php
+/_ide_helper.php
+/_ide_helper_models.php
+.phpstorm.meta.php
