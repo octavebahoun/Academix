@@ -58,9 +58,9 @@ npm run dev
 
 ## 👥 Équipe
 
-- Hanna - Frontend (React)
-- Mourchid - Backend (Laravel)
-- Toi - Backend (Node.js + Python IA)
+- Hanna BIAOU - Frontend (React)
+- Mourchid FOLARIN - Backend (Laravel)
+- Octave BAHOUN-HOUTOUKPE - Backend (Node.js + Python IA)
 
 ---
 
