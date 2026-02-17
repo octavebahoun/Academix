@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     # Modèles
     LLM_MODEL: str = "llama-3.3-70b-versatile"
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    SUMMARY_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    QUIZ_MODEL: str = "qwen/qwen3-32b"
+    EXERCISE_MODEL: str = "qwen/qwen3-32b"
+    
+    # Répertoires de sortie
+    SUMMARY_OUTPUT_DIR: str = Field(default="./generated/summaries")
+    QUIZ_OUTPUT_DIR: str = Field(default="./generated/quizzes")
+    EXERCISE_OUTPUT_DIR: str = Field(default="./generated/exercises")
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -43,3 +51,6 @@ settings = Settings()
 # Création automatique des dossiers nécessaires au démarrage
 os.makedirs(settings.CHROMA_DB_DIR, exist_ok=True)
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+os.makedirs(settings.SUMMARY_OUTPUT_DIR, exist_ok=True)
+os.makedirs(settings.QUIZ_OUTPUT_DIR, exist_ok=True)
+os.makedirs(settings.EXERCISE_OUTPUT_DIR, exist_ok=True)

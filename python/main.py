@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router as api_router
+from app.api.summary_routes import router as summary_router
+from app.api.quiz_routes import router as quiz_router
+from app.api.exercise_routes import router as exercise_router
 from app.core.config import settings
 
 # Création de l'application FastAPI
@@ -21,6 +24,9 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api/v1", tags=["RAG Service"])
+app.include_router(summary_router, prefix="/api/v1/summary", tags=["Summary Service"])
+app.include_router(quiz_router, prefix="/api/v1/quiz", tags=["Quiz Service"])
+app.include_router(exercise_router, prefix="/api/v1/exercises", tags=["Exercise Service"])
 
 @app.get("/")
 def root():
