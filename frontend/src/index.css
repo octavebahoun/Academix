@@ -1,1 +1,32 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap");
+
+:root {
+  --font-display: "Outfit", "Segoe UI", sans-serif;
+  --font-body: "Manrope", "Segoe UI", sans-serif;
+  --ink-900: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --accent: #2563eb;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--surface-muted);
+  color: var(--ink-900);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}

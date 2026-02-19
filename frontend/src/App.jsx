@@ -1,11 +1,21 @@
+import { useState } from "react";
 import "./App.css";
+import ChatPage from "./pages/ChatPage";
+import SessionsFeedPage from "./pages/SessionsFeedPage";
 
 function App() {
-  return (
-    <>
-      <h1 class="text-3xl font-bold underline">Hello world!</h1>
-    </>
-  );
+  const [activeSession, setActiveSession] = useState(null);
+
+  if (activeSession) {
+    return (
+      <ChatPage
+        session={activeSession}
+        onLeave={() => setActiveSession(null)}
+      />
+    );
+  }
+
+  return <SessionsFeedPage onJoinSession={setActiveSession} />;
 }
 
 export default App;
