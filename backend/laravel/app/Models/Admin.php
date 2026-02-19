@@ -6,24 +6,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
     use HasApiTokens;
 
     protected $fillable = [
-        'matricule',
         'nom',
         'prenom',
         'email',
         'password',
         'telephone',
         'photo',
-        'filiere_id',
-        'annee_admission',
-        'objectif_moyenne',
-        'style_apprentissage',
+        'role',
+        'departement_id',
         'is_active',
-        'email_verified_at',
         'last_login',
     ];
 
@@ -33,29 +29,27 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'objectif_moyenne' => 'decimal:2',
         'is_active' => 'boolean',
-        'email_verified_at' => 'datetime',
         'last_login' => 'datetime',
     ];
 
-    public function filiere(): BelongsTo
+    public function departement(): BelongsTo
     {
-        return $this->belongsTo(Filiere::class);
+        return $this->belongsTo(Departement::class);
     }
 
-    public function notes(): HasMany
+    public function importLogs(): HasMany
     {
-        return $this->hasMany(Note::class);
+        return $this->hasMany(ImportLog::class);
     }
 
-    public function taches(): HasMany
+    public function isSuperAdmin(): bool
     {
-        return $this->hasMany(Tache::class);
+        return $this->role === 'super_admin';
     }
 
-    public function alertes(): HasMany
+    public function isChefDepartement(): bool
     {
-        return $this->hasMany(Alerte::class);
+        return $this->role === 'chef_departement';
     }
 }

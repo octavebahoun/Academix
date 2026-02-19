@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,12 +9,14 @@ return new class extends Migration
     {
         Schema::create('matieres', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('nom');
-            $table->decimal('coefficient', 3, 1)->default(1.0);
-            $table->string('couleur', 7)->default('#3B82F6');
-            $table->integer('niveau_maitrise')->default(3); // 1-5
+            $table->string('nom', 100);
+            $table->string('code', 20);
+            $table->integer('coefficient')->default(1);
+            $table->text('description')->nullable();
+            $table->string('enseignant', 100)->nullable();
             $table->timestamps();
+            
+            $table->index('code');
         });
     }
 
