@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import Editor from "@monaco-editor/react";
 import {
   Mic,
   MicOff,
@@ -171,7 +172,6 @@ const CodeEditorOverlay = ({ code, setCode, onClose }) => {
     () => localStorage.getItem("rapidapi_key") || "",
   );
   const [showSettings, setShowSettings] = useState(false);
-  const textareaRef = useRef(null);
 
   // État de la disposition : 'split' (50/50), 'editor' (100% code), 'preview' (100% output)
   const [layout, setLayout] = useState("split");
@@ -191,23 +191,8 @@ const CodeEditorOverlay = ({ code, setCode, onClose }) => {
     }
   }, [code, language]);
 
-  // Hook pour conserver la position du curseur lors des mises à jour distantes
-  const cursorRef = useRef(null);
-
-  React.useLayoutEffect(() => {
-    if (textareaRef.current && document.activeElement === textareaRef.current) {
-      if (cursorRef.current !== null) {
-        textareaRef.current.setSelectionRange(
-          cursorRef.current,
-          cursorRef.current,
-        );
-      }
-    }
-  }, [code]);
-
-  const handleChange = (e) => {
-    cursorRef.current = e.target.selectionStart;
-    setCode(e.target.value);
+  const handleChange = (value) => {
+    setCode(value);
   };
 
   const runCode = async () => {
@@ -381,15 +366,23 @@ const CodeEditorOverlay = ({ code, setCode, onClose }) => {
           <div className="bg-slate-900 px-4 py-1 text-[10px] font-mono text-slate-500 uppercase tracking-wider border-b border-slate-800 whitespace-nowrap overflow-hidden">
             {LANGUAGE_CONFIG[language].name}
           </div>
-          <textarea
-            ref={textareaRef}
-            value={code}
-            onChange={handleChange}
-            wrap="off"
-            className="flex-1 w-full min-h-0 bg-[#0d1117] text-slate-300 p-4 font-mono text-sm outline-none resize-none leading-relaxed min-w-0 overflow-auto overscroll-contain"
-            spellCheck="false"
-            autoFocus
-          />
+          <div className="flex-1 w-full min-h-0 bg-[#1e1e1e]">
+            <Editor
+              height="100%"
+              language={language === "web" ? "html" : language}
+              value={code}
+              theme="vs-dark"
+              onChange={handleChange}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                wordWrap: "on",
+                automaticLayout: true,
+                padding: { top: 16 },
+                scrollBeyondLastLine: false,
+              }}
+            />
+          </div>
         </div>
 
         {/* Panneau Sortie / Preview (Droite) */}
