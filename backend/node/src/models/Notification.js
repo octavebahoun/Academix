@@ -1,3 +1,11 @@
+/**
+ * @file Notification.js
+ * @description Modèle Mongoose représentant une notification utilisateur.
+ * Gère les différents types de notifications (info, rappel, alerte, succès,
+ * badge, session, message) avec support pour les données additionnelles,
+ * le statut de lecture et l'expiration automatique via TTL index.
+ */
+
 const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
@@ -8,7 +16,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['info', 'rappel', 'alerte', 'succes', 'badge', 'session', 'message'],
+    enum: ['info', 'rappel', 'alerte', 'succes', 'badge', 'session', 'message', 'mention'],
     required: true
   },
   titre: {
@@ -46,6 +54,7 @@ const notificationSchema = new mongoose.Schema({
 
 // Index pour performance
 notificationSchema.index({ user_id: 1, is_read: 1, createdAt: -1 });
+notificationSchema.index({ user_id: 1, createdAt: -1 });
 notificationSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 }); // TTL index
 
 module.exports = mongoose.model('Notification', notificationSchema);

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "seed:realtime": "node src/scripts/seedRealtimeData.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.17.2",
     "redis": "^5.10.0",
     "socket.io": "^4.8.3",
     "winston": "^3.19.0"

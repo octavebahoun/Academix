@@ -1,3 +1,11 @@
+/**
+ * @file ChatRoom.js
+ * @description Modèle Mongoose représentant un salon de chat.
+ * Chaque ChatRoom est lié à une session collaborative et contient
+ * la liste des utilisateurs actifs, le statut d'activité et les timestamps.
+ * Utilisé pour organiser les conversations par session d'étude.
+ */
+
 const mongoose = require('mongoose');
 
 const chatRoomSchema = new mongoose.Schema({
@@ -31,7 +39,6 @@ const chatRoomSchema = new mongoose.Schema({
   collection: 'chat_rooms'
 });
 
-chatRoomSchema.index({ session_id: 1 });
 chatRoomSchema.index({ is_active: 1, last_activity: -1 });
 
 module.exports = mongoose.model('ChatRoom', chatRoomSchema);

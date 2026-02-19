@@ -1,3 +1,11 @@
+/**
+ * @file OnlineUser.js
+ * @description Modèle Mongoose représentant un utilisateur actuellement connecté.
+ * Suit la présence en temps réel des utilisateurs (online, away, busy),
+ * associe chaque utilisateur à son socket_id et à sa session en cours.
+ * Inclut un TTL de 5 minutes pour nettoyage automatique des utilisateurs inactifs.
+ */
+
 const mongoose = require('mongoose');
 
 const onlineUserSchema = new mongoose.Schema({

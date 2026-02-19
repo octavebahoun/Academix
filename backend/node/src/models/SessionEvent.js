@@ -1,3 +1,11 @@
+/**
+ * @file SessionEvent.js
+ * @description Modèle Mongoose représentant un événement survenu dans une session collaborative.
+ * Enregistre l'historique des actions des utilisateurs au sein d'une session :
+ * rejoindre, quitter, être exclu, être promu ou être mis en sourdine.
+ * Permet de tracer l'activité et l'historique de chaque session.
+ */
+
 const mongoose = require('mongoose');
 
 const sessionEventSchema = new mongoose.Schema({
