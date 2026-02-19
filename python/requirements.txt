@@ -22,4 +22,5 @@ langchain-community
 langchain-chroma
 langchain-huggingface
 langchain-groq
+langchain-openai
 chromadb

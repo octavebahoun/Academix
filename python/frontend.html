@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academix AI - Plateforme Éducative</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1337ec;
+            --primary-dark: #0e45b8;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--light);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online {
+            background: var(--success);
+        }
+
+        .status-offline {
+            background: var(--danger);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .nav-item:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .content-area {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+            min-height: 600px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .section-description {
+            color: #64748b;
+            margin-bottom: 32px;
+            font-size: 15px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(19, 55, 236, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--light);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: rgba(19, 55, 236, 0.05);
+        }
+
+        .file-upload.dragover {
+            border-color: var(--primary);
+            background: rgba(19, 55, 236, 0.1);
+        }
+
+        .file-upload i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .file-name {
+            margin-top: 12px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .option-card {
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+            background: rgba(19, 55, 236, 0.05);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .option-card i {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Results */
+        .result-container {
+            margin-top: 32px;
+            padding: 24px;
+            background: var(--light);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .result-container.success {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .result-container.error {
+            border-left-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .markdown-content {
+            line-height: 1.7;
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .markdown-content li {
+            margin-bottom: 8px;
+        }
+
+        .markdown-content code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .markdown-content pre {
+            background: #1e293b;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            max-width: 800px;
+        }
+
+        .question-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .answer-option {
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .answer-option:hover {
+            border-color: var(--primary);
+            background: rgba(19, 55, 236, 0.05);
+        }
+
+        .answer-option.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .answer-option.correct {
+            border-color: var(--success);
+            background: var(--success);
+            color: white;
+        }
+
+        .answer-option.incorrect {
+            border-color: var(--danger);
+            background: var(--danger);
+            color: white;
+        }
+
+        .answer-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .answer-option.selected .answer-letter,
+        .answer-option.correct .answer-letter,
+        .answer-option.incorrect .answer-letter {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .quiz-progress {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .progress-dot {
+            flex: 1;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .progress-dot.completed {
+            background: var(--success);
+        }
+
+        .progress-dot.current {
+            background: var(--primary);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 8px;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 16px;
+            }
+
+            .content-area {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .logo-text h1 {
+                font-size: 20px;
+            }
+
+            .sidebar {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Image Preview */
+        .image-preview {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 16px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Academix AI</h1>
+                    <p>Plateforme Éducative Intelligente</p>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Vérification...</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar Navigation -->
+            <div class="sidebar">
+                <div class="nav-item active" data-section="summary">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Résumé</span>
+                </div>
+                <div class="nav-item" data-section="quiz">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Quiz</span>
+                </div>
+                <div class="nav-item" data-section="exercises">
+                    <i class="fas fa-pen"></i>
+                    <span>Exercices</span>
+                </div>
+                <div class="nav-item" data-section="image">
+                    <i class="fas fa-image"></i>
+                    <span>Génération Image</span>
+                </div>
+                <div class="nav-item" data-section="history">
+                    <i class="fas fa-history"></i>
+                    <span>Historique</span>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Summary Section -->
+                <div id="summary" class="section active">
+                    <h2 class="section-title">Générer une Fiche de Révision</h2>
+                    <p class="section-description">Uploadez un document PDF ou TXT pour générer automatiquement un
+                        résumé structuré avec les points clés.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Fichier</label>
+                        <div class="file-upload" id="summaryFileUpload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p><strong>Cliquez pour uploader</strong> ou glissez-déposez</p>
+                            <p style="font-size: 13px; color: #64748b; margin-top: 8px;">PDF, TXT ou MD (max 10MB)</p>
+                            <p class="file-name" id="summaryFileName"></p>
+                        </div>
+                        <input type="file" id="summaryFileInput" accept=".pdf,.txt,.md" style="display: none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Niveau de détail</label>
+                        <div class="options-grid">
+                            <div class="option-card" data-value="short">
+                                <i class="fas fa-compress-alt"></i>
+                                <div><strong>Court</strong></div>
+                                <div style="font-size: 12px; color: #64748b;">300-500 mots</div>
+                            </div>
+                            <div class="option-card selected" data-value="medium">
+                                <i class="fas fa-equals"></i>
+                                <div><strong>Moyen</strong></div>
+                                <div style="font-size: 12px; color: #64748b;">700-1000 mots</div>
+                            </div>
+                            <div class="option-card" data-value="detailed">
+                                <i class="fas fa-expand-alt"></i>
+                                <div><strong>Détaillé</strong></div>
+                                <div style="font-size: 12px; color: #64748b;">1500-2000 mots</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Style de rédaction</label>
+                        <select class="form-select" id="summaryStyle">
+                            <option value="bullets">Listes à puces</option>
+                            <option value="narrative">Paragraphes narratifs</option>
+                            <option value="schema">Structure hiérarchique</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Matière (optionnel)</label>
+                        <input type="text" class="form-input" id="summaryMatiere"
+                            placeholder="Ex: Biologie, Histoire...">
+                    </div>
+
+                    <button class="btn btn-primary" id="generateSummaryBtn">
+                        <i class="fas fa-magic"></i>
+                        Générer le résumé
+                    </button>
+
+                    <div id="summaryResult"></div>
+                </div>
+
+                <!-- Quiz Section -->
+                <div id="quiz" class="section">
+                    <h2 class="section-title">Générer un Quiz</h2>
+                    <p class="section-description">Créez un quiz interactif avec correction automatique à partir de
+                        votre cours.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Fichier</label>
+                        <div class="file-upload" id="quizFileUpload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p><strong>Cliquez pour uploader</strong> ou glissez-déposez</p>
+                            <p style="font-size: 13px; color: #64748b; margin-top: 8px;">PDF, TXT ou MD (max 10MB)</p>
+                            <p class="file-name" id="quizFileName"></p>
+                        </div>
+                        <input type="file" id="quizFileInput" accept=".pdf,.txt,.md" style="display: none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre de questions (5-20)</label>
+                        <input type="number" class="form-input" id="quizNbQuestions" value="10" min="5" max="20">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Difficulté</label>
+                        <div class="options-grid">
+                            <div class="option-card" data-value="easy">
+                                <i class="fas fa-smile"></i>
+                                <div><strong>Facile</strong></div>
+                            </div>
+                            <div class="option-card selected" data-value="medium">
+                                <i class="fas fa-meh"></i>
+                                <div><strong>Moyen</strong></div>
+                            </div>
+                            <div class="option-card" data-value="hard">
+                                <i class="fas fa-frown"></i>
+                                <div><strong>Difficile</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Matière (optionnel)</label>
+                        <input type="text" class="form-input" id="quizMatiere"
+                            placeholder="Ex: Mathématiques, Physique...">
+                    </div>
+
+                    <button class="btn btn-primary" id="generateQuizBtn">
+                        <i class="fas fa-magic"></i>
+                        Générer le quiz
+                    </button>
+
+                    <div id="quizResult"></div>
+                </div>
+
+                <!-- Exercises Section -->
+                <div id="exercises" class="section">
+                    <h2 class="section-title">Générer des Exercices</h2>
+                    <p class="section-description">Créez des exercices personnalisés avec corrections détaillées.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Fichier</label>
+                        <div class="file-upload" id="exercisesFileUpload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p><strong>Cliquez pour uploader</strong> ou glissez-déposez</p>
+                            <p style="font-size: 13px; color: #64748b; margin-top: 8px;">PDF, TXT ou MD (max 10MB)</p>
+                            <p class="file-name" id="exercisesFileName"></p>
+                        </div>
+                        <input type="file" id="exercisesFileInput" accept=".pdf,.txt,.md" style="display: none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre d'exercices (3-15)</label>
+                        <input type="number" class="form-input" id="exercisesNb" value="5" min="3" max="15">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Difficulté</label>
+                        <div class="options-grid">
+                            <div class="option-card" data-value="easy">
+                                <i class="fas fa-star"></i>
+                                <div><strong>Facile</strong></div>
+                            </div>
+                            <div class="option-card" data-value="medium">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <div><strong>Moyen</strong></div>
+                            </div>
+                            <div class="option-card" data-value="hard">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <div><strong>Difficile</strong></div>
+                            </div>
+                            <div class="option-card selected" data-value="progressive">
+                                <i class="fas fa-chart-line"></i>
+                                <div><strong>Progressif</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Matière (optionnel)</label>
+                        <input type="text" class="form-input" id="exercisesMatiere"
+                            placeholder="Ex: Chimie, Informatique...">
+                    </div>
+
+                    <button class="btn btn-primary" id="generateExercisesBtn">
+                        <i class="fas fa-magic"></i>
+                        Générer les exercices
+                    </button>
+
+                    <div id="exercisesResult"></div>
+                </div>
+
+                <!-- Image Section -->
+                <div id="image" class="section">
+                    <h2 class="section-title">Générer une Image IA</h2>
+                    <p class="section-description">Créez des images éducatives avec l'intelligence artificielle.</p>
+
+                    <div class="form-group">
+                        <label class="form-label">Description de l'image</label>
+                        <textarea class="form-textarea" id="imagePrompt"
+                            placeholder="Décrivez l'image que vous souhaitez générer... Ex: Un schéma de la cellule eucaryote avec tous ses organites"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" id="generateImageBtn">
+                        <i class="fas fa-magic"></i>
+                        Générer l'image
+                    </button>
+
+                    <div id="imageResult"></div>
+                </div>
+
+                <!-- History Section -->
+                <div id="history" class="section">
+                    <h2 class="section-title">Historique des générations</h2>
+                    <p class="section-description">Retrouvez toutes vos générations précédentes.</p>
+
+                    <div id="historyList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000/api/v1';
+
+        // State
+        let currentSection = 'summary';
+        let summaryFile = null;
+        let quizFile = null;
+        let exercisesFile = null;
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let selectedAnswers = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initFileUploads();
+            initOptionCards();
+            initButtons();
+            checkAPIStatus();
+            loadHistory();
+        });
+
+        // Navigation
+        function initNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const section = item.dataset.section;
+                    switchSection(section);
+                });
+            });
+        }
+
+        function switchSection(section) {
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.section === section);
+            });
+
+            // Update sections
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.toggle('active', sec.id === section);
+            });
+
+            currentSection = section;
+        }
+
+        // File Uploads
+        function initFileUploads() {
+            setupFileUpload('summary', 'summaryFileUpload', 'summaryFileInput', 'summaryFileName');
+            setupFileUpload('quiz', 'quizFileUpload', 'quizFileInput', 'quizFileName');
+            setupFileUpload('exercises', 'exercisesFileUpload', 'exercisesFileInput', 'exercisesFileName');
+        }
+
+        function setupFileUpload(type, uploadId, inputId, fileNameId) {
+            const uploadArea = document.getElementById(uploadId);
+            const fileInput = document.getElementById(inputId);
+            const fileName = document.getElementById(fileNameId);
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (type === 'summary') summaryFile = file;
+                    if (type === 'quiz') quizFile = file;
+                    if (type === 'exercises') exercisesFile = file;
+                    fileName.textContent = file.name;
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // Option Cards
+        function initOptionCards() {
+            document.querySelectorAll('.options-grid').forEach(grid => {
+                grid.querySelectorAll('.option-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        grid.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                    });
+                });
+            });
+        }
+
+        // Buttons
+        function initButtons() {
+            document.getElementById('generateSummaryBtn').addEventListener('click', generateSummary);
+            document.getElementById('generateQuizBtn').addEventListener('click', generateQuiz);
+            document.getElementById('generateExercisesBtn').addEventListener('click', generateExercises);
+            document.getElementById('generateImageBtn').addEventListener('click', generateImage);
+        }
+
+        // API Status
+        async function checkAPIStatus() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            try {
+                const response = await fetch('http://localhost:8000/');
+                const data = await response.json();
+
+                if (data.status === 'online') {
+                    statusDot.className = 'status-dot status-online';
+                    statusText.textContent = 'API en ligne';
+                } else {
+                    throw new Error('API offline');
+                }
+            } catch (error) {
+                statusDot.className = 'status-dot status-offline';
+                statusText.textContent = 'API hors ligne';
+            }
+        }
+
+        // Generate Summary
+        async function generateSummary() {
+            if (!summaryFile) {
+                showAlert('error', 'Veuillez sélectionner un fichier');
+                return;
+            }
+
+            const btn = document.getElementById('generateSummaryBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading"></div> Génération...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', summaryFile);
+
+                const level = document.querySelector('#summary .option-card.selected').dataset.value;
+                const style = document.getElementById('summaryStyle').value;
+                const matiere = document.getElementById('summaryMatiere').value;
+
+                const params = new URLSearchParams({
+                    level,
+                    style,
+                    format: 'markdown'
+                });
+
+                if (matiere) params.append('matiere', matiere);
+
+                const response = await fetch(`${API_BASE_URL}/summary/generate?${params}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Erreur API');
+                }
+
+                const result = await response.json();
+                displaySummaryResult(result);
+                saveToHistory('summary', result);
+
+            } catch (error) {
+                showAlert('error', `Erreur: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function displaySummaryResult(data) {
+            const resultDiv = document.getElementById('summaryResult');
+            const markdownHTML = marked.parse(data.content);
+
+            resultDiv.innerHTML = `
+                <div class="result-container success">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-check-circle"></i>
+                            ${data.title}
+                        </div>
+                        <button class="btn btn-secondary" onclick="downloadSummary('${data.summary_id}')">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div style="background: #f8fafc; color: #1e293b; padding: 16px; border-radius: 8px;">
+                            <div class="stat-label" style="color: #64748b;">Mots</div>
+                            <div class="stat-value" style="font-size: 24px;">${data.word_count}</div>
+                        </div>
+                        <div style="background: #f8fafc; color: #1e293b; padding: 16px; border-radius: 8px;">
+                            <div class="stat-label" style="color: #64748b;">Mots-clés</div>
+                            <div class="stat-value" style="font-size: 24px;">${data.keywords?.length || 0}</div>
+                        </div>
+                    </div>
+                    
+                    ${data.keywords?.length ? `
+                        <div style="margin: 16px 0;">
+                            ${data.keywords.map(kw => `<span class="tag">${kw}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="markdown-content">
+                        ${markdownHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function downloadSummary(summaryId) {
+            window.open(`${API_BASE_URL}/summary/download/${summaryId}`, '_blank');
+        }
+
+        // Generate Quiz
+        async function generateQuiz() {
+            if (!quizFile) {
+                showAlert('error', 'Veuillez sélectionner un fichier');
+                return;
+            }
+
+            const btn = document.getElementById('generateQuizBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading"></div> Génération...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', quizFile);
+
+                const difficulty = document.querySelector('#quiz .option-card.selected').dataset.value;
+                const nbQuestions = document.getElementById('quizNbQuestions').value;
+                const matiere = document.getElementById('quizMatiere').value;
+
+                const params = new URLSearchParams({
+                    nb_questions: nbQuestions,
+                    difficulty
+                });
+
+                if (matiere) params.append('matiere', matiere);
+
+                const response = await fetch(`${API_BASE_URL}/quiz/generate?${params}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Erreur API');
+                }
+
+                const result = await response.json();
+                currentQuiz = result;
+                currentQuestionIndex = 0;
+                selectedAnswers = new Array(result.questions.length).fill(null);
+                displayQuiz();
+                saveToHistory('quiz', result);
+
+            } catch (error) {
+                showAlert('error', `Erreur: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function displayQuiz() {
+            const resultDiv = document.getElementById('quizResult');
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const letters = ['A', 'B', 'C', 'D'];
+
+            const progressHTML = currentQuiz.questions.map((_, i) => {
+                let className = 'progress-dot';
+                if (i < currentQuestionIndex) className += ' completed';
+                if (i === currentQuestionIndex) className += ' current';
+                return `<div class="${className}"></div>`;
+            }).join('');
+
+            const answersHTML = question.options.map((opt, i) => `
+                <div class="answer-option" onclick="selectAnswer(${i})">
+                    <div class="answer-letter">${letters[i]}</div>
+                    <div>${opt}</div>
+                </div>
+            `).join('');
+
+            resultDiv.innerHTML = `
+                <div class="result-container">
+                    <div class="quiz-progress">${progressHTML}</div>
+                    
+                    <div class="question-card">
+                        <div style="color: #64748b; font-size: 14px; margin-bottom: 8px;">
+                            Question ${currentQuestionIndex + 1} / ${currentQuiz.questions.length}
+                        </div>
+                        <div class="question-text">${question.question}</div>
+                        ${answersHTML}
+                    </div>
+                    
+                    <div class="btn-group">
+                        ${currentQuestionIndex > 0 ? '<button class="btn btn-secondary" onclick="previousQuestion()"><i class="fas fa-arrow-left"></i> Précédent</button>' : ''}
+                        ${currentQuestionIndex < currentQuiz.questions.length - 1
+                    ? '<button class="btn btn-primary" onclick="nextQuestion()">Suivant <i class="fas fa-arrow-right"></i></button>'
+                    : '<button class="btn btn-success" onclick="submitQuiz()"><i class="fas fa-check"></i> Terminer</button>'}
+                    </div>
+                </div>
+            `;
+
+            // Restore selection
+            if (selectedAnswers[currentQuestionIndex] !== null) {
+                const options = resultDiv.querySelectorAll('.answer-option');
+                options[selectedAnswers[currentQuestionIndex]].classList.add('selected');
+            }
+        }
+
+        function selectAnswer(index) {
+            selectedAnswers[currentQuestionIndex] = index;
+            const options = document.querySelectorAll('.answer-option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuiz();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                currentQuestionIndex++;
+                displayQuiz();
+            }
+        }
+
+        async function submitQuiz() {
+            if (selectedAnswers.includes(null)) {
+                if (!confirm('Certaines questions n\'ont pas de réponse. Continuer ?')) return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/quiz/correct`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        quiz_id: currentQuiz.quiz_id,
+                        answers: selectedAnswers
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erreur lors de la correction');
+
+                const results = await response.json();
+                displayQuizResults(results);
+
+            } catch (error) {
+                showAlert('error', `Erreur: ${error.message}`);
+            }
+        }
+
+        function displayQuizResults(results) {
+            const percentage = parseFloat(results.percentage);
+            const grade = percentage >= 90 ? 'A+' : percentage >= 80 ? 'A' : percentage >= 70 ? 'B' : percentage >= 60 ? 'C' : 'D';
+
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.innerHTML = `
+                <div class="result-container success">
+                    <div class="result-title">
+                        <i class="fas fa-trophy"></i>
+                        Résultats du Quiz
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Score</div>
+                            <div class="stat-value">${results.score}/${results.total}</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <div class="stat-label">Pourcentage</div>
+                            <div class="stat-value">${results.percentage}%</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <div class="stat-label">Note</div>
+                            <div class="stat-value">${grade}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 24px;">
+                        ${results.details.map(d => `
+                            <div style="padding: 12px; background: ${d.correct ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ${d.correct ? '#10b981' : '#ef4444'};">
+                                <strong>Question ${d.question_number}:</strong>
+                                ${d.correct ? '<span style="color: #10b981;"> ✓ Correct</span>' : '<span style="color: #ef4444;"> ✗ Incorrect</span>'}
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="generateQuiz()">
+                        <i class="fas fa-redo"></i> Nouveau Quiz
+                    </button>
+                </div>
+            `;
+        }
+
+        // Generate Exercises
+        async function generateExercises() {
+            if (!exercisesFile) {
+                showAlert('error', 'Veuillez sélectionner un fichier');
+                return;
+            }
+
+            const btn = document.getElementById('generateExercisesBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading"></div> Génération...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', exercisesFile);
+
+                const difficulty = document.querySelector('#exercises .option-card.selected').dataset.value;
+                const nbExercises = document.getElementById('exercisesNb').value;
+                const matiere = document.getElementById('exercisesMatiere').value;
+
+                const params = new URLSearchParams({
+                    nb_exercises: nbExercises,
+                    difficulty
+                });
+
+                if (matiere) params.append('matiere', matiere);
+
+                const response = await fetch(`${API_BASE_URL}/exercises/generate?${params}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Erreur API');
+                }
+
+                const result = await response.json();
+                displayExercisesResult(result);
+                saveToHistory('exercises', result);
+
+            } catch (error) {
+                showAlert('error', `Erreur: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function displayExercisesResult(data) {
+            const resultDiv = document.getElementById('exercisesResult');
+
+            const exercisesHTML = data.exercises.map((ex, i) => `
+                <div style="background: white; border: 2px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px;">
+                    <div style="font-weight: 700; font-size: 18px; margin-bottom: 16px; color: var(--primary);">
+                        Exercice ${i + 1}
+                    </div>
+                    <div style="margin-bottom: 16px; line-height: 1.6;">
+                        ${ex.statement}
+                    </div>
+                    <details style="margin-top: 12px;">
+                        <summary style="cursor: pointer; color: var(--primary); font-weight: 600;">
+                            <i class="fas fa-lightbulb"></i> Voir la solution
+                        </summary>
+                        <div style="margin-top: 12px; padding: 16px; background: #f8fafc; border-radius: 8px;">
+                            ${ex.solution}
+                        </div>
+                    </details>
+                </div>
+            `).join('');
+
+            resultDiv.innerHTML = `
+                <div class="result-container success">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-check-circle"></i>
+                            ${data.title}
+                        </div>
+                        <button class="btn btn-secondary" onclick="downloadExercises('${data.exercise_id}')">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                    
+                    <div style="margin: 16px 0;">
+                        <span class="tag">Difficulté: ${data.difficulty}</span>
+                        <span class="tag">${data.nb_exercises} exercices</span>
+                        ${data.matiere ? `<span class="tag">${data.matiere}</span>` : ''}
+                    </div>
+                    
+                    ${exercisesHTML}
+                </div>
+            `;
+        }
+
+        async function downloadExercises(exerciseId) {
+            window.open(`${API_BASE_URL}/exercises/download/${exerciseId}`, '_blank');
+        }
+
+        // Generate Image
+        async function generateImage() {
+            const prompt = document.getElementById('imagePrompt').value.trim();
+            if (!prompt) {
+                showAlert('error', 'Veuillez entrer une description');
+                return;
+            }
+
+            const btn = document.getElementById('generateImageBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading"></div> Génération...';
+
+            try {
+                const params = new URLSearchParams({ prompt });
+                const response = await fetch(`${API_BASE_URL}/image/generate?${params}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erreur API');
+                }
+
+                const result = await response.json();
+
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                displayImageResult(result);
+                saveToHistory('image', result);
+
+            } catch (error) {
+                showAlert('error', `Erreur: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function displayImageResult(data) {
+            const resultDiv = document.getElementById('imageResult');
+            const imageUrl = `http://localhost:8000${data.image_url}`;
+
+            resultDiv.innerHTML = `
+                <div class="result-container success">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-check-circle"></i>
+                            Image générée
+                        </div>
+                        <a href="${imageUrl}" download class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Télécharger
+                        </a>
+                    </div>
+                    
+                    <div style="margin: 16px 0;">
+                        <span class="tag">Format: ${data.format}</span>
+                        <span class="tag">Taille: ${(data.size_bytes / 1024).toFixed(2)} KB</span>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <img src="${imageUrl}" class="image-preview" alt="${data.prompt}">
+                    </div>
+                    
+                    <div style="margin-top: 16px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 14px;">
+                        <strong>Prompt:</strong> ${data.prompt}
+                    </div>
+                </div>
+            `;
+        }
+
+        // History Management
+        function saveToHistory(type, data) {
+            const history = JSON.parse(localStorage.getItem('academix_history') || '[]');
+            history.unshift({
+                type,
+                data,
+                timestamp: new Date().toISOString()
+            });
+            // Keep only last 20 items
+            if (history.length > 20) history.pop();
+            localStorage.setItem('academix_history', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('academix_history') || '[]');
+            const listDiv = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                listDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> Aucun élément dans l\'historique</div>';
+                return;
+            }
+
+            const icons = {
+                summary: 'fa-file-alt',
+                quiz: 'fa-question-circle',
+                exercises: 'fa-pen',
+                image: 'fa-image'
+            };
+
+            const labels = {
+                summary: 'Résumé',
+                quiz: 'Quiz',
+                exercises: 'Exercices',
+                image: 'Image'
+            };
+
+            listDiv.innerHTML = history.map((item, i) => `
+                <div style="background: white; border: 2px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fas ${icons[item.type]}" style="color: var(--primary);"></i>
+                                <strong>${labels[item.type]}</strong>
+                                <span style="font-size: 12px; color: #64748b;">
+                                    ${new Date(item.timestamp).toLocaleString('fr-FR')}
+                                </span>
+                            </div>
+                            <div style="font-size: 14px; color: #64748b;">
+                                ${item.data.title || item.data.prompt || 'Sans titre'}
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" style="padding: 8px 16px;" onclick="viewHistoryItem(${i})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('academix_history') || '[]');
+            const item = history[index];
+
+            if (item.type === 'summary') {
+                switchSection('summary');
+                displaySummaryResult(item.data);
+            } else if (item.type === 'quiz') {
+                switchSection('quiz');
+                currentQuiz = item.data;
+                currentQuestionIndex = 0;
+                selectedAnswers = new Array(item.data.questions.length).fill(null);
+                displayQuiz();
+            } else if (item.type === 'exercises') {
+                switchSection('exercises');
+                displayExercisesResult(item.data);
+            } else if (item.type === 'image') {
+                switchSection('image');
+                displayImageResult(item.data);
+            }
+        }
+
+        // Alerts
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+
+            const section = document.querySelector('.section.active');
+            section.insertBefore(alertDiv, section.firstChild);
+
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+    </script>
+</body>
+
+</html>

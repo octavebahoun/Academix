@@ -218,6 +218,7 @@
             <div class="tab" onclick="showTab('quiz')">🎲 Quiz</div>
             <div class="tab" onclick="showTab('correct')">✅ Correction</div>
             <div class="tab" onclick="showTab('exercises')">🏋️ Exercices</div>
+            <div class="tab" onclick="showTab('image')">🖼️ Image IA</div>
         </div>
 
         <!-- RAG CHAT -->
@@ -316,6 +317,19 @@
                 <input type="text" id="correct-answers" placeholder="ex: 0,1,2,0,3">
                 <button onclick="testCorrection()">Corriger <span id="correct-loader" class="loader">⏳</span></button>
                 <div id="correct-result" class="result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- IMAGE GENERATION -->
+        <div id="image" class="section">
+            <div class="card">
+                <h2><span class="badge post">POST</span> /api/v1/image/generate</h2>
+                <label>Prompt (description de l'image)</label>
+                <textarea id="image-prompt" placeholder="Ex: Un chat astronaute sur la lune, style cartoon"></textarea>
+                <button onclick="testImage()">🖼️ Générer l'image <span id="image-loader"
+                        class="loader">⏳</span></button>
+                <div id="image-result" class="result" style="display:none;"></div>
+                <div id="image-display" style="display:none; margin-top:15px; text-align:center;"></div>
             </div>
         </div>
 
@@ -556,6 +570,34 @@
                 showResult('exo-result', 'Erreur: ' + e.message, true);
             }
             toggleLoader('exo-loader', false);
+        }
+
+        // --- IMAGE GENERATION ---
+        async function testImage() {
+            const prompt = document.getElementById('image-prompt').value;
+            if (!prompt) return alert('Écris une description d\'image');
+            toggleLoader('image-loader', true);
+            document.getElementById('image-display').style.display = 'none';
+            try {
+                const res = await fetch(`${API}/api/v1/image/generate?prompt=${encodeURIComponent(prompt)}`, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                showResult('image-result', data, !res.ok);
+
+                if (res.ok && data.image_url) {
+                    const container = document.getElementById('image-display');
+                    container.style.display = 'block';
+                    container.innerHTML = `
+                        <p style="margin-bottom:10px; color:#22c55e;">✅ Image générée (${data.format}, ${(data.size_bytes / 1024).toFixed(1)} KB)</p>
+                        <img src="${API}${data.image_url}" alt="${data.prompt}" style="max-width:100%; border-radius:12px; border:1px solid #334155;">
+                        <br><a href="${API}${data.image_url}" target="_blank" style="color:#38bdf8; margin-top:10px; display:inline-block;">📥 Ouvrir en plein écran</a>
+                    `;
+                }
+            } catch (e) {
+                showResult('image-result', 'Erreur: ' + e.message, true);
+            }
+            toggleLoader('image-loader', false);
         }
 
         function renderExercises(data) {

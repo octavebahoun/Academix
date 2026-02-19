@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = Field(default="")
     ANTHROPIC_API_KEY: str = Field(default="")
     HF_TOKEN: str = Field(default="")
+    OPENROUTER_API_KEY: str = Field(default="")
     
     # Configuration uploads
     MAX_UPLOAD_SIZE: int = Field(default=10485760)  # 10MB
