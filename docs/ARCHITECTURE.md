@@ -37,7 +37,7 @@ AcademiX utilise une **architecture microservices hybride** optimisée pour :
     │  │   Laravel    │  │   Node.js    │  │  Python  │ │
     │  │   Backend    │  │   WebSocket  │  │ FastAPI  │ │
     │  │              │  │              │  │          │ │
-    │  │  Port: 8000  │  │  Port: 3001  │  │ Port:8001│ │
+    │  │  Port: 8000  │  │  Port: 3001  │  │ Port:5000│ │
     │  │              │  │              │  │          │ │
     │  │  - REST API  │  │  - Socket.io │  │ - IA Gen │ │
     │  │  - Sanctum   │  │  - Redis Pub │  │ - OpenAI │ │
@@ -482,7 +482,7 @@ services:
 
   python:
     build: ./python
-    ports: ["8001:8001"]
+    ports: ["5000:5000"]
 
   node:
     build: ./backend/node

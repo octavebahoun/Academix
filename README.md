@@ -142,12 +142,12 @@ cd backend/node
 npm run dev
 ```
 
-#### Terminal 3 - Python FastAPI (Port 8001)
+#### Terminal 3 - Python FastAPI (Port 5000)
 
 ```bash
 cd python
 source venv/bin/activate
-uvicorn main:app --reload --port 8001
+uvicorn main:app --reload --port 5000
 ```
 
 #### Terminal 4 - Frontend React (Port 5173)
@@ -183,7 +183,7 @@ Consultez le dossier [/docs](./docs/) pour la documentation complète :
 - Frontend: http://localhost:5173
 - Laravel API: http://localhost:8000
 - Node WebSocket: http://localhost:3001
-- Python IA: http://localhost:8001
+- Python IA: http://localhost:5000
 
 ## 👥 Équipe
 

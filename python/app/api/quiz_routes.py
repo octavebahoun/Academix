@@ -1,12 +1,13 @@
 import os
 import shutil
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Depends
 from app.core.config import settings
 from app.services.quiz_generator import quiz_generator
 from app.models.schemas import (
     QuizResponse, QuizDifficulty, 
     QuizCorrectionRequest, CorrectionResponse
 )
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -16,7 +17,8 @@ async def generate_quiz_endpoint(
     file: UploadFile = File(...),
     nb_questions: int = Query(default=10, ge=5, le=20, description="Nombre de questions (5-20)"),
     difficulty: QuizDifficulty = Query(default=QuizDifficulty.medium, description="Difficulté"),
-    matiere: str = Query(default=None, description="Matière du cours")
+    matiere: str = Query(default=None, description="Matière du cours"),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Génère un quiz QCM depuis un fichier PDF ou TXT.
@@ -68,7 +70,7 @@ async def generate_quiz_endpoint(
 
 
 @router.post("/correct", response_model=CorrectionResponse)
-async def correct_quiz_endpoint(correction: QuizCorrectionRequest):
+async def correct_quiz_endpoint(correction: QuizCorrectionRequest, current_user: dict = Depends(get_current_user)):
     """
     Corrige un quiz à partir des réponses de l'étudiant.
     
@@ -87,7 +89,7 @@ async def correct_quiz_endpoint(correction: QuizCorrectionRequest):
 
 
 @router.get("/{quiz_id}", response_model=QuizResponse)
-async def get_quiz_endpoint(quiz_id: str):
+async def get_quiz_endpoint(quiz_id: str, current_user: dict = Depends(get_current_user)):
     """
     Récupère un quiz existant par son ID.
     """

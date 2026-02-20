@@ -1,10 +1,11 @@
 import os
 import shutil
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Depends
 from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.services.exercise_generator import exercise_generator
 from app.models.schemas import ExerciseResponse, ExerciseDifficulty
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -15,7 +16,8 @@ async def generate_exercises_endpoint(
     nb_exercises: int = Query(default=5, ge=3, le=15, description="Nombre d'exercices (3-15)"),
     difficulty: ExerciseDifficulty = Query(default=ExerciseDifficulty.progressive, description="Difficulté"),
     matiere: str = Query(default=None, description="Matière du cours"),
-    chapitre: str = Query(default=None, description="Chapitre spécifique")
+    chapitre: str = Query(default=None, description="Chapitre spécifique"),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Génère des exercices avec corrections depuis un fichier PDF ou TXT.
@@ -68,7 +70,7 @@ async def generate_exercises_endpoint(
 
 
 @router.get("/{exercise_id}", response_model=ExerciseResponse)
-async def get_exercises_endpoint(exercise_id: str):
+async def get_exercises_endpoint(exercise_id: str, current_user: dict = Depends(get_current_user)):
     """Récupère des exercices existants par ID."""
     result = await exercise_generator.get_exercises(exercise_id)
     
@@ -88,7 +90,7 @@ async def get_exercises_endpoint(exercise_id: str):
 
 
 @router.get("/download/{exercise_id}")
-async def download_exercises_endpoint(exercise_id: str):
+async def download_exercises_endpoint(exercise_id: str, current_user: dict = Depends(get_current_user)):
     """Télécharge les exercices en format markdown."""
     md_path = exercise_generator.get_markdown_path(exercise_id)
     

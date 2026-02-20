@@ -1,10 +1,11 @@
 import os
 import shutil
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Depends
 from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.services.text_summarizer import text_summarizer
 from app.models.schemas import SummaryRequest, SummaryResponse, SummaryLevel, SummaryStyle, SummaryFormat
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -15,7 +16,8 @@ async def generate_summary_endpoint(
     level: SummaryLevel = Query(default=SummaryLevel.medium, description="Niveau de détail"),
     style: SummaryStyle = Query(default=SummaryStyle.bullets, description="Style de rédaction"),
     format: SummaryFormat = Query(default=SummaryFormat.markdown, description="Format de sortie"),
-    matiere: str = Query(default=None, description="Matière du cours")
+    matiere: str = Query(default=None, description="Matière du cours"),
+    current_user: dict = Depends(get_current_user)
 ):
     """
     Génère une fiche de révision depuis un fichier PDF ou TXT.
@@ -69,7 +71,7 @@ async def generate_summary_endpoint(
 
 
 @router.get("/{summary_id}", response_model=SummaryResponse)
-async def get_summary_endpoint(summary_id: str):
+async def get_summary_endpoint(summary_id: str, current_user: dict = Depends(get_current_user)):
     """
     Récupère une fiche de révision existante par son ID.
     """
@@ -90,7 +92,7 @@ async def get_summary_endpoint(summary_id: str):
 
 
 @router.get("/download/{summary_id}")
-async def download_summary_endpoint(summary_id: str):
+async def download_summary_endpoint(summary_id: str, current_user: dict = Depends(get_current_user)):
     """
     Télécharge le fichier markdown de la fiche de révision.
     """

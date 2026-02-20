@@ -5,9 +5,10 @@ import os
 import base64
 import uuid
 import requests
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import FileResponse
 from app.core.config import settings
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -18,6 +19,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 @router.post("/generate")
 async def generate_image(
     prompt: str = Query(..., description="Description de l'image à générer"),
+    current_user: dict = Depends(get_current_user)
 ):
     """Génère une image via OpenRouter + Gemini 2.5 Flash Image Preview."""
     api_key = settings.OPENROUTER_API_KEY
@@ -91,7 +93,7 @@ async def generate_image(
 
 
 @router.get("/download/{filename}")
-async def download_image(filename: str):
+async def download_image(filename: str, current_user: dict = Depends(get_current_user)):
     """Télécharge une image générée."""
     file_path = os.path.join(OUTPUT_DIR, filename)
     if not os.path.exists(file_path):

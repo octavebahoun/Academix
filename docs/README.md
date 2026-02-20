@@ -88,7 +88,7 @@ cd /home/octave/Bureau/hackaton
 
 - **Frontend**: http://localhost:5173
 - **API Laravel**: http://localhost:8000
-- **API Python IA**: http://localhost:8001
+- **API Python IA**: http://localhost:5000
 - **WebSocket Node**: http://localhost:3001
 
 ---
@@ -112,7 +112,7 @@ cd /home/octave/Bureau/hackaton
              ▼
     ┌─────────────────┐
     │  Python FastAPI │
-    │  Port: 8001     │
+    │  Port: 5000     │
     │  IA Services    │
     │  OpenAI, Claude │
     └─────────────────┘
@@ -133,7 +133,7 @@ cd /home/octave/Bureau/hackaton
 | ------------------- | ----------------------- | ---- | ------------------------------ |
 | **Frontend**        | React + Vite + Tailwind | 5173 | Interface utilisateur          |
 | **API Core**        | Laravel 11 + Sanctum    | 8000 | Backend principal, Auth, CRUD  |
-| **Service IA**      | Python + FastAPI        | 8001 | Génération contenus IA         |
+| **Service IA**      | Python + FastAPI        | 5000 | Génération contenus IA         |
 | **Temps Réel**      | Node.js + Socket.io     | 3001 | Quiz live, Chat, Notifications |
 | **Base de Données** | MySQL 8.0               | 3306 | Stockage données               |
 

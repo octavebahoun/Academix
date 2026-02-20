@@ -5,7 +5,7 @@
 AcademiX expose **3 APIs principales** :
 
 1. **Laravel REST API** - Backend core (Port 8000)
-2. **Python FastAPI** - Service IA (Port 8001)
+2. **Python FastAPI** - Service IA (Port 5000)
 3. **Node.js WebSocket** - Temps réel (Port 3001)
 
 ---
@@ -642,7 +642,7 @@ Marquer comme lue
 
 # 🐍 2. Python FastAPI - Service IA
 
-**Base URL**: `http://localhost:8001/api/v1`  
+**Base URL**: `http://localhost:5000/api/v1`  
 **Auth**: API Key (header `X-API-Key`)
 
 ## 📝 Génération de Contenus
@@ -752,7 +752,7 @@ Générer un podcast audio (TTS)
 
 ```json
 {
-  "audio_url": "http://localhost:8001/generated/podcast_abc123.mp3",
+  "audio_url": "http://localhost:5000/generated/podcast_abc123.mp3",
   "duree_secondes": 245,
   "taille_bytes": 3145728
 }

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     
     # Configuration API
     API_HOST: str = Field(default="0.0.0.0")
-    API_PORT: int = Field(default=8001)
+    API_PORT: int = Field(default=5000)
     API_RELOAD: bool = Field(default=True)
     API_KEY: str = Field(default="your_secret_api_key_change_this")
     
@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = Field(default="")
     HF_TOKEN: str = Field(default="")
     OPENROUTER_API_KEY: str = Field(default="")
+    
+    # Configuration Base de données (MySQL)
+    DB_HOST: str = Field(default="127.0.0.1")
+    DB_PORT: int = Field(default=3306)
+    DB_NAME: str = Field(default="academix")
+    DB_USER: str = Field(default="root")
+    DB_PASSWORD: str = Field(default="")
     
     # Configuration uploads
     MAX_UPLOAD_SIZE: int = Field(default=10485760)  # 10MB

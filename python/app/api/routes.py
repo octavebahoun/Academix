@@ -1,16 +1,18 @@
 import os
 import shutil
-from fastapi import APIRouter, UploadFile, File, HTTPException, Body
+from fastapi import APIRouter, UploadFile, File, HTTPException, Body, Depends
 from app.core.config import settings
 from app.services.rag_service import rag_service
 from app.models.schemas import ChatRequest, ChatResponse, FileUploadResponse
+from app.api.dependencies import get_current_user
 
 router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(request: ChatRequest):
+async def chat_endpoint(request: ChatRequest, current_user: dict = Depends(get_current_user)):
 
     try:
+        # print(f"Utilisateur {current_user['email']} appelle le chat")
         # On appelle le service RAG 
         answer_text = await rag_service.ask_question(request.question)
         
@@ -23,7 +25,7 @@ async def chat_endpoint(request: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload", response_model=FileUploadResponse)
-async def upload_endpoint(file: UploadFile = File(...)):
+async def upload_endpoint(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """
     Route pour uploader un fichier PDF ou TXT.
     Le fichier est sauvegardé puis indexé par le RAG.

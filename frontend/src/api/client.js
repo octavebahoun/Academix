@@ -7,7 +7,10 @@ import axios from 'axios';
 const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || 'https://team-d-excellence-hackbyifri-2026.onrender.com/api';
 
 // URL API Laravel (Authentification, Utilisateurs, Cours)
-const LARAVEL_API_URL = import.meta.env.VITE_LARAVEL_API_URL || 'https://teamd-excellencehackbyifri2026-production.up.railway.app/api';
+const LARAVEL_API_URL = import.meta.env.VITE_LARAVEL_API_URL || 'http://127.0.0.1:8000/api/v1';
+
+// URL API Python (IA: Résumés, Quiz, Exercices, Images)
+const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL || 'http://127.0.0.1:5000/api/v1';
 
 /**
  * Client pour l'API Node.js (Chat, Notifications, etc.)
@@ -30,6 +33,16 @@ const laravelApiClient = axios.create({
         'Accept': 'application/json',
     },
     withCredentials: true,
+});
+
+/**
+ * Client pour l'API Python (Intelligence Artificielle)
+ */
+const pythonApiClient = axios.create({
+    baseURL: PYTHON_API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 // Fonction pour configurer les intercepteurs sur un client donné
@@ -65,12 +78,13 @@ const setupInterceptors = (client) => {
     );
 };
 
-// Configurer les intercepteurs pour les deux clients
+// Configurer les intercepteurs pour tous les clients
 setupInterceptors(nodeApiClient);
 setupInterceptors(laravelApiClient);
+setupInterceptors(pythonApiClient);
 
-// Export par défaut pour la rétrocompatibilité (pointe vers Node car c'est ce qui est le plus utilisé actuellement)
+// Export par défaut (Historique: Node)
 export default nodeApiClient;
 
 // Exports nommés pour une utilisation explicite
-export { nodeApiClient, laravelApiClient };
+export { nodeApiClient, laravelApiClient, pythonApiClient };

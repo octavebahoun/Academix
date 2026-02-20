@@ -23,7 +23,9 @@ class ChefDepartementController extends Controller
             ->orderBy('nom')
             ->get();
 
-        return response()->json($chefs);
+        return response()->json([
+            'data' => $chefs
+        ]);
     }
 
     // ---------------------------------------------------------------

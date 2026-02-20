@@ -255,7 +255,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 # Service URLs
-PYTHON_AI_SERVICE_URL=http://localhost:8001
+PYTHON_AI_SERVICE_URL=http://localhost:5000
 NODE_SOCKET_SERVICE_URL=http://localhost:3001
 
 # API Keys (à remplir)
@@ -494,14 +494,14 @@ def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=5000)
 EOF
     
     # Créer .env
     cat > .env << 'EOF'
 # API Configuration
 API_HOST=0.0.0.0
-API_PORT=8001
+API_PORT=5000
 API_RELOAD=True
 
 # Security
@@ -522,7 +522,7 @@ EOF
     
     cat > .env.example << 'EOF'
 API_HOST=0.0.0.0
-API_PORT=8001
+API_PORT=5000
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
 EOF
@@ -623,7 +623,7 @@ npm run dev
 ```bash
 cd python
 source venv/bin/activate
-uvicorn main:app --reload --port 8001
+uvicorn main:app --reload --port 5000
 ```
 
 #### Terminal 4 - Frontend
@@ -643,7 +643,7 @@ npm run dev
 - Frontend: http://localhost:5173
 - Laravel API: http://localhost:8000
 - Node WebSocket: http://localhost:3001
-- Python IA: http://localhost:8001
+- Python IA: http://localhost:5000
 
 ## 👥 Équipe
 
@@ -668,14 +668,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
     osascript -e 'tell app "Terminal" to do script "cd '"$PWD"'/backend/laravel && php artisan serve"'
     osascript -e 'tell app "Terminal" to do script "cd '"$PWD"'/backend/node && npm run dev"'
-    osascript -e 'tell app "Terminal" to do script "cd '"$PWD"'/python && source venv/bin/activate && uvicorn main:app --reload --port 8001"'
+    osascript -e 'tell app "Terminal" to do script "cd '"$PWD"'/python && source venv/bin/activate && uvicorn main:app --reload --port 5000"'
     osascript -e 'tell app "Terminal" to do script "cd '"$PWD"'/frontend && npm run dev"'
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux
     if command -v gnome-terminal &> /dev/null; then
         gnome-terminal -- bash -c "cd $PWD/backend/laravel && php artisan serve; exec bash"
         gnome-terminal -- bash -c "cd $PWD/backend/node && npm run dev; exec bash"
-        gnome-terminal -- bash -c "cd $PWD/python && source venv/bin/activate && uvicorn main:app --reload --port 8001; exec bash"
+        gnome-terminal -- bash -c "cd $PWD/python && source venv/bin/activate && uvicorn main:app --reload --port 5000; exec bash"
         gnome-terminal -- bash -c "cd $PWD/frontend && npm run dev; exec bash"
     else
         echo "Installe gnome-terminal ou lance manuellement"
@@ -758,7 +758,7 @@ show_summary() {
     echo -e "${YELLOW}Option 2 - Manuel (4 terminaux):${NC}"
     echo "   Terminal 1: cd backend/laravel && php artisan serve"
     echo "   Terminal 2: cd backend/node && npm run dev"
-    echo "   Terminal 3: cd python && source venv/bin/activate && uvicorn main:app --reload --port 8001"
+    echo "   Terminal 3: cd python && source venv/bin/activate && uvicorn main:app --reload --port 5000"
     echo "   Terminal 4: cd frontend && npm run dev"
     echo ""
     
@@ -773,7 +773,7 @@ show_summary() {
     echo "   Frontend:    http://localhost:5173"
     echo "   Laravel API: http://localhost:8000"
     echo "   Node Socket: http://localhost:3001"
-    echo "   Python IA:   http://localhost:8001"
+    echo "   Python IA:   http://localhost:5000"
     echo ""
     
     echo -e "${GREEN}Bonne chance pour le hackathon! 🔥${NC}"

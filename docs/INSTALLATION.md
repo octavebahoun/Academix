@@ -221,7 +221,7 @@ DB_DATABASE=academix
 DB_USERNAME=academix_user
 DB_PASSWORD=Academix2026Strong!
 
-PYTHON_AI_SERVICE_URL=http://localhost:8001
+PYTHON_AI_SERVICE_URL=http://localhost:5000
 NODE_SOCKET_SERVICE_URL=http://localhost:3001
 ```
 
@@ -346,7 +346,7 @@ nano .env
 ```env
 VITE_API_URL=http://localhost:8000/api/v1
 VITE_SOCKET_URL=http://localhost:3001
-VITE_PYTHON_API_URL=http://localhost:8001/api/v1
+VITE_PYTHON_API_URL=http://localhost:5000/api/v1
 ```
 
 **Builder (optionnel en dev):**
@@ -424,8 +424,8 @@ npm run dev
 ```bash
 cd python
 source venv/bin/activate
-uvicorn main:app --reload --port 8001
-# → http://localhost:8001
+uvicorn main:app --reload --port 5000
+# → http://localhost:5000
 ```
 
 **Terminal 4 - Frontend:**
@@ -449,7 +449,7 @@ curl http://localhost:8000/api/v1/health
 ### Python API
 
 ```bash
-curl http://localhost:8001/health
+curl http://localhost:5000/health
 ```
 
 ### WebSocket (avec wscat)

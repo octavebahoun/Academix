@@ -18,9 +18,9 @@ class Departement extends Model
         return $this->hasMany(Filiere::class);
     }
 
-    public function admins(): HasMany
+    public function chefs(): HasMany
     {
-        return $this->hasMany(Admin::class);
+        return $this->hasMany(ChefDepartement::class);
     }
 
     public function statistiques(): HasMany
