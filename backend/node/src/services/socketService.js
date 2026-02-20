@@ -381,12 +381,18 @@ module.exports = (io) => {
         socket.emit('session-role', { sessionId, role: resolvedRole });
 
         const latestSession = await SessionCollaborative.findById(sessionObjectId)
-          .select('whiteboard_state whiteboard_updated_at code_content code_language')
+          .select('whiteboard_state whiteboard_updated_at code_content code_language whiteboard_text')
           .lean();
 
         socket.emit('code-update', {
           code: latestSession?.code_content || '',
           language: latestSession?.code_language || 'web',
+          timestamp: new Date().toISOString(),
+          isInitial: true
+        });
+
+        socket.emit('text-update', {
+          text: latestSession?.whiteboard_text || '',
           timestamp: new Date().toISOString(),
           isInitial: true
         });
@@ -620,7 +626,17 @@ module.exports = (io) => {
           created_at: new Date()
         };
 
-        await SessionCollaborative.updateOne(
+        // 1. Émettre immédiatement pour une réactivité maximale (Temps Réel)
+        // On utilise socket.broadcast.to pour ne pas le renvoyer à l'émetteur
+        socket.broadcast.to(sessionRoomName(sessionId)).emit('whiteboard-update', {
+          action,
+          ...payload,
+          by: socket.user?.id || null,
+          timestamp: new Date().toISOString()
+        });
+
+        // 2. Sauvegarder en arrière-plan sans bloquer l'émission
+        SessionCollaborative.updateOne(
           { _id: sessionObjectId },
           {
             $push: {
@@ -633,14 +649,7 @@ module.exports = (io) => {
               whiteboard_updated_at: new Date()
             }
           }
-        );
-
-        io.to(sessionRoomName(sessionId)).emit('whiteboard-update', {
-          action,
-          ...payload,
-          by: socket.user?.id || null,
-          timestamp: new Date().toISOString()
-        });
+        ).catch(err => logger.error('Error saving whiteboard state:', err));
       } catch (error) {
         logger.error('Error whiteboard-draw:', error);
       }
@@ -653,7 +662,16 @@ module.exports = (io) => {
       if (!sessionObjectId) return;
 
       try {
-        await SessionCollaborative.updateOne(
+        // 1. Diffusion immédiate aux autres
+        socket.to(sessionRoomName(sessionId)).emit('code-update', {
+          code,
+          language,
+          by: socket.user?.id || null,
+          timestamp: new Date().toISOString()
+        });
+
+        // 2. Sauvegarde asynchrone
+        SessionCollaborative.updateOne(
           { _id: sessionObjectId },
           {
             $set: {
@@ -662,16 +680,38 @@ module.exports = (io) => {
               updatedAt: new Date()
             }
           }
-        );
+        ).catch(err => logger.error('Error saving code content:', err));
+      } catch (error) {
+        logger.error('Error code-update:', error);
+      }
+    });
 
-        socket.to(sessionRoomName(sessionId)).emit('code-update', {
-          code,
-          language,
+    socket.on('text-update', async (data) => {
+      const { sessionId, text } = data || {};
+      if (!sessionId) return;
+      const sessionObjectId = toObjectId(sessionId);
+      if (!sessionObjectId) return;
+
+      try {
+        // 1. Diffusion immédiate
+        socket.to(sessionRoomName(sessionId)).emit('text-update', {
+          text,
           by: socket.user?.id || null,
           timestamp: new Date().toISOString()
         });
+
+        // 2. Sauvegarde asynchrone
+        SessionCollaborative.updateOne(
+          { _id: sessionObjectId },
+          {
+            $set: {
+              whiteboard_text: text,
+              updatedAt: new Date()
+            }
+          }
+        ).catch(err => logger.error('Error saving whiteboard text:', err));
       } catch (error) {
-        logger.error('Error code-update:', error);
+        logger.error('Error text-update:', error);
       }
     });
 

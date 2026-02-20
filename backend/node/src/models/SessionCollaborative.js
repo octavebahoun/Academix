@@ -108,6 +108,10 @@ const sessionCollaborativeSchema = new mongoose.Schema({
   code_language: {
     type: String,
     default: "web"
+  },
+  whiteboard_text: {
+    type: String,
+    default: ""
   }
 }, {
   timestamps: true,

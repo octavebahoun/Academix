@@ -108,6 +108,15 @@ class SessionSocketService {
     }
   }
 
+  textUpdate(sessionId, text) {
+    if (this.socket) {
+      this.socket.emit('text-update', {
+        sessionId,
+        text
+      });
+    }
+  }
+
   requestWhiteboardSync(sessionId) {
     if (this.socket) {
       this.socket.emit('whiteboard-sync-request', { sessionId });
@@ -201,6 +210,12 @@ class SessionSocketService {
   onCodeUpdate(callback) {
     if (this.socket) {
       this.socket.on('code-update', callback);
+    }
+  }
+
+  onTextUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('text-update', callback);
     }
   }
 

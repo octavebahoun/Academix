@@ -498,29 +498,36 @@ const WhiteboardCanvas = ({
 
   // --- Synchronisation Code via Socket ---
   // Écouter les mises à jour distantes
+  // Référence pour éviter les boucles infinies et les sauts de curseur
+  const lastUpdateRef = useRef("");
+
+  // Référence pour accéder à codeContent dans le callback sans redéclencher l'useEffect du socket
+  const codeContentRef = useRef(codeContent);
+  useEffect(() => {
+    codeContentRef.current = codeContent;
+  }, [codeContent]);
+
+  // Écouter les mises à jour distantes du code
   useEffect(() => {
     if (!sessionId) return;
 
     const handleCodeUpdate = (data) => {
-      console.log(
-        `[Socket] Received code update for session ${sessionId}:`,
-        data.code.substring(0, 50) + "...",
-      );
-      // Éviter de remplacer si c'est notre propre modification (optimiste)
-      // Mais ici on simplifie : on met à jour si le timestamp est plus récent
-      // Pour une vraie collab temps réel (OT/CRDT), utiliser Yjs.
-      // Ici c'est du "last write wins" simple.
+      // Ignorer si c'est identique à ce qu'on a déjà (local ou reçu précédemment)
+      if (data.code === codeContentRef.current) return;
+
+      console.log(`[Socket] Received remote code update (diff)`);
       setCodeContent(data.code);
-      // Si le langage change, on pourrait aussi le mettre à jour ici
+      lastUpdateRef.current = data.code;
     };
 
+    let socketModule;
     import("../services/sessionSocket").then((module) => {
-      console.log(`[Socket] Setting up listener for code-update`);
-      module.default.onCodeUpdate(handleCodeUpdate);
+      socketModule = module.default;
+      socketModule.onCodeUpdate(handleCodeUpdate);
     });
 
     return () => {
-      // Cleanup listener if possible
+      // Nettoyage si possible
     };
   }, [sessionId]);
 
@@ -528,17 +535,56 @@ const WhiteboardCanvas = ({
   useEffect(() => {
     if (!sessionId) return;
 
+    // Si le code actuel est le même que le dernier reçu/émis, on n'envoie rien
+    if (codeContent === lastUpdateRef.current) return;
+
     const timeoutId = setTimeout(() => {
-      console.log(
-        `[Socket] Emitting code update (debounced) for session ${sessionId}`,
-      );
+      console.log(`[Socket] Emitting code update`);
+      lastUpdateRef.current = codeContent;
       import("../services/sessionSocket").then((module) => {
-        module.default.codeUpdate(sessionId, codeContent, "web"); // TODO: sync language
+        module.default.codeUpdate(sessionId, codeContent, "web");
       });
-    }, 500); // 500ms debounce
+    }, 800); // Augmentation légère du debounce pour limiter le trafic vocal
 
     return () => clearTimeout(timeoutId);
   }, [codeContent, sessionId]);
+  // Synchronisation du Texte Global (Écrit ou Dicté)
+  const lastTextUpdateRef = useRef("");
+  const globalTextRef = useRef(globalText);
+
+  useEffect(() => {
+    globalTextRef.current = globalText;
+  }, [globalText]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const handleTextUpdate = (data) => {
+      if (data.text === globalTextRef.current) return;
+      console.log(`[Socket] Received text update`);
+      setGlobalText(data.text);
+      lastTextUpdateRef.current = data.text;
+    };
+
+    import("../services/sessionSocket").then((module) => {
+      module.default.onTextUpdate(handleTextUpdate);
+    });
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    if (globalText === lastTextUpdateRef.current) return;
+
+    const timeoutId = setTimeout(() => {
+      console.log(`[Socket] Emitting text update`);
+      lastTextUpdateRef.current = globalText;
+      import("../services/sessionSocket").then((module) => {
+        module.default.textUpdate(sessionId, globalText);
+      });
+    }, 1000); // 1s debounce pour le texte
+
+    return () => clearTimeout(timeoutId);
+  }, [globalText, sessionId]);
 
   // Callback Audio
   const handleFinalTranscript = useCallback((newText) => {
@@ -643,7 +689,8 @@ const WhiteboardCanvas = ({
     drawingRef.current = false;
     e.currentTarget.releasePointerCapture(e.pointerId);
     if (currentStrokeRef.current?.points?.length > 0) {
-      addOperation({ action: "draw", data: currentStrokeRef.current });
+      const strokeData = currentStrokeRef.current;
+      addOperation({ action: "draw", data: strokeData });
     }
     currentStrokeRef.current = null;
   };
