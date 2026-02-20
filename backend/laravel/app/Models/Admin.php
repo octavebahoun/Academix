@@ -1,15 +1,16 @@
 <?php
+
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Laravel\Sanctum\HasApiTokens;
 
 class Admin extends Authenticatable
 {
     use HasApiTokens;
-
+    protected $table = 'super_admins';
     protected $fillable = [
         'nom',
         'prenom',
@@ -17,10 +18,15 @@ class Admin extends Authenticatable
         'password',
         'telephone',
         'photo',
-        'role',
-        'departement_id',
+        'departement_id', 
         'is_active',
         'last_login',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'last_login' => 'datetime',
+        'departement_id' => 'integer', 
     ];
 
     protected $hidden = [
@@ -28,10 +34,7 @@ class Admin extends Authenticatable
         'remember_token',
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-        'last_login' => 'datetime',
-    ];
+
 
     public function departement(): BelongsTo
     {
@@ -45,11 +48,11 @@ class Admin extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'super_admin';
+        return is_null($this->departement_id);
     }
 
     public function isChefDepartement(): bool
     {
-        return $this->role === 'chef_departement';
+        return !is_null($this->departement_id);
     }
 }

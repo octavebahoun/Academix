@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Departement;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class DepartementController extends Controller
 {
@@ -60,18 +61,62 @@ class DepartementController extends Controller
      * ---------------------------------------------------------------
      */
     public function store(Request $request)
-    {
-        // TODO: Valider les champs
-        // $validated = $request->validate([
-        //     'nom'         => 'required|string|max:100',
-        //     'code'        => 'required|string|max:10|unique:departements,code',
-        //     'description' => 'nullable|string',
-        // ]);
+{
+    try {
+        // 🔹 Récupérer l'utilisateur authentifié
+        $admin = $request->user(); // ou Auth::guard('admin')->user()
 
-        // TODO: Créer et retourner
-        // $departement = Departement::create($validated);
-        // return response()->json($departement, 201);
+        // 🔹 Vérification existance de l'utilisateur
+        if (!$admin) {
+            return response()->json([
+                'message' => 'Non authentifié. Veuillez vous connecter.'
+            ], 401);
+        }
+
+        // 🔹 Vérification du rôle
+        if (!($admin->isSuperAdmin() || $admin->isChefDepartement())) {
+            return response()->json([
+                'message' => 'Accès interdit. Vous n’avez pas les droits pour créer un département.'
+            ], 403);
+        }
+
+        // 🔹 Validation sécurisée des données
+        $validated = $request->validate([
+            'nom'         => 'required|string|max:100',
+            'code'        => 'required|string|max:10|unique:departements,code',
+            'description' => 'nullable|string',
+        ]);
+
+        // 🔹 Création sécurisée avec gestion des exceptions
+        $departement = Departement::create($validated);
+
+        return response()->json([
+            'message' => 'Département créé avec succès.',
+            'data' => $departement
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Gestion des erreurs de validation
+        return response()->json([
+            'message' => 'Données invalides.',
+            'errors' => $e->errors()
+        ], 422);
+
+    } catch (\Illuminate\Database\QueryException $e) {
+        // Gestion des erreurs liées à la base de données
+        return response()->json([
+            'message' => 'Erreur lors de la création en base de données.',
+            'error' => $e->getMessage()
+        ], 500);
+
+    } catch (\Exception $e) {
+        // Gestion de toutes les erreurs inattendues
+        return response()->json([
+            'message' => 'Une erreur inattendue est survenue.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     /**
      * ---------------------------------------------------------------

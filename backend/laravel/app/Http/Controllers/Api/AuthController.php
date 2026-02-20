@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Admin;
 use App\Models\User;
+use App\Models\Admin;
+use App\Models\Departement;
 use Illuminate\Http\Request;
+use App\Models\ChefDepartement;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -47,36 +50,27 @@ class AuthController extends Controller
      */
     public function adminLogin(Request $request)
     {
-        // TODO: Valider les champs entrants
-        // $request->validate([
-        //     'email'    => 'required|email',
-        //     'password' => 'required|string',
-        // ]);
-
-        // TODO: Chercher l'admin par email
-        // $admin = Admin::with('departement')->where('email', $request->email)->first();
-
-        // TODO: Vérifier les credentials et le statut
-        // if (!$admin || !Hash::check($request->password, $admin->password)) {
-        //     return response()->json(['message' => 'Identifiants incorrects'], 401);
-        // }
-        // if (!$admin->is_active) {
-        //     return response()->json(['message' => 'Compte désactivé'], 403);
-        // }
-
-        // TODO: Mettre à jour la date de dernière connexion
-        // $admin->update(['last_login' => now()]);
-
-        // TODO: Révoquer les anciens tokens et créer un nouveau
-        // $admin->tokens()->delete(); // optionnel : une session à la fois
-        // $token = $admin->createToken('admin-token')->plainTextToken;
-
-        // TODO: Retourner le token et le profil
-        // return response()->json([
-        //     'token'      => $token,
-        //     'token_type' => 'Bearer',
-        //     'admin'      => $admin,
-        // ]);
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+        $admin = Admin::where('email', $request->email)->first();
+        if (!$admin || !Hash::check($request->password, $admin->password)) {
+            return response()->json(['message' => 'Identifiants incorrects'], 401);
+        }
+        if (!$admin->is_active) {
+            return response()->json(['message' => 'Compte désactivé'], 403);
+        }
+        if ($admin and $admin->is_active) {
+            $admin->update(['is_connect' => true]);
+        }
+        $admin->update(['last_login' => now()]);
+        $token = $admin->createToken('admin-token')->plainTextToken;
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'admin' => $admin,
+        ]);
     }
 
     /**
@@ -96,10 +90,35 @@ class AuthController extends Controller
      */
     public function adminLogout(Request $request)
     {
-        // TODO: Supprimer le token courant
-        // $request->user()->currentAccessToken()->delete();
-        // return response()->json(['message' => 'Déconnecté avec succès']);
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Déconnecté avec succès']);
     }
+    public function chefDepartementRegister(Request $request)
+ {
+     $creator = $request->user();
+    if (!$creator->isSuperAdmin()) {
+        return response()->json(['message' => 'Seul un Super Admin peut créer un chef.'], 403);
+    }
+    $validatedData = $request->validate([
+        'nom' => 'required|string|max:100',
+        'prenom' => 'required|string|max:100',
+        'email' => 'required|email|unique:chefs_departement,email',
+        'password' => 'required|string|min:8',
+        'departement_id' => 'required|exists:departements,id',
+    ]); 
+    if(ChefDepartement::where('departement_id', $validatedData['departement_id'])->where('is_active', true)->exists()) {
+        return response()->json(['message' => 'Il y a déjà un chef de département actif pour ce département'], 422);
+    }               
+    $chef = ChefDepartement::create([
+        'nom' => $validatedData['nom'],
+        'prenom' => $validatedData['prenom'],
+        'email' => $validatedData['email'],
+        'password' => Hash::make($validatedData['password']),
+        'departement_id' => $validatedData['departement_id'],
+        'created_by_admin' => $request->user()->id,
+    ]);
+    return response()->json(['message' => 'Chef de département créé !', 'chef' => $chef], 201);
+}
 
     /**
      * ---------------------------------------------------------------
@@ -233,7 +252,20 @@ class AuthController extends Controller
         // $request->user()->currentAccessToken()->delete();
         // return response()->json(['message' => 'Déconnecté avec succès']);
     }
-
+      public function store(Request $request)
+    {
+        $admin = $request->user();
+        if (!$admin->isSuperAdmin()) {
+            return response()->json(['message' => 'Accès interdit'], 403);
+        }
+        $validated = $request->validate([
+            'nom'         => 'required|string|max:100',
+            'code'        => 'required|string|max:10|unique:departements,code',
+            'description' => 'nullable|string',
+        ]);
+        $departement = Departement::create($validated);
+        return response()->json($departement, 201);
+    }
     /**
      * ---------------------------------------------------------------
      * PROFIL DE L'UTILISATEUR CONNECTÉ
@@ -272,5 +304,30 @@ class AuthController extends Controller
         //     'type'   => 'student',
         //     'profil' => $user->load('filiere.departement'),
         // ]);
+    }
+    public function adminRegister(Request $request)
+    {
+        $validatedData = $request->validate([
+            'nom' => 'required|string|max:100',
+            'email' => 'required|email|unique:super_admins,email',
+            'password' => 'required|string|min:8|confirmed',
+            'prenom' => 'required|string|max:100',
+            'telephone' => 'nullable|string|max:20',
+            'photo' => 'nullable|string|max:255',
+            'is_active' => 'boolean',
+            'last_login' => 'nullable|date',
+        ]);
+        $admin = Admin::create([
+            'nom' => $validatedData['nom'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+            'prenom' => $validatedData['prenom'],
+            'telephone' => $validatedData['telephone'] ?? null,
+            'photo' => $validatedData['photo'] ?? null,
+            'is_active' => $validatedData['is_active'] ?? true,
+            'last_login' => $validatedData['last_login'] ?? null,
+
+        ]);
+        return response()->json(['message' => 'Admin enregistré avec succès', 'admin' => $admin], 201);
     }
 }

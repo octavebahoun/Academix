@@ -9,7 +9,7 @@ return new class extends Migration
     {
         Schema::create('import_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_id')->constrained()->onDelete('cascade');
+            $table->foreignId('admin_id')->constrained('super_admins')->onDelete('cascade');
             $table->enum('type_import', ['etudiants', 'notes']);
             $table->string('fichier_nom');
             $table->string('fichier_path')->nullable();

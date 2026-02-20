@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,9 +10,10 @@ return new class extends Migration
     {
         Schema::create('departements', function (Blueprint $table) {
             $table->id();
-            $table->string('nom', 100);
+            $table->string('nom', 100)->unique();
             $table->string('code', 10)->unique();
-            $table->text('description')->nullable();
+            // Le Super Admin qui a initialisé ce département
+            $table->foreignId('created_by')->constrained('super_admins');
             $table->timestamps();
         });
     }
