@@ -1,17 +1,12 @@
 <?php
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Alerte;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class AlerteController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DES ALERTES DE L'ÉTUDIANT
-     * ---------------------------------------------------------------
-     */
     public function index(Request $request)
     {
         $user = $request->user();
