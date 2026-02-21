@@ -10,3 +10,4 @@ class APIResponse(BaseModel, Generic[T]):
 
 # Exemple d'utilisation : 
 # return APIResponse(success=True, message="OK", data=my_chat_response)
+#wesh je suis completement près pour ce hackaton

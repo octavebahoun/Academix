@@ -82,7 +82,7 @@ int main() {
   },
 };
 
-// --- Hook Personnalisé : Reconnaissance Vocale ---
+// J'ai penser qu'ajouter la Reconnaissance Vocale  etait ouf nn ---
 const useSpeechRecognition = (onFinalTranscript) => {
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
@@ -162,7 +162,7 @@ const useSpeechRecognition = (onFinalTranscript) => {
   };
 };
 
-// --- Composant : Overlay Éditeur de Code Multi-Langage ---
+// --- Composant : Overlay Éditeur de Code Multi-Langage plus monaco ca serai ouf nn---
 const CodeEditorOverlay = ({ code, setCode, onClose }) => {
   const [language, setLanguage] = useState("web");
   const [output, setOutput] = useState("");
@@ -201,6 +201,7 @@ const CodeEditorOverlay = ({ code, setCode, onClose }) => {
     // Si on lance le code et qu'on est en mode "éditeur seul", on bascule vers la preview pour voir le résultat
     if (layout === "editor") setLayout("preview");
 
+    //La je me demande si je vais pas mettre la clé en dur mais c'est pas pro du tout mais je vais voir que faire moi
     if (!apiKey) {
       setOutput(
         "⚠️ Erreur : Veuillez entrer une clé API RapidAPI (Judge0) dans les paramètres (⚙️) pour exécuter du Python/C/C++.",
@@ -858,3 +859,5 @@ const WhiteboardCanvas = ({
 };
 
 export default WhiteboardCanvas;
+
+// heure de debut 10h et heure de fin dui code 16h

@@ -49,3 +49,5 @@ export const getUnreadCount = async () => {
     const response = await apiClient.get('/messages/unread-count');
     return response.data;
 };
+
+//Jour 2 fini avec succès  ouf

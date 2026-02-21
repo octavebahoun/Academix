@@ -66,8 +66,6 @@ const setupInterceptors = (client) => {
         (response) => response,
         (error) => {
             if (error.response?.status === 401) {
-                // Redirection vers la page de connexion si non authentifié
-                // Attention : ne pas rediriger si on est déjà sur login pour éviter une boucle
                 if (!window.location.pathname.includes('/login')) {
                     localStorage.removeItem('token');
                     window.location.href = '/login';
@@ -83,8 +81,8 @@ setupInterceptors(nodeApiClient);
 setupInterceptors(laravelApiClient);
 setupInterceptors(pythonApiClient);
 
-// Export par défaut (Historique: Node)
+// Export par défaut 
 export default nodeApiClient;
 
-// Exports nommés pour une utilisation explicite
+// Exports nommés
 export { nodeApiClient, laravelApiClient, pythonApiClient };

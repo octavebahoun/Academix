@@ -2,13 +2,6 @@
  * @file auth.js
  * @description Middleware d'authentification Node.js branché sur Laravel Sanctum.
  *
- * Laravel Sanctum ne génère PAS de JWT — il génère des tokens opaques stockés
- * dans la table MySQL `personal_access_tokens` avec les colonnes :
- *   - tokenable_type : 'App\Models\Admin' | 'App\Models\ChefDepartement' | 'App\Models\User'
- *   - tokenable_id   : ID de l'utilisateur dans sa table respective
- *   - token          : SHA-256 du token (la partie après le '|')
- *   - expires_at     : date d'expiration (null = pas d'expiration)
- *
  * Fonctionnement :
  *   1. Le client envoie : Authorization: Bearer {id}|{plainToken}
  *   2. On extrait l'ID et le plainToken

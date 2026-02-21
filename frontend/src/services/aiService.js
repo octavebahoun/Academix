@@ -9,7 +9,7 @@ export const aiService = {
 
     // Résumés
     generateSummary: async (formData) => {
-        // Note: formData est utilisé ici car on envoie un fichier
+        //  formData est utilisé ici car on envoie un fichier
         const response = await pythonApiClient.post('/summary/generate', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 // AuthController : responsable UNIQUEMENT de l'authentification
-// ✅ Admin Login / Logout
-// ✅ Chef de Département Login / Logout
-// ✅ Étudiant Register / Login / Logout
-// ✅ Me (profil de l'utilisateur connecté)
-// ❌ PAS de création de département (→ DepartementController)
-// ❌ PAS de création de chef (→ ChefDepartementController)
+//  Admin Login / Logout
+//  Chef de Département Login / Logout
+//  Étudiant Register / Login / Logout
+//  Me (profil de l'utilisateur connecté)
+//  PAS de création de département (→ DepartementController)
+//  PAS de création de chef (→ ChefDepartementController)
 
 use App\Models\User;
 use App\Models\Admin;

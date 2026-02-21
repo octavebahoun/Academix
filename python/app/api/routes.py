@@ -12,7 +12,6 @@ router = APIRouter()
 async def chat_endpoint(request: ChatRequest, current_user: dict = Depends(get_current_user)):
 
     try:
-        # print(f"Utilisateur {current_user['email']} appelle le chat")
         # On appelle le service RAG 
         answer_text = await rag_service.ask_question(request.question)
         

@@ -22,7 +22,7 @@ class SummaryFormat(str, Enum):
 
 class ChatRequest(BaseModel):
     question: str
-    # Plus tard, ajouter 'history' ici pour la mémoire conversationnelle
+    # j'ajouterai si le temps le permet 'history' ici pour la mémoire conversationnelle
 
 class ChatResponse(BaseModel):
     answer: str
