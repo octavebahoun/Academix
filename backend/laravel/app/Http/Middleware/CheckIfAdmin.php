@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Middleware\Middleware;
+namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckIfAdmin
 {
@@ -16,17 +16,19 @@ class CheckIfAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Vérifier si l'utilisateur est authentifié avec le garde 'admin'
-        if (!Auth::guard('admin')->check()) {
+        $admin = $request->user();
+
+        if (!$admin) {
             return response()->json([
                 'message' => 'Non authentifié. Accès réservé aux administrateurs.'
             ], 401);
         }
 
-        $admin = Auth::guard('admin')->user();
-
         // Vérifier que c'est un super admin OR chef de département
-        if (!($admin->isSuperAdmin() || $admin->isChefDepartement())) {
+        $isSuperAdmin = method_exists($admin, 'isSuperAdmin') && $admin->isSuperAdmin();
+        $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
+
+        if (!($isSuperAdmin || $isChef)) {
             return response()->json([
                 'message' => 'Non autorisé. Accès réservé aux administrateurs.'
             ], 403);

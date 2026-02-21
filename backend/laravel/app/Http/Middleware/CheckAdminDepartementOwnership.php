@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Middleware\Middleware;
+namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckAdminDepartementOwnership
 {
@@ -17,21 +17,21 @@ class CheckAdminDepartementOwnership
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::guard('admin')->check()) {
+        $admin = $request->user();
+
+        if (!$admin) {
             return response()->json([
                 'message' => 'Non authentifié.'
             ], 401);
         }
 
-        $admin = Auth::guard('admin')->user();
-
         // Les super admins ont accès à tout
-        if ($admin->isSuperAdmin()) {
+        if (method_exists($admin, 'isSuperAdmin') && $admin->isSuperAdmin()) {
             return $next($request);
         }
 
         // Pour les chefs de département
-        if ($admin->isChefDepartement()) {
+        if (method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement()) {
             // Vérifier si un departement_id est fourni en paramètre
             $departement_id = $request->route('departement_id') ?? $request->input('departement_id');
 

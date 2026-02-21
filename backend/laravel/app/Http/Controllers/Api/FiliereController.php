@@ -1,11 +1,11 @@
 <?php
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Filiere;
 use App\Models\User;
+use App\Models\Filiere;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
 
 class FiliereController extends Controller
 {
@@ -51,6 +51,14 @@ class FiliereController extends Controller
         //     ->get();
 
         // TODO: return response()->json($filieres);
+        $admin = $request->user();
+        $filieres = Filiere::with('departement')
+            ->withCount('users')
+            ->when($admin->isChefDepartement(), fn($q) => $q->where('departement_id', $admin->departement_id))
+            ->when($request->niveau, fn($q, $n) => $q->where('niveau', $n))
+            ->orderBy('departement_id')->orderBy('niveau')
+            ->get();
+        return response()->json($filieres);
     }
 
     /**
@@ -75,31 +83,21 @@ class FiliereController extends Controller
      * ---------------------------------------------------------------
      */
     public function store(Request $request)
-    {
-        // TODO: Récupérer l'admin connecté
-        // $admin = $request->user();
-
-        // TODO: Valider les champs
-        // $validated = $request->validate([
-        //     'departement_id'   => 'required|integer|exists:departements,id',
-        //     'nom'              => 'required|string|max:100',
-        //     'niveau'           => 'required|in:L1,L2,L3,M1,M2',
-        //     'code'             => 'required|string|max:20|unique:filieres,code',
-        //     'annee_academique' => 'required|string|max:20',
-        //     'description'      => 'nullable|string',
-        // ]);
-
-        // TODO: (Sécurité) Un chef ne peut créer que dans SON département
-        // ⚠️ $admin->departement_id existe UNIQUEMENT sur le modèle ChefDepartement.
-        //    Si $admin est un Super Admin (modèle Admin), cette propriété n'existe pas.
-        //    La condition isChefDepartement() garantit qu'on est bien sur un ChefDepartement.
-        // if ($admin->isChefDepartement()) {
-        //     $validated['departement_id'] = $admin->departement_id;
-        // }
-
-        // TODO: Créer et retourner
-        // $filiere = Filiere::create($validated);
-        // return response()->json($filiere->load('departement'), 201);
+    {       
+        $admin = $request->user();
+        if ($admin->isChefDepartement()) {
+            $request->merge(['departement_id' => $admin->departement_id]);
+        }
+        $validated = $request->validate([
+            'departement_id' => 'required|integer|exists:departements,id',
+            'nom'  => 'required|string|max:100',
+            'niveau'  => 'required|in:L1,L2,L3,M1,M2',
+            'code'  => 'required|string|max:20|unique:filieres,code',
+            'annee_academique' => 'required|string|max:20',
+            'description' => 'nullable|string',
+        ]);
+        $filiere = Filiere::create($validated);
+        return response()->json($filiere->load('departement'), 201);
     }
 
     /**

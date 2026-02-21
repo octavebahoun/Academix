@@ -26,26 +26,18 @@ class AuthController extends Controller
     // ---------------------------------------------------------------
     public function adminLogin(Request $request)
     {
-        // 1. Valider que l'email et le mot de passe sont fournis
         $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
         ]);
-
-        // 2. Chercher le Super Admin par son email dans la table super_admins
         $admin = Admin::where('email', $request->email)->first();
-
-        // 3. Vérifier que l'admin existe ET que le mot de passe correspond
         if (!$admin || !Hash::check($request->password, $admin->password)) {
             return response()->json(['message' => 'Identifiants incorrects'], 401);
         }
 
-        // 4. Vérifier que le compte n'est pas désactivé
         if (!$admin->is_active) {
             return response()->json(['message' => 'Compte désactivé. Contactez le responsable.'], 403);
         }
-
-        // 5. Mettre à jour la date de dernière connexion
         $admin->update([
             'last_login'  => now(),
             'is_connect'  => true,
@@ -138,37 +130,53 @@ class AuthController extends Controller
     // ---------------------------------------------------------------
     public function studentRegister(Request $request)
     {
-        // 1. Valider les données
-        $request->validate([
-            'matricule'             => 'required|string|exists:users,matricule',
-            'email'                 => 'required|email|unique:users,email',
-            'password'              => 'required|string|min:8|confirmed',
-            'telephone'             => 'nullable|string|max:20',
-        ]);
+        // 1. Vérifier que seul un admin ou un chef peut enregistrer un étudiant
+        $admin = $request->user();
+        $isSuperAdmin = method_exists($admin, 'isSuperAdmin') && $admin->isSuperAdmin();
+        $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 
-        // 2. Trouver l'étudiant par son matricule (créé lors de l'import CSV)
-        $user = User::where('matricule', $request->matricule)->firstOrFail();
-
-        // 3. Vérifier que le compte n'est pas déjà activé
-        if (!empty($user->email)) {
-            return response()->json(['message' => 'Ce compte est déjà activé.'], 409);
+        if (!$admin || !($isSuperAdmin || $isChef)) {
+            return response()->json(['message' => 'Non autorisé. Seul un administrateur peut enregistrer un étudiant.'], 403);
         }
 
-        // 4. Activer le compte en renseignant email + password hashé
-        $user->update([
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
-            'telephone' => $request->telephone,
-            'is_active' => true,
+        // 2. Valider les données
+        $request->validate([
+            'matricule'             => 'required|string|unique:users,matricule',
+            'nom'                   => 'required|string|max:100',
+            'prenom'                => 'required|string|max:100',
+            'annee_academique'      => 'required|string|max:20',
+            'filiere_id'            => 'required|integer|exists:filieres,id',
+            'email'                 => 'required|email|unique:users,email',
+            'telephone'             => 'nullable|string|max:20',
+        ]);
+ 
+        $password = $request->matricule;
+
+        // 3. (Optionnel) Vérifier si le chef a le droit sur cette filière
+        if ($isChef) {
+            $filiere = \App\Models\Filiere::find($request->filiere_id);
+            if ($filiere && $filiere->departement_id !== $admin->departement_id) {
+                return response()->json(['message' => 'Non autorisé. Cette filière ne fait pas partie de votre département.'], 403);
+            }
+        }
+
+        // 4. Créer l'étudiant
+        $user = User::create([
+            'matricule'        => $request->matricule,
+            'nom'              => $request->nom,
+            'prenom'           => $request->prenom,
+            'annee_academique' => $request->annee_academique,
+            'filiere_id'       => $request->filiere_id,
+            'email'            => $request->email,
+            'password'         => Hash::make($password),
+            'telephone'        => $request->telephone,
+            'is_active'        => true,
+            'annee_admission'  => date('Y'),
         ]);
 
-        // 5. Créer le token et retourner
-        $token = $user->createToken('student-token')->plainTextToken;
-
         return response()->json([
-            'token'      => $token,
-            'token_type' => 'Bearer',
-            'user'       => $user->load('filiere'),
+            'message' => 'Étudiant enregistré avec succès.',
+            'user'    => $user->load('filiere'),
         ], 201);
     }
 

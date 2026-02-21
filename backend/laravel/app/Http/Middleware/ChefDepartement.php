@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Middleware\Middleware;
+namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class ChefDepartement
 {
@@ -15,17 +15,16 @@ class ChefDepartement
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Vérifier si l'utilisateur est authentifié avec le garde 'admin'
-        if (!Auth::guard('admin')->check()) {
+        $admin = $request->user();
+
+        if (!$admin) {
             return response()->json([
                 'message' => 'Non authentifié. Accès réservé aux administrateurs.'
             ], 401);
         }
 
-        $admin = Auth::guard('admin')->user();
-
         // Vérifier si c'est un chef de département
-        if (!$admin->isChefDepartement()) {
+        if (!method_exists($admin, 'isChefDepartement') || !$admin->isChefDepartement()) {
             return response()->json([
                 'message' => 'Non autorisé. Accès réservé aux chefs de département.'
             ], 403);

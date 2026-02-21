@@ -32,99 +32,86 @@ use App\Http\Controllers\Api\ChefDepartementController;
 */
 
 Route::prefix('v1')->group(function () {
-
-    // ============================================================
-    // AUTHENTIFICATION (routes publiques et protégées)
-    // ============================================================
     Route::prefix('auth')->group(function () {
 
-        // --- SUPER ADMIN ---
-        // ⚠️ Protéger /admin/register en production (ou le supprimer après le premier setup)
+        //  ADMIN 
         Route::post('admin/register', [AuthController::class, 'adminRegister']);
         Route::post('admin/login', [AuthController::class, 'adminLogin']);
         Route::post('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');
 
-        // --- CHEF DE DÉPARTEMENT ---
-        // La connexion du chef utilise sa propre route dédiée
+        //  CHEF DE DÉPARTEMENT
         Route::post('chef/login', [AuthController::class, 'chefLogin']);
         Route::post('chef/logout', [AuthController::class, 'chefLogout'])->middleware('auth:sanctum');
 
-        // --- ÉTUDIANT ---
-        Route::post('student/register', [AuthController::class, 'studentRegister']);
+        // ÉTUDIANT 
+        Route::post('student/register', [AuthController::class, 'studentRegister'])->middleware('auth:sanctum');
         Route::post('student/login', [AuthController::class, 'studentLogin']);
         Route::post('student/logout', [AuthController::class, 'studentLogout'])->middleware('auth:sanctum');
-
-        // --- PROFIL DE L'UTILISATEUR CONNECTÉ (admin, chef, ou étudiant) ---
+        // PROFIL DE L'UTILISATEUR CONNECTÉ (admin, chef, ou étudiant) 
         Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
     });
 
-    // ============================================================
-    // ROUTES SUPER ADMIN UNIQUEMENT
-    // Middleware : auth:sanctum + super.admin
-    // ============================================================
     Route::prefix('admin')->middleware(['auth:sanctum', 'super.admin'])->group(function () {
 
-        // 📋 GESTION DES DÉPARTEMENTS
-        // Ordre : créer un département AVANT de créer un chef
+        //  GESTION DES DÉPARTEMENTS
         Route::prefix('departements')->group(function () {
-            Route::get('', [DepartementController::class, 'index']);   // Lister tous
-            Route::post('', [DepartementController::class, 'store']);   // Créer un département
-            Route::get('{id}', [DepartementController::class, 'show']);    // Voir un département
-            Route::put('{id}', [DepartementController::class, 'update']);  // Modifier
-            Route::delete('{id}', [DepartementController::class, 'destroy']); // Supprimer
-            Route::get('{id}/stats', [DepartementController::class, 'stats']);   // Statistiques
+            Route::get('',[DepartementController::class,'index']);   // Lister tous
+            Route::post('',[DepartementController::class,'store']);   // Créer un département
+            Route::get('{id}',[DepartementController::class,'show']);    // Voir un département
+            Route::put('{id}',[DepartementController::class,'update']);  // Modifier
+            Route::delete('{id}',[DepartementController::class,'destroy']); // Supprimer
+            Route::get('{id}/stats',[DepartementController::class,'stats']);   // Statistiques
         });
 
-        // 👨‍💼 GESTION DES CHEFS DE DÉPARTEMENT
-        // Ordre : le département doit exister AVANT de créer un chef
+        // GESTION DES CHEFS DE DÉPARTEMENT
         Route::prefix('chefs-departement')->group(function () {
-            Route::get('', [ChefDepartementController::class, 'index']);   // Lister
-            Route::post('', [ChefDepartementController::class, 'store']);   // Créer (département requis)
-            Route::get('{id}', [ChefDepartementController::class, 'show']);    // Voir un chef
-            Route::put('{id}', [ChefDepartementController::class, 'update']);  // Modifier
-            Route::delete('{id}', [ChefDepartementController::class, 'destroy']); // Supprimer
-            Route::post('{id}/toggle', [ChefDepartementController::class, 'toggle']); // Activer/Désactiver
+            Route::get('',[ChefDepartementController::class, 'index']);   // Lister
+            Route::post('',[ChefDepartementController::class, 'store']);   // Créer (département requis)
+            Route::get('{id}',[ChefDepartementController::class, 'show']);    // Voir un chef
+            Route::put('{id}',[ChefDepartementController::class, 'update']);  // Modifier
+            Route::delete('{id}',[ChefDepartementController::class, 'destroy']); // Supprimer
+            Route::post('{id}/toggle',[ChefDepartementController::class, 'toggle']); // Activer/Désactiver
         });
 
-        // 📊 STATISTIQUES GLOBALES
+        //  STATISTIQUES GLOBALES
         Route::get('stats/global', [StatistiqueController::class, 'global']);
         Route::get('stats/dashboard', [StatistiqueController::class, 'dashboard']);
+
+        // GESTION DES MATIÈRES (Super Admin)
+        Route::apiResource('matieres', MatiereController::class);
     });
-
-    // ============================================================
-    // ROUTES CHEF DE DÉPARTEMENT
-    // Middleware : auth:sanctum + chef.departement + admin.departement.owner
-    // ============================================================
-    Route::prefix('departement')->middleware(['auth:sanctum', 'chef.departement', 'admin.departement.owner'])->group(function () {
-
-        // 📚 GESTION DES FILIÈRES (dans son département uniquement)
+    
+    Route::prefix('departement')->middleware(['auth:sanctum', 'admin', 'admin.departement.owner'])->group(function () {
+        // GESTION DES MATIÈRES (Chef de Département)
+        Route::apiResource('matieres', MatiereController::class);
+        
+        //  GESTION DES FILIÈRES (dans son département uniquement)
         Route::prefix('filieres')->group(function () {
             Route::get('', [FiliereController::class, 'index']);
             Route::post('', [FiliereController::class, 'store']);
             Route::get('{id}', [FiliereController::class, 'show']);
             Route::put('{id}', [FiliereController::class, 'update']);
             Route::delete('{id}', [FiliereController::class, 'destroy']);
+            
+            // Assignation / Rétractation de matières à une filière
+            Route::post('{id}/matieres', [MatiereController::class, 'assignToFiliere']);
+            Route::delete('{id}/matieres/{matiere_id}', [MatiereController::class, 'removeFromFiliere']);
         });
 
-        // 📝 GESTION DES ÉTUDIANTS & NOTES
+        //  GESTION DES ÉTUDIANTS & NOTES
         Route::get('etudiants', [StudentController::class, 'index']);
         Route::post('import/etudiants', [ImportController::class, 'importEtudiants']);
         Route::post('import/notes', [ImportController::class, 'importNotes']);
 
-        // 📊 TABLEAU DE BORD DU DÉPARTEMENT
+        //  TABLEAU DE BORD DU DÉPARTEMENT
         Route::get('dashboard', [StatistiqueController::class, 'dashboard']);
     });
-
-    // ============================================================
-    // ROUTES ÉTUDIANT
-    // Middleware : auth:sanctum + student
-    // ============================================================
     Route::prefix('student')->middleware(['auth:sanctum', 'student'])->group(function () {
         Route::get('profil', [StudentController::class, 'profil']);
         Route::get('notes', [StudentController::class, 'notes']);
         Route::get('emploi-temps', [StudentController::class, 'emploiTemps']);
 
-        // ✅ TÂCHES PERSONNELLES (CRUD complet)
+        //  TÂCHES PERSONNELLES
         Route::apiResource('taches', TacheController::class);
     });
 });
