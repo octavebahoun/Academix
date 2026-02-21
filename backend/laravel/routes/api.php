@@ -35,17 +35,17 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
 
         //  ADMIN 
-        Route::post('admin/register', [AuthController::class, 'adminRegister']);
-        Route::post('admin/login', [AuthController::class, 'adminLogin']);
-        Route::post('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');
-
+        Route::post('admin/register', [AuthController::class, 'adminRegister']);//Bon
+        Route::post('admin/login', [AuthController::class, 'adminLogin']);//Bon
+        Route::post('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');//Bon
         //  CHEF DE DÉPARTEMENT
-        Route::post('chef/login', [AuthController::class, 'chefLogin']);
-        Route::post('chef/logout', [AuthController::class, 'chefLogout'])->middleware('auth:sanctum');
+        Route::post('chef/login', [AuthController::class, 'chefLogin']);//Bon
+        Route::post('chef/logout', [AuthController::class, 'chefLogout'])->middleware('auth:sanctum');//Bon
 
         // ÉTUDIANT 
         Route::post('student/register', [AuthController::class, 'studentRegister'])->middleware('auth:sanctum');
         Route::post('student/login', [AuthController::class, 'studentLogin']);
+        Route::post('student/activate', [AuthController::class, 'studentActivate']);
         Route::post('student/logout', [AuthController::class, 'studentLogout'])->middleware('auth:sanctum');
         // PROFIL DE L'UTILISATEUR CONNECTÉ (admin, chef, ou étudiant) 
         Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
@@ -60,7 +60,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}',[DepartementController::class,'show']);    // Voir un département
             Route::put('{id}',[DepartementController::class,'update']);  // Modifier
             Route::delete('{id}',[DepartementController::class,'destroy']); // Supprimer
-            Route::get('{id}/stats',[DepartementController::class,'stats']);   // Statistiques
+            Route::get('{id}/stats',[StatistiqueController::class,'departement']);   // Statistiques
         });
 
         // GESTION DES CHEFS DE DÉPARTEMENT
@@ -79,6 +79,11 @@ Route::prefix('v1')->group(function () {
 
         // GESTION DES MATIÈRES (Super Admin)
         Route::apiResource('matieres', MatiereController::class);
+        
+        // GESTION MANUELLE DES NOTES ET EMPLOI DU TEMPS
+        Route::apiResource('notes', NoteController::class);
+        Route::apiResource('emploi-temps', EmploiTempsController::class);
+        Route::get('emploi-temps/filieres/{id}', [EmploiTempsController::class, 'index']);
     });
     
     Route::prefix('departement')->middleware(['auth:sanctum', 'admin', 'admin.departement.owner'])->group(function () {
@@ -96,12 +101,21 @@ Route::prefix('v1')->group(function () {
             // Assignation / Rétractation de matières à une filière
             Route::post('{id}/matieres', [MatiereController::class, 'assignToFiliere']);
             Route::delete('{id}/matieres/{matiere_id}', [MatiereController::class, 'removeFromFiliere']);
+            
+            // Etudiants et Statistiques pour la Filiere
+            Route::get('{id}/etudiants', [FiliereController::class, 'etudiants']);
+            Route::get('{id}/stats', [StatistiqueController::class, 'filiere']);
+            Route::get('{id}/emploi-temps', [EmploiTempsController::class, 'index']);
         });
 
         //  GESTION DES ÉTUDIANTS & NOTES
         Route::get('etudiants', [StudentController::class, 'index']);
         Route::post('import/etudiants', [ImportController::class, 'importEtudiants']);
         Route::post('import/notes', [ImportController::class, 'importNotes']);
+        
+        // GESTION MANUELLE DES NOTES ET DE L'EMPLOI DU TEMPS (Chef de Département)
+        Route::apiResource('notes', NoteController::class);
+        Route::apiResource('emploi-temps', EmploiTempsController::class);
 
         //  TABLEAU DE BORD DU DÉPARTEMENT
         Route::get('dashboard', [StatistiqueController::class, 'dashboard']);
@@ -112,6 +126,11 @@ Route::prefix('v1')->group(function () {
         Route::get('emploi-temps', [StudentController::class, 'emploiTemps']);
 
         //  TÂCHES PERSONNELLES
+        Route::patch('taches/{id}/complete', [TacheController::class, 'complete']);
         Route::apiResource('taches', TacheController::class);
+
+        //  ALERTES
+        Route::get('alertes', [AlerteController::class, 'index']);
+        Route::patch('alertes/{id}/read', [AlerteController::class, 'markAsRead']);
     });
 });

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>API Docs — Academux Full API v1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0f1117;
+            --sidebar: #161b27;
+            --card: #1a2035;
+            --border: #2a3350;
+            --accent: #6366f1;
+            --accent2: #22d3ee;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --blue: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh
+        }
+
+        nav {
+            width: 280px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 10
+        }
+
+        nav .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px
+        }
+
+        nav .logo h1 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        nav .logo p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        nav a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: .2s;
+            border-left: 2px solid transparent
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--text);
+            background: rgba(99, 102, 241, .08);
+            border-left-color: var(--accent)
+        }
+
+        nav .group {
+            padding: 16px 20px 6px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted)
+        }
+
+        main {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+            max-width: 920px
+        }
+
+        h2.section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 48px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        h2.section-title:first-of-type {
+            margin-top: 0
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--card), #1e1b4b);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6
+        }
+
+        .hero .meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500
+        }
+
+        .tag.url {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent)
+        }
+
+        .tag.auth {
+            background: rgba(34, 211, 238, .1);
+            color: var(--accent2)
+        }
+
+        .endpoint {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .endpoint-header:hover {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .method {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            min-width: 52px;
+            text-align: center
+        }
+
+        .GET {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green)
+        }
+
+        .POST {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent)
+        }
+
+        .PUT {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow)
+        }
+
+        .DELETE {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red)
+        }
+
+        .PATCH {
+            background: rgba(59, 130, 246, .15);
+            color: var(--blue)
+        }
+
+        .path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text);
+            flex: 1
+        }
+
+        .arrow {
+            color: var(--muted);
+            font-size: 12px;
+            transition: .3s
+        }
+
+        .endpoint-body {
+            display: none;
+            padding: 0 18px 18px;
+            border-top: 1px solid var(--border)
+        }
+
+        .endpoint-body.open {
+            display: block
+        }
+
+        .body-section {
+            margin-top: 14px
+        }
+
+        .body-section h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: 8px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px
+        }
+
+        th {
+            text-align: left;
+            padding: 7px 10px;
+            background: rgba(255, 255, 255, .03);
+            color: var(--muted);
+            font-weight: 500;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        td {
+            padding: 7px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            vertical-align: top
+        }
+
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent2)
+        }
+
+        pre {
+            background: #0a0d14;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 12px;
+            overflow-x: auto;
+            line-height: 1.6;
+            color: #a5b4fc
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-right: 4px
+        }
+
+        .badge-200 {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green)
+        }
+
+        .badge-201 {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent)
+        }
+
+        .badge-422 {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow)
+        }
+
+        .ready-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .access-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, .1);
+            color: var(--accent);
+            margin-bottom: 10px
+        }
+
+        .search-wrap {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 8px
+        }
+
+        .search-wrap input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-size: 12px;
+            outline: none
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px
+        }
+
+        @media(max-width:768px) {
+            nav {
+                display: none
+            }
+
+            main {
+                margin-left: 0;
+                padding: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav id="sidebar">
+        <div class="logo">
+            <h1>⚡ Academux Full API</h1>
+            <p>Hackaton BYIFRI 2026 · v1.0</p>
+        </div>
+        <div class="search-wrap">
+            <input type="text" id="navSearch" placeholder="Rechercher..." oninput="filterNav(this.value)">
+        </div>
+        <div id="navLinks"></div>
+    </nav>
+
+    <main id="main"></main>
+
+    <script>
+        const API = [
+            {
+                group: "🔐 Authentification", id: "auth",
+                endpoints: [
+                    {
+                        method: "POST", path: "/auth/admin/register", title: "Inscription Super Admin", access: "Public", status: "READY",
+                        body: [["nom", "string", "✅", ""], ["prenom", "string", "✅", ""], ["email", "string", "✅", "Unique"], ["password", "string", "✅", "min:8"], ["password_confirmation", "string", "✅", ""]],
+                        codes: ["201", "422"]
+                    },
+                    {
+                        method: "POST", path: "/auth/admin/login", title: "Login Super Admin", access: "Public", status: "READY",
+                        body: [["email", "string", "✅", ""], ["password", "string", "✅", ""]],
+                        codes: ["200", "401", "422"]
+                    },
+                    {
+                        method: "POST", path: "/auth/chef/login", title: "Login Chef Dept", access: "Public", status: "READY",
+                        body: [["email", "string", "✅", ""], ["password", "string", "✅", ""]],
+                        codes: ["200", "401", "422"]
+                    },
+                    {
+                        method: "POST", path: "/auth/student/register", title: "Inscription Étudiant (Admin)", access: "auth:sanctum", status: "READY",
+                        body: [["matricule", "string", "✅", ""], ["nom", "string", "✅", ""], ["prenom", "string", "✅", ""], ["filiere_id", "integer", "✅", "exists:filieres"], ["email", "email", "❌", ""], ["telephone", "string", "❌", "Max 20"]],
+                        codes: ["201", "403", "422"]
+                    },
+                    {
+                        method: "POST", path: "/auth/student/activate", title: "Activation Compte Étudiant", access: "Public", status: "READY",
+                        body: [["matricule", "string", "✅", "exists:users"], ["email", "email", "✅", "unique:users"], ["password", "string", "✅", "min:8 + confirmation"]],
+                        codes: ["200", "422"]
+                    },
+                    {
+                        method: "POST", path: "/auth/student/login", title: "Login Étudiant", access: "Public", status: "READY",
+                        body: [["email", "email", "✅", ""], ["password", "string", "✅", ""]],
+                        codes: ["200", "401", "422"]
+                    }
+                ]
+            },
+            {
+                group: "🏢 Super Admin : Départements", id: "infra",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/departements", title: "Lister Départements", access: "super_admin", status: "READY",
+                        params: [["search", "string", "Par nom ou code"]], codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/admin/departements", title: "Créer Département", access: "super_admin", status: "READY",
+                        body: [["nom", "string", "✅", "Max 100"], ["code", "string", "✅", "Unique, Max 10"], ["description", "string", "❌", ""]],
+                        codes: ["201", "422"]
+                    },
+                    {
+                        method: "PUT", path: "/admin/departements/{id}", title: "Modifier Dept", access: "super_admin", status: "READY",
+                        body: [["nom", "string", "❌", ""], ["code", "string", "❌", "Unique"], ["description", "string", "❌", ""]],
+                        codes: ["200", "422", "404"]
+                    }
+                ]
+            },
+            {
+                group: "👤 Super Admin : Chefs de Dept", id: "admin-chefs",
+                endpoints: [
+                    {
+                        method: "POST", path: "/admin/chefs-departement", title: "Créer Chef", access: "super_admin", status: "READY",
+                        body: [["nom", "string", "✅", ""], ["prenom", "string", "✅", ""], ["email", "string", "✅", "Unique"], ["password", "string", "✅", "min:8"], ["departement_id", "integer", "✅", "exists:departements"]],
+                        codes: ["201", "409", "422"]
+                    },
+                    {
+                        method: "PUT", path: "/admin/chefs-departement/{id}", title: "Modifier Chef", access: "super_admin", status: "READY",
+                        body: [["nom", "string", "❌", ""], ["prenom", "string", "❌", ""], ["email", "string", "❌", "Unique"], ["password", "string", "❌", "min:8"], ["departement_id", "integer", "❌", "exists:departements"]],
+                        codes: ["200", "422", "404"]
+                    }
+                ]
+            },
+            {
+                group: "📖 Super Admin : Matières", id: "admin-matieres",
+                endpoints: [
+                    {
+                        method: "POST", path: "/admin/matieres", title: "Créer Matière", access: "super_admin/chef", status: "READY",
+                        body: [["nom", "string", "✅", ""], ["code", "string", "✅", "Unique"], ["coefficient", "integer", "❌", "1-10"], ["description", "string", "❌", ""], ["enseignant", "string", "❌", ""]],
+                        codes: ["201", "422"]
+                    },
+                    {
+                        method: "PUT", path: "/admin/matieres/{id}", title: "Modifier Matière", access: "super_admin/chef", status: "READY",
+                        body: [["nom", "string", "❌", ""], ["code", "string", "❌", "Unique"], ["coefficient", "integer", "❌", ""], ["description", "string", "❌", ""], ["enseignant", "string", "❌", ""]],
+                        codes: ["200", "422", "404"]
+                    }
+                ]
+            },
+            {
+                group: "🗓 Super Admin : EDT & Notes", id: "admin-edt-notes",
+                endpoints: [
+                    {
+                        method: "POST", path: "/admin/notes", title: "Créer Note Manuelle", access: "super_admin/chef", status: "READY",
+                        body: [["user_id", "integer", "✅", ""], ["matiere_id", "integer", "✅", ""], ["note", "numeric", "✅", "min:0"], ["note_max", "numeric", "❌", "défaut: 20"], ["type_evaluation", "string", "✅", "Devoir, Partiel..."], ["coefficient", "integer", "❌", ""], ["date_evaluation", "date", "✅", ""], ["semestre", "string", "✅", "S1|S2"], ["annee_academique", "string", "✅", ""]],
+                        codes: ["201", "422"]
+                    },
+                    {
+                        method: "POST", path: "/admin/emploi-temps", title: "Créer Entrée EDT", access: "super_admin/chef", status: "READY",
+                        body: [["filiere_id", "integer", "✅", ""], ["matiere_id", "integer", "✅", ""], ["jour", "string", "✅", "Lundi-Samedi"], ["heure_debut", "string", "✅", "H:i"], ["heure_fin", "string", "✅", "H:i > debut"], ["salle", "string", "❌", ""], ["type_cours", "string", "✅", "CM,TD,TP"], ["semestre", "string", "✅", "S1|S2"]],
+                        codes: ["201", "409", "422"]
+                    }
+                ]
+            },
+            {
+                group: "📚 Chef : Filières", id: "chef-filieres",
+                endpoints: [
+                    {
+                        method: "POST", path: "/departement/filieres", title: "Créer Filière", access: "chef_departement", status: "READY",
+                        body: [["nom", "string", "✅", ""], ["niveau", "string", "✅", "L1-M2"], ["code", "string", "✅", "Unique"], ["annee_academique", "string", "✅", ""], ["description", "string", "❌", ""]],
+                        codes: ["201", "422"]
+                    },
+                    {
+                        method: "POST", path: "/departement/filieres/{id}/matieres", title: "Assigner Matière", access: "chef_departement", status: "READY",
+                        body: [["matiere_id", "integer", "✅", ""], ["semestre", "string", "✅", "S1|S2"]],
+                        codes: ["201", "409", "422"]
+                    }
+                ]
+            },
+            {
+                group: "📝 Étudiant : Profil & Tâches", id: "student-tasks",
+                endpoints: [
+                    {
+                        method: "PUT", path: "/student/profil", title: "Mettre à jour profil", access: "student", status: "READY",
+                        body: [["telephone", "string", "❌", ""], ["photo", "string", "❌", "URL"], ["objectif_moyenne", "numeric", "❌", "0-20"], ["style_apprentissage", "string", "❌", "visuel, auditif..."]],
+                        codes: ["200", "422"]
+                    },
+                    {
+                        method: "POST", path: "/student/taches", title: "Créer Tâche", access: "student", status: "READY",
+                        body: [["titre", "string", "✅", "Max 255"], ["description", "string", "❌", ""], ["matiere_id", "integer", "❌", ""], ["date_limite", "date", "✅", "Futur"], ["priorite", "string", "❌", "basse, moyenne, haute"]],
+                        codes: ["201", "422"]
+                    }
+                ]
+            }
+        ];
+
+        const HTTP_CODES = { "200": { label: "200 OK", cls: "badge-200" }, "201": { label: "201 Created", cls: "badge-201" }, "401": { label: "401 Unauthorized", cls: "badge-401" }, "422": { label: "422 Validation Error", cls: "badge-422" } };
+
+        function renderEndpoint(ep, idx) {
+            const bodyRows = (ep.body || []).map(([f, t, r, d]) => `<tr><td>${f}</td><td>${t}</td><td style="text-align:center">${r}</td><td style="color:var(--muted)">${d}</td></tr>`).join('');
+            const paramRows = (ep.params || []).map(([f, t, d]) => `<tr><td>${f}</td><td>${t}</td><td style="color:var(--muted)">${d}</td></tr>`).join('');
+            return `
+  <div class="endpoint" id="ep-${idx}">
+    <div class="endpoint-header" onclick="toggle('ep-${idx}')">
+      <span class="method ${ep.method}">${ep.method}</span>
+      <span class="path">${ep.path}</span>
+      <span class="badge ready-badge">${ep.status}</span>
+      <span class="summary">${ep.title}</span>
+      <span class="arrow" id="arrow-ep-${idx}">▼</span>
+    </div>
+    <div class="endpoint-body" id="body-ep-${idx}">
+      <div style="margin-top:12px"><span class="access-badge">🔒 Accès : ${ep.access}</span></div>
+      ${paramRows ? `<div class="body-section"><h4>Paramètres URL</h4><table><thead><tr><th>Filtre</th><th>Type</th><th>Description</th></tr></thead><tbody>${paramRows}</tbody></table></div>` : ''}
+      ${bodyRows ? `<div class="body-section"><h4>JSON Payload (Body)</h4><table><thead><tr><th>Clé</th><th>Type</th><th>Requis</th><th>Contraintes</th></tr></thead><tbody>${bodyRows}</tbody></table></div>` : ''}
+      <div class="body-section"><h4>Codes HTTP</h4><div class="badges">${(ep.codes || []).map(c => `<span class="badge ${(HTTP_CODES[c] || { cls: '' }).cls}">${(HTTP_CODES[c] || { label: c }).label}</span>`).join('')}</div></div>
+    </div>
+  </div>`;
+        }
+
+        function render() {
+            const nav = document.getElementById('navLinks');
+            const main = document.getElementById('main');
+            let navHtml = '', mainHtml = `<div class="hero"><h1>⚡ Academux Full API : Validation Details</h1><p>Cette version inclut les règles de validation (champs obligatoires ✅ vs optionnels ❌) extraites directement des contrôleurs backend.</p></div>`;
+            API.forEach((group, gIdx) => {
+                navHtml += `<div class="group">${group.group}</div><a href="#sec-${group.id}" onclick="scrollTo('sec-${group.id}')">${group.group}</a>`;
+                mainHtml += `<h2 class="section-title" id="sec-${group.id}">${group.group}</h2>`;
+                group.endpoints.forEach((ep, eIdx) => { mainHtml += renderEndpoint(ep, gIdx + '-' + eIdx); });
+            });
+            nav.innerHTML = navHtml; main.innerHTML = mainHtml;
+        }
+
+        function toggle(id) { const b = document.getElementById('body-' + id); const a = document.getElementById('arrow-' + id); b.classList.toggle('open'); a.style.transform = b.classList.contains('open') ? 'rotate(180deg)' : ''; }
+        function scrollTo(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        function filterNav(q) { document.querySelectorAll('#navLinks a').forEach(a => { a.style.display = a.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none'; }); }
+        render();
+    </script>
+</body>
+
+</html>
