@@ -34,7 +34,7 @@ use App\Http\Controllers\Api\ChefDepartementController;
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
 
-        //  ADMIN 
+        //  ADMIN
         Route::post('admin/register', [AuthController::class, 'adminRegister']);
         Route::post('admin/login', [AuthController::class, 'adminLogin']);
         Route::post('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');
@@ -43,11 +43,11 @@ Route::prefix('v1')->group(function () {
         Route::post('chef/login', [AuthController::class, 'chefLogin']);
         Route::post('chef/logout', [AuthController::class, 'chefLogout'])->middleware('auth:sanctum');
 
-        // ÉTUDIANT 
+        // ÉTUDIANT
         Route::post('student/register', [AuthController::class, 'studentRegister'])->middleware('auth:sanctum');
         Route::post('student/login', [AuthController::class, 'studentLogin']);
         Route::post('student/logout', [AuthController::class, 'studentLogout'])->middleware('auth:sanctum');
-        // PROFIL DE L'UTILISATEUR CONNECTÉ (admin, chef, ou étudiant) 
+        // PROFIL DE L'UTILISATEUR CONNECTÉ (admin, chef, ou étudiant)
         Route::get('me', [AuthController::class, 'me'])->middleware('auth:sanctum');
     });
 
@@ -55,22 +55,22 @@ Route::prefix('v1')->group(function () {
 
         //  GESTION DES DÉPARTEMENTS
         Route::prefix('departements')->group(function () {
-            Route::get('',[DepartementController::class,'index']);   // Lister tous
-            Route::post('',[DepartementController::class,'store']);   // Créer un département
-            Route::get('{id}',[DepartementController::class,'show']);    // Voir un département
-            Route::put('{id}',[DepartementController::class,'update']);  // Modifier
-            Route::delete('{id}',[DepartementController::class,'destroy']); // Supprimer
-            Route::get('{id}/stats',[DepartementController::class,'stats']);   // Statistiques
+            Route::get('', [DepartementController::class, 'index']);   // Lister tous
+            Route::post('', [DepartementController::class, 'store']);   // Créer un département
+            Route::get('{id}', [DepartementController::class, 'show']);    // Voir un département
+            Route::put('{id}', [DepartementController::class, 'update']);  // Modifier
+            Route::delete('{id}', [DepartementController::class, 'destroy']); // Supprimer
+            Route::get('{id}/stats', [DepartementController::class, 'stats']);   // Statistiques
         });
 
         // GESTION DES CHEFS DE DÉPARTEMENT
         Route::prefix('chefs-departement')->group(function () {
-            Route::get('',[ChefDepartementController::class, 'index']);   // Lister
-            Route::post('',[ChefDepartementController::class, 'store']);   // Créer (département requis)
-            Route::get('{id}',[ChefDepartementController::class, 'show']);    // Voir un chef
-            Route::put('{id}',[ChefDepartementController::class, 'update']);  // Modifier
-            Route::delete('{id}',[ChefDepartementController::class, 'destroy']); // Supprimer
-            Route::post('{id}/toggle',[ChefDepartementController::class, 'toggle']); // Activer/Désactiver
+            Route::get('', [ChefDepartementController::class, 'index']);   // Lister
+            Route::post('', [ChefDepartementController::class, 'store']);   // Créer (département requis)
+            Route::get('{id}', [ChefDepartementController::class, 'show']);    // Voir un chef
+            Route::put('{id}', [ChefDepartementController::class, 'update']);  // Modifier
+            Route::delete('{id}', [ChefDepartementController::class, 'destroy']); // Supprimer
+            Route::post('{id}/toggle', [ChefDepartementController::class, 'toggle']); // Activer/Désactiver
         });
 
         //  STATISTIQUES GLOBALES
@@ -78,13 +78,25 @@ Route::prefix('v1')->group(function () {
         Route::get('stats/dashboard', [StatistiqueController::class, 'dashboard']);
 
         // GESTION DES MATIÈRES (Super Admin)
-        Route::apiResource('matieres', MatiereController::class);
+        Route::apiResource('matieres', MatiereController::class)->names([
+            'index' => 'admin.matieres.index',
+            'store' => 'admin.matieres.store',
+            'show' => 'admin.matieres.show',
+            'update' => 'admin.matieres.update',
+            'destroy' => 'admin.matieres.destroy'
+        ]);
     });
-    
+
     Route::prefix('departement')->middleware(['auth:sanctum', 'admin', 'admin.departement.owner'])->group(function () {
         // GESTION DES MATIÈRES (Chef de Département)
-        Route::apiResource('matieres', MatiereController::class);
-        
+        Route::apiResource('matieres', MatiereController::class)->names([
+            'index' => 'departement.matieres.index',
+            'store' => 'departement.matieres.store',
+            'show' => 'departement.matieres.show',
+            'update' => 'departement.matieres.update',
+            'destroy' => 'departement.matieres.destroy'
+        ]);
+
         //  GESTION DES FILIÈRES (dans son département uniquement)
         Route::prefix('filieres')->group(function () {
             Route::get('', [FiliereController::class, 'index']);
@@ -92,7 +104,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}', [FiliereController::class, 'show']);
             Route::put('{id}', [FiliereController::class, 'update']);
             Route::delete('{id}', [FiliereController::class, 'destroy']);
-            
+
             // Assignation / Rétractation de matières à une filière
             Route::post('{id}/matieres', [MatiereController::class, 'assignToFiliere']);
             Route::delete('{id}/matieres/{matiere_id}', [MatiereController::class, 'removeFromFiliere']);
