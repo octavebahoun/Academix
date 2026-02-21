@@ -120,39 +120,36 @@ class AuthController extends Controller
     }
 
     // ---------------------------------------------------------------
-    // INSCRIPTION ÉTUDIANT (via matricule pré-existant)
+    // CRÉATION MANUELLE ÉTUDIANT (par un ADMIN)
     // POST /api/v1/auth/student/register
-    // Accès : public (non protégé)
-    //
-    // WORKFLOW :
-    //   1. Le Super Admin importe les étudiants via CSV (matricule + nom + filière)
-    //   2. L'étudiant complète son compte ici avec email + password
+    // Accès : Admin ou Chef de Département authentifié
     // ---------------------------------------------------------------
     public function studentRegister(Request $request)
     {
         // 1. Vérifier que seul un admin ou un chef peut enregistrer un étudiant
         $admin = $request->user();
+        if (!$admin) {
+            return response()->json(['message' => 'Non authentifié.'], 401);
+        }
+
         $isSuperAdmin = method_exists($admin, 'isSuperAdmin') && $admin->isSuperAdmin();
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 
-        if (!$admin || !($isSuperAdmin || $isChef)) {
+        if (!($isSuperAdmin || $isChef)) {
             return response()->json(['message' => 'Non autorisé. Seul un administrateur peut enregistrer un étudiant.'], 403);
         }
 
         // 2. Valider les données
         $request->validate([
-            'matricule'             => 'required|string|unique:users,matricule',
+            'matricule'             => 'required|string', // Pas de unique ici car on peut vouloir mettre à jour un étudiant importé
             'nom'                   => 'required|string|max:100',
             'prenom'                => 'required|string|max:100',
-            'annee_academique'      => 'required|string|max:20',
             'filiere_id'            => 'required|integer|exists:filieres,id',
-            'email'                 => 'required|email|unique:users,email',
+            'email'                 => 'nullable|email', // L'email peut être défini plus tard par l'étudiant
             'telephone'             => 'nullable|string|max:20',
         ]);
- 
-        $password = $request->matricule;
 
-        // 3. (Optionnel) Vérifier si le chef a le droit sur cette filière
+        // 3. Vérification des droits du Chef sur la filière
         if ($isChef) {
             $filiere = \App\Models\Filiere::find($request->filiere_id);
             if ($filiere && $filiere->departement_id !== $admin->departement_id) {
@@ -160,24 +157,61 @@ class AuthController extends Controller
             }
         }
 
-        // 4. Créer l'étudiant
-        $user = User::create([
-            'matricule'        => $request->matricule,
-            'nom'              => $request->nom,
-            'prenom'           => $request->prenom,
-            'annee_academique' => $request->annee_academique,
-            'filiere_id'       => $request->filiere_id,
-            'email'            => $request->email,
-            'password'         => Hash::make($password),
-            'telephone'        => $request->telephone,
-            'is_active'        => true,
-            'annee_admission'  => date('Y'),
-        ]);
+        // 4. Créer ou Mettre à jour l'étudiant (pour gérer les imports CSV préalables)
+        // Si l'étudiant existe déjà via son matricule, on met à jour ses infos
+        $user = User::updateOrCreate(
+            ['matricule' => $request->matricule],
+            [
+                'nom'              => $request->nom,
+                'prenom'           => $request->prenom,
+                'filiere_id'       => $request->filiere_id,
+                'email'            => $request->email,
+                'telephone'        => $request->telephone,
+                'is_active'        => true, // On l'active car c'est une création manuelle par l'admin
+                'annee_admission'  => date('Y'),
+                // Si c'est une création pure, on met un mot de passe temporaire égal au matricule
+                'password'         => Hash::make($request->matricule), 
+            ]
+        );
 
         return response()->json([
             'message' => 'Étudiant enregistré avec succès.',
             'user'    => $user->load('filiere'),
         ], 201);
+    }
+
+    // ---------------------------------------------------------------
+    // ACTIVATION COMPTE ÉTUDIANT (par l'étudiant lui-même)
+    // POST /api/v1/auth/student/activate
+    // Accès : Public
+    // ---------------------------------------------------------------
+    public function studentActivate(Request $request)
+    {
+        $request->validate([
+            'matricule' => 'required|string|exists:users,matricule',
+            'email'     => 'required|email|unique:users,email',
+            'password'  => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::where('matricule', $request->matricule)->first();
+
+        // Si l'étudiant a déjà un email et est actif, il ne peut pas ré-activer
+        if ($user->is_active && $user->email) {
+            return response()->json([
+                'message' => 'Ce compte est déjà activé. Veuillez vous connecter.'
+            ], 422);
+        }
+
+        $user->update([
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Compte activé avec succès. Vous pouvez maintenant vous connecter.',
+            'user'    => $user->load('filiere'),
+        ]);
     }
 
     // ---------------------------------------------------------------

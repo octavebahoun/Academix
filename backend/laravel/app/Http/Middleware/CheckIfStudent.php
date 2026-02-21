@@ -15,14 +15,14 @@ class CheckIfStudent
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Vérifier si l'utilisateur est authentifié avec le garde 'web' (users/étudiants)
-        if (!Auth::guard('web')->check()) {
+        $user = $request->user();
+
+        // Vérifier que l'utilisateur est bien un étudiant (instance de App\Models\User)
+        if (!$user || !($user instanceof \App\Models\User)) {
             return response()->json([
                 'message' => 'Non authentifié. Accès réservé aux étudiants.'
             ], 401);
         }
-
-        $user = Auth::guard('web')->user();
 
         // Vérifier que l'utilisateur est actif
         if (!$user->is_active) {
