@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('type_cours', ['CM', 'TD', 'TP']);
             $table->string('enseignant', 100)->nullable();
             $table->enum('semestre', ['S1', 'S2']);
-            
+
             $table->index(['filiere_id', 'jour']);
         });
     }

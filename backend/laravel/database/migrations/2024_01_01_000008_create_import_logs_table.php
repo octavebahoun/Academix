@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('statut', ['en_cours', 'termine', 'erreur'])->default('en_cours');
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['admin_id', 'type_import', 'created_at']);
         });
     }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('annee_academique', 20);
             $table->text('description')->nullable();
             $table->timestamps();
-            
+
             $table->index(['departement_id', 'niveau']);
         });
     }

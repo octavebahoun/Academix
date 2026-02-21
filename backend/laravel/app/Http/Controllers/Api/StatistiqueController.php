@@ -12,11 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class StatistiqueController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * STATISTIQUES GLOBALES (toute l'université)
-     * ---------------------------------------------------------------
-     */
+
     public function global(Request $request)
     {
         $admin = $request->user();
@@ -38,7 +34,6 @@ class StatistiqueController extends Controller
         $tauxReussite = $totalUsersNote > 0 ? round(($usersReussite / $totalUsersNote) * 100, 2) : 0;
 
         $departements = Departement::withCount(['filieres', 'chefs'])->get();
-        // Optionnel : rajouter les moyennes par département si nécessaire, mais ça coûte en ressources
 
         $stats = [
             'total_departements' => Departement::count(),
@@ -52,15 +47,10 @@ class StatistiqueController extends Controller
         return response()->json($stats);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * STATISTIQUES D'UN DÉPARTEMENT
-     * ---------------------------------------------------------------
-     */
     public function departement(Request $request, $id)
     {
         $admin = $request->user();
-        
+
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
         if ($isChef && $admin->departement_id != $id) {
             return response()->json(['message' => 'Accès refusé. Ce n\'est pas votre département.'], 403);
@@ -72,7 +62,7 @@ class StatistiqueController extends Controller
         $total_etudiants = User::whereIn('filiere_id', $filiereIds)->count();
 
         $userIds = User::whereIn('filiere_id', $filiereIds)->pluck('id');
-        
+
         $moyenneGenerale = 0;
         $tauxReussite = 0;
 
@@ -87,7 +77,7 @@ class StatistiqueController extends Controller
                 ->select('user_id', DB::raw('SUM(notes.note * matieres.coefficient) / SUM(matieres.coefficient) as moyenne'))
                 ->groupBy('user_id')
                 ->get();
-                
+
             $totalUsersNote = $usersAvecMoyenne->count();
             if ($totalUsersNote > 0) {
                  $usersReussite = $usersAvecMoyenne->where('moyenne', '>=', 10)->count();
@@ -104,11 +94,6 @@ class StatistiqueController extends Controller
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * STATISTIQUES D'UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function filiere(Request $request, $id)
     {
         $filiere = Filiere::with('matieres')->findOrFail($id);
@@ -148,18 +133,13 @@ class StatistiqueController extends Controller
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * DASHBOARD PERSONNALISÉ SELON LE RÔLE
-     * ---------------------------------------------------------------
-     */
     public function dashboard(Request $request)
     {
         $admin = $request->user();
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 
         if (!$isChef) {
-            // Dashboard Super Admin
+
             $moyenneGenerale = Note::join('matieres', 'notes.matiere_id', '=', 'matieres.id')
                 ->select(DB::raw('SUM(notes.note * matieres.coefficient) / SUM(matieres.coefficient) as moyenne'))
                 ->value('moyenne');
@@ -172,14 +152,14 @@ class StatistiqueController extends Controller
                     'total_etudiants'    => User::where('is_active', true)->count(),
                     'moyenne_generale'   => round((float)$moyenneGenerale, 2),
                 ],
-                // On prend les 5 derniers imports globaux
+
                 'derniers_imports' => ImportLog::with('admin:id,nom,prenom')->latest()->take(5)->get(),
             ];
             return response()->json($data);
         } else {
-            // Dashboard Chef de Département
+
             $deptId = $admin->departement_id;
-            
+
             $filiereIds = Filiere::where('departement_id', $deptId)->pluck('id');
             $userIds = User::whereIn('filiere_id', $filiereIds)->pluck('id');
 
@@ -200,7 +180,7 @@ class StatistiqueController extends Controller
                     ->having('moyenne', '<', 10)
                     ->take(10)
                     ->get();
-                    
+
                  if ($usersMoyenne->isNotEmpty()) {
                      $uIds = $usersMoyenne->pluck('user_id');
                      $etudiantsDifficulte = User::whereIn('id', $uIds)->get()->map(function($u) use ($usersMoyenne) {

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('import_id')->nullable()->constrained('import_logs')->onDelete('set null');
             $table->foreignId('created_by_admin_id')->nullable()->constrained('super_admins')->onDelete('set null');
             $table->timestamps();
-            
+
             $table->index(['user_id', 'matiere_id', 'semestre']);
         });
     }

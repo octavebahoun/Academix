@@ -16,7 +16,7 @@ return new class extends Migration
             $table->decimal('moyenne_generale', 5, 2)->nullable();
             $table->decimal('taux_reussite', 5, 2)->nullable();
             $table->timestamps();
-            
+
             $table->unique(['departement_id', 'annee_academique']);
         });
     }

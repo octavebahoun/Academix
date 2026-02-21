@@ -16,11 +16,7 @@ use League\Csv\Writer;
 
 class ImportController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * IMPORTER DES ÉTUDIANTS VIA CSV
-     * ---------------------------------------------------------------
-     */
+
     public function importEtudiants(Request $request)
     {
         $request->validate(['file' => 'required|file|mimes:csv,txt|max:5120']);
@@ -43,7 +39,7 @@ class ImportController extends Controller
 
         $erreurs = [];
         $valides = 0;
-        
+
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 
         DB::beginTransaction();
@@ -73,8 +69,8 @@ class ImportController extends Controller
                         'prenom'          => $record['prenom'],
                         'filiere_id'      => $filiere->id,
                         'annee_admission' => $record['annee_admission'] ?? date('Y'),
-                        'password'        => Hash::make(Str::random(16)), // temporaire
-                        'is_active'       => false, // activé lors du register
+                        'password'        => Hash::make(Str::random(16)), 
+                        'is_active'       => false, 
                     ]);
                     $valides++;
                 } catch (\Exception $e) {
@@ -106,11 +102,6 @@ class ImportController extends Controller
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * IMPORTER DES NOTES VIA CSV
-     * ---------------------------------------------------------------
-     */
     public function importNotes(Request $request)
     {
         $request->validate(['file' => 'required|file|mimes:csv,txt|max:5120']);
@@ -133,7 +124,7 @@ class ImportController extends Controller
 
         $erreurs = [];
         $valides = 0;
-        
+
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 
         DB::beginTransaction();
@@ -165,7 +156,7 @@ class ImportController extends Controller
                         ->where('type_evaluation', $record['type_evaluation'])
                         ->where('date_evaluation', $record['date_evaluation'])
                         ->first();
-                        
+
                     if ($existingNote) {
                         throw new \Exception("Cette note a déjà été importée (Doublon).");
                     }
@@ -213,11 +204,6 @@ class ImportController extends Controller
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * HISTORIQUE DES IMPORTS
-     * ---------------------------------------------------------------
-     */
     public function history(Request $request)
     {
         $admin = $request->user();
@@ -233,11 +219,6 @@ class ImportController extends Controller
         return response()->json($imports);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * DÉTAILS D'UN IMPORT
-     * ---------------------------------------------------------------
-     */
     public function show(Request $request, $id)
     {
         $import = ImportLog::with('admin:id,nom,prenom')->findOrFail($id);
@@ -248,7 +229,6 @@ class ImportController extends Controller
             return response()->json(['message' => 'Accès refusé'], 403);
         }
 
-        // Parse JSON for better output readability if it's stored as JSON string
         if (is_string($import->erreurs_details)) {
             $import->erreurs_details = json_decode($import->erreurs_details, true);
         }
@@ -256,34 +236,24 @@ class ImportController extends Controller
         return response()->json($import);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * TÉLÉCHARGER LE TEMPLATE CSV ÉTUDIANTS
-     * ---------------------------------------------------------------
-     */
     public function templateEtudiants()
     {
         $csv = Writer::createFromString();
         $csv->insertOne(['matricule', 'nom', 'prenom', 'filiere_code', 'annee_admission']);
         $csv->insertOne(['ETU001', 'DUPONT', 'Jean', 'L1-INFO-2026', '2025']);
-        
+
         return response($csv->toString(), 200, [
             'Content-Type'        => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_etudiants.csv"',
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * TÉLÉCHARGER LE TEMPLATE CSV NOTES
-     * ---------------------------------------------------------------
-     */
     public function templateNotes()
     {
         $csv = Writer::createFromString();
         $csv->insertOne(['matricule','matiere_code','note','note_max','type_evaluation','coefficient','date_evaluation','semestre','annee_academique']);
         $csv->insertOne(['ETU001','ALGO101','14.5','20','Devoir','2','2025-11-15','S1','2025-2026']);
-        
+
         return response($csv->toString(), 200, [
             'Content-Type'        => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_notes.csv"',

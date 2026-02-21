@@ -11,18 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DES ÉTUDIANTS (Niveau Département)
-     * ---------------------------------------------------------------
-     */
+
     public function index(Request $request)
     {
         $admin = $request->user();
-        
+
         $etudiants = User::with('filiere')
             ->when($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement(), function($query) use ($admin) {
-                // Return only students in the department
+
                 $query->whereHas('filiere', function($q) use ($admin) {
                     $q->where('departement_id', $admin->departement_id);
                 });
@@ -40,22 +36,12 @@ class StudentController extends Controller
         return response()->json($etudiants);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * PROFIL DE L'ÉTUDIANT CONNECTÉ
-     * ---------------------------------------------------------------
-     */
     public function profil(Request $request)
     {
         $user = $request->user()->load('filiere.departement');
         return response()->json($user);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * METTRE À JOUR SON PROFIL
-     * ---------------------------------------------------------------
-     */
     public function updateProfil(Request $request)
     {
         $validated = $request->validate([
@@ -69,11 +55,6 @@ class StudentController extends Controller
         return response()->json($request->user()->fresh()->load('filiere'));
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MES NOTES (lecture seule)
-     * ---------------------------------------------------------------
-     */
     public function notes(Request $request)
     {
         $notes = Note::with('matiere:id,nom,code,coefficient')
@@ -90,11 +71,6 @@ class StudentController extends Controller
         return response()->json($notes);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MES MOYENNES CALCULÉES
-     * ---------------------------------------------------------------
-     */
     public function moyennes(Request $request)
     {
         $user = $request->user();
@@ -111,7 +87,6 @@ class StudentController extends Controller
             ->groupBy('notes.matiere_id', 'matieres.nom', 'matieres.coefficient', 'notes.semestre')
             ->get();
 
-        // Organize the data and calculate general averages
         $semestres = [];
         $totalGeneralPonderee = 0;
         $totalGeneralCoeff = 0;
@@ -125,7 +100,7 @@ class StudentController extends Controller
                     'total_coeff' => 0,
                 ];
             }
-            
+
             $semestres[$sem]['matieres'][] = [
                 'matiere_id' => $matiere->matiere_id,
                 'nom' => $matiere->matiere_nom,
@@ -135,7 +110,7 @@ class StudentController extends Controller
 
             $semestres[$sem]['total_ponderee'] += ($matiere->moyenne_ponderee * $matiere->coefficient);
             $semestres[$sem]['total_coeff'] += $matiere->coefficient;
-            
+
             $totalGeneralPonderee += ($matiere->moyenne_ponderee * $matiere->coefficient);
             $totalGeneralCoeff += $matiere->coefficient;
         }
@@ -159,11 +134,6 @@ class StudentController extends Controller
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * EMPLOI DU TEMPS DE MA FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function emploiTemps(Request $request)
     {
         $user = $request->user();
@@ -178,15 +148,10 @@ class StudentController extends Controller
             ->orderByRaw("FIELD(jour, 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi')")
             ->orderBy('heure_debut')
             ->get();
-            
+
         return response()->json($edt);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MATIÈRES DE MA FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function matieres(Request $request)
     {
         $user = $request->user();
@@ -194,7 +159,7 @@ class StudentController extends Controller
                 $query->withPivot('semestre');
             }])
             ->find($user->filiere_id);
-            
+
         return response()->json($filiere->matieres);
     }
 }

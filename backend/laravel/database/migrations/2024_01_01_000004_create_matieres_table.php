@@ -15,7 +15,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('enseignant', 100)->nullable();
             $table->timestamps();
-            
+
             $table->index('code');
         });
     }

@@ -9,11 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckIfAdmin
 {
-    /**
-     * Handle an incoming request.
-     * Vérifie que l'utilisateur authentifié est un administrateur 
-     * (super admin OU chef de département)
-     */
+
     public function handle(Request $request, Closure $next): Response
     {
         $admin = $request->user();
@@ -24,7 +20,6 @@ class CheckIfAdmin
             ], 401);
         }
 
-        // Vérifier que c'est un super admin OR chef de département
         $isSuperAdmin = method_exists($admin, 'isSuperAdmin') && $admin->isSuperAdmin();
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 

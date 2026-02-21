@@ -8,11 +8,7 @@ use Illuminate\Validation\Rule;
 
 class TacheController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DES TÂCHES DE L'ÉTUDIANT
-     * ---------------------------------------------------------------
-     */
+
     public function index(Request $request)
     {
         $taches = Tache::with('matiere:id,nom,code')
@@ -32,11 +28,6 @@ class TacheController extends Controller
         return response()->json($taches);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * CRÉER UNE TÂCHE
-     * ---------------------------------------------------------------
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -54,11 +45,6 @@ class TacheController extends Controller
         return response()->json($tache->load('matiere:id,nom,code'), 201);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * DÉTAILS D'UNE TÂCHE
-     * ---------------------------------------------------------------
-     */
     public function show(Request $request, $id)
     {
         $tache = Tache::with('matiere:id,nom,code')->findOrFail($id);
@@ -70,11 +56,6 @@ class TacheController extends Controller
         return response()->json($tache);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MODIFIER UNE TÂCHE
-     * ---------------------------------------------------------------
-     */
     public function update(Request $request, $id)
     {
         $tache = Tache::findOrFail($id);
@@ -96,11 +77,6 @@ class TacheController extends Controller
         return response()->json($tache->load('matiere:id,nom,code'));
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * SUPPRIMER UNE TÂCHE
-     * ---------------------------------------------------------------
-     */
     public function destroy(Request $request, $id)
     {
         $tache = Tache::findOrFail($id);
@@ -113,11 +89,6 @@ class TacheController extends Controller
         return response()->noContent();
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MARQUER UNE TÂCHE COMME TERMINÉE
-     * ---------------------------------------------------------------
-     */
     public function complete(Request $request, $id)
     {
         $tache = Tache::findOrFail($id);

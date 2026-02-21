@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             FiliereSeeder::class,
             MatiereSeeder::class,
-            // UserSeeder::class, // À créer pour tester
+
         ]);
     }
 }

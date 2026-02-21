@@ -17,7 +17,7 @@ return new class extends Migration
             $table->json('actions_suggerees')->nullable();
             $table->boolean('est_lue')->default(false);
             $table->timestamps();
-            
+
             $table->index(['user_id', 'est_lue']);
         });
     }

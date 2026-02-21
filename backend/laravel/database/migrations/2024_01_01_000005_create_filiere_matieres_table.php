@@ -12,7 +12,7 @@ return new class extends Migration
             $table->foreignId('filiere_id')->constrained()->onDelete('cascade');
             $table->foreignId('matiere_id')->constrained()->onDelete('cascade');
             $table->enum('semestre', ['S1', 'S2']);
-            
+
             $table->unique(['filiere_id', 'matiere_id']);
         });
     }

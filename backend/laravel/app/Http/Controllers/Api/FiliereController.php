@@ -9,11 +9,7 @@ use App\Http\Controllers\Controller;
 
 class FiliereController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DES FILIÈRES
-     * ---------------------------------------------------------------
-     */
+
     public function index(Request $request)
     {
         $admin = $request->user();
@@ -28,22 +24,17 @@ class FiliereController extends Controller
             ->orderBy('departement_id')
             ->orderBy('niveau')
             ->get();
-            
+
         return response()->json($filieres);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * CRÉER UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function store(Request $request)
     {       
         $admin = $request->user();
         if ($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement()) {
             $request->merge(['departement_id' => $admin->departement_id]);
         }
-        
+
         $validated = $request->validate([
             'departement_id' => 'required|integer|exists:departements,id',
             'nom'  => 'required|string|max:100',
@@ -52,16 +43,11 @@ class FiliereController extends Controller
             'annee_academique' => 'required|string|max:20',
             'description' => 'nullable|string',
         ]);
-        
+
         $filiere = Filiere::create($validated);
         return response()->json($filiere->load('departement'), 201);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * DÉTAILS D'UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function show(Request $request, $id)
     {
         $filiere = Filiere::with(['departement', 'matieres'])
@@ -78,11 +64,6 @@ class FiliereController extends Controller
         return response()->json($filiere);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MODIFIER UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function update(Request $request, $id)
     {
         $filiere = Filiere::findOrFail($id);
@@ -106,11 +87,6 @@ class FiliereController extends Controller
         return response()->json($filiere->load('departement'));
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * SUPPRIMER UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function destroy(Request $request, $id)
     {
         $filiere = Filiere::withCount('users')->findOrFail($id);
@@ -132,11 +108,6 @@ class FiliereController extends Controller
         return response()->noContent();
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DES ÉTUDIANTS D'UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function etudiants(Request $request, $id)
     {
         $filiere = Filiere::findOrFail($id);
@@ -164,11 +135,6 @@ class FiliereController extends Controller
         return response()->json($etudiants);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * STATISTIQUES D'UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
     public function stats(Request $request, $id)
     {
         $filiere = Filiere::findOrFail($id);
@@ -180,8 +146,6 @@ class FiliereController extends Controller
             }
         }
 
-        // Forward to the shared stats logic if it exists, otherwise provide a basic return.
-        // For now, we will just return a placeholder.
         return response()->json([
             'message' => 'Statistiques en cours de construction.',
             'filiere_id' => $filiere->id

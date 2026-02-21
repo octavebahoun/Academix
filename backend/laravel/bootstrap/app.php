@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Enregistrer les middlewares pour les rôles et permissions
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\CheckIfAdmin::class,
             'super.admin' => \App\Http\Middleware\CheckIfSuperAdmin::class,
@@ -23,5 +23,5 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+
     })->create();

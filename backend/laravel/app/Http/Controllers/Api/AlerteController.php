@@ -23,7 +23,6 @@ class AlerteController extends Controller
         $nonLues = Alerte::where('user_id', $user->id)->where('est_lue', false)->count();
         $total = $query->count();
 
-        // Decode JSON suggestions if needed
         $alertes = $query->get()->map(function($alerte) {
              if (is_string($alerte->actions_suggerees)) {
                  $alerte->actions_suggerees = json_decode($alerte->actions_suggerees, true);
@@ -38,11 +37,6 @@ class AlerteController extends Controller
         ]);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MARQUER UNE ALERTE COMME LUE
-     * ---------------------------------------------------------------
-     */
     public function markAsRead(Request $request, $id)
     {
         $alerte = Alerte::findOrFail($id);
@@ -50,9 +44,7 @@ class AlerteController extends Controller
         if ($alerte->user_id !== $request->user()->id) {
             return response()->json(['message' => 'Accès refusé'], 403);
         }
-
         $alerte->update(['est_lue' => true]);
-
         return response()->json([
             'message' => 'Alerte marquée comme lue',
             'alerte'  => $alerte,

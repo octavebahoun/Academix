@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('chefs_departement', function (Blueprint $table) {
@@ -20,10 +18,8 @@ return new class extends Migration
             $table->string('telephone', 20)->nullable();
             $table->string('photo')->nullable();
 
-            // Relation avec le département (un chef appartient à un département)
             $table->foreignId('departement_id')->constrained('departements')->onDelete('cascade');
 
-            // Relation de création : qui l'a enregistré ?
             $table->foreignId('created_by_admin')->constrained('super_admins')->onDelete('cascade');
 
             $table->boolean('is_active')->default(true);
@@ -34,9 +30,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('chefs_departement');

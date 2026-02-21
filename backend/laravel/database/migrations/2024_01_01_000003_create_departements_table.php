@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom', 100)->unique();
             $table->string('code', 10)->unique();
-            // Le Super Admin qui a initialisé ce département
+
             $table->foreignId('created_by')->constrained('super_admins');
             $table->timestamps();
         });

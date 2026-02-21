@@ -7,7 +7,7 @@ use App\Models\ChefDepartement;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\Sanctum;
 
-$chef = ChefDepartement::find(1); // Dept ID: 1
+$chef = ChefDepartement::find(1); 
 Sanctum::actingAs($chef);
 
 echo "--- Testing access to his own department filieres ---\n";
@@ -16,7 +16,3 @@ $request->headers->set('Accept', 'application/json');
 $response = $app->handle($request);
 echo "Status: " . $response->getStatusCode() . "\n";
 echo "Content: " . $response->getContent() . "\n";
-
-// To test the owner middleware, we need an endpoint that takes a departement_id.
-// But wait, the route /api/v1/departement/... is wrapped in admin.departement.owner.
-// Let's check the middleware logic for admin.departement.owner.

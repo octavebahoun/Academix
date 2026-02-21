@@ -9,11 +9,7 @@ use Illuminate\Http\Request;
 
 class NoteController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DES NOTES
-     * ---------------------------------------------------------------
-     */
+
     public function index(Request $request)
     {
         $admin = $request->user();
@@ -36,11 +32,6 @@ class NoteController extends Controller
         return response()->json($notes);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     *  CRÉER UNE NOTE MANUELLEMENT
-     * ---------------------------------------------------------------
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -73,11 +64,6 @@ class NoteController extends Controller
         return response()->json($note->load(['user', 'matiere']), 201);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MODIFIER UNE NOTE MANUELLEMENT
-     * ---------------------------------------------------------------
-     */
     public function update(Request $request, $id)
     {
         $note = Note::findOrFail($id);
@@ -110,11 +96,6 @@ class NoteController extends Controller
         return response()->json($note->load(['user', 'matiere']));
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * SUPPRIMER UNE NOTE
-     * ---------------------------------------------------------------
-     */
     public function destroy(Request $request, $id)
     {
         $note = Note::findOrFail($id);

@@ -9,11 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class EmploiTempsController extends Controller
 {
-    /**
-     * ---------------------------------------------------------------
-     * LISTE DE L'EDT D'UNE FILIÈRE
-     * ---------------------------------------------------------------
-     */
+
     public function index(Request $request, $filiereId)
     {
         $filiere = Filiere::findOrFail($filiereId);
@@ -39,11 +35,6 @@ class EmploiTempsController extends Controller
         return response()->json($edt);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * AJOUTER UN COURS À L'EDT
-     * ---------------------------------------------------------------
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -60,7 +51,7 @@ class EmploiTempsController extends Controller
 
         $admin = $request->user();
         $filiere = Filiere::findOrFail($validated['filiere_id']);
-        
+
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
         if ($isChef && $filiere->departement_id !== $admin->departement_id) {
             return response()->json(['message' => 'Accès refusé'], 403);
@@ -70,7 +61,7 @@ class EmploiTempsController extends Controller
             ->where('filiere_id', $validated['filiere_id'])
             ->where('matiere_id', $validated['matiere_id'])
             ->exists();
-            
+
         if (!$matiereLiee) {
             return response()->json(['message' => 'Cette matière n\'appartient pas à cette filière'], 422);
         }
@@ -82,7 +73,7 @@ class EmploiTempsController extends Controller
                 ->where('heure_debut', '<', $validated['heure_fin'])
                 ->where('heure_fin', '>', $validated['heure_debut'])
                 ->exists();
-                
+
             if ($conflit) {
                 return response()->json(['message' => 'Conflit de salle détecté'], 409);
             }
@@ -92,16 +83,11 @@ class EmploiTempsController extends Controller
         return response()->json($cours->load('matiere'), 201);
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * MODIFIER UN COURS DE L'EDT
-     * ---------------------------------------------------------------
-     */
     public function update(Request $request, $id)
     {
         $cours = EmploiTempsFiliere::findOrFail($id);
         $cours->load('filiere');
-        
+
         $admin = $request->user();
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
         if ($isChef && $cours->filiere->departement_id !== $admin->departement_id) {
@@ -124,7 +110,7 @@ class EmploiTempsController extends Controller
                 ->where('filiere_id', $cours->filiere_id)
                 ->where('matiere_id', $validated['matiere_id'])
                 ->exists();
-                
+
             if (!$matiereLiee) {
                 return response()->json(['message' => 'La nouvelle matière n\'appartient pas à la filière'], 422);
             }
@@ -134,16 +120,11 @@ class EmploiTempsController extends Controller
         return response()->json($cours->fresh()->load('matiere'));
     }
 
-    /**
-     * ---------------------------------------------------------------
-     * SUPPRIMER UN COURS DE L'EDT
-     * ---------------------------------------------------------------
-     */
     public function destroy(Request $request, $id)
     {
         $cours = EmploiTempsFiliere::findOrFail($id);
         $cours->load('filiere');
-        
+
         $admin = $request->user();
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
         if ($isChef && $cours->filiere->departement_id !== $admin->departement_id) {

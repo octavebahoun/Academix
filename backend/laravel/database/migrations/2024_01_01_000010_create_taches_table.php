@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('priorite', ['basse', 'moyenne', 'haute'])->default('moyenne');
             $table->enum('statut', ['a_faire', 'en_cours', 'terminee'])->default('a_faire');
             $table->timestamps();
-            
+
             $table->index(['user_id', 'statut', 'date_limite']);
         });
     }

@@ -8,8 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('departements', function (Blueprint $table) {
-            // Ajout de la description (nullable car elle n'existait pas avant)
-            // Placée après 'code' pour un ordre logique
+
             $table->text('description')->nullable()->after('code');
         });
     }
