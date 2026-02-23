@@ -17,7 +17,7 @@ export default function StudentDashboardOverview() {
           studentService.getAlertes(),
         ]);
         setMoyennesData(moyennes);
-        setAlertes(alertesRes);
+        setAlertes(alertesRes.alertes || []);
       } catch (error) {
         console.error("Erreur lors du chargement de l'overview :", error);
       } finally {
