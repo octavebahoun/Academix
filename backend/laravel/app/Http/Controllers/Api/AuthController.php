@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function adminLogin(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
         $admin = Admin::where('email', $request->email)->first();
@@ -27,17 +27,17 @@ class AuthController extends Controller
             return response()->json(['message' => 'Compte désactivé. Contactez le responsable.'], 403);
         }
         $admin->update([
-            'last_login'  => now(),
-            'is_connect'  => true,
+            'last_login' => now(),
+            'is_connect' => true,
         ]);
 
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         return response()->json([
-            'token'      => $token,
+            'token' => $token,
             'token_type' => 'Bearer',
-            'admin'      => $admin,
-            'role'       => 'super_admin',
+            'admin' => $admin,
+            'role' => 'super_admin',
         ]);
     }
 
@@ -53,7 +53,7 @@ class AuthController extends Controller
     {
 
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
@@ -72,10 +72,10 @@ class AuthController extends Controller
         $token = $chef->createToken('chef-token')->plainTextToken;
 
         return response()->json([
-            'token'      => $token,
+            'token' => $token,
             'token_type' => 'Bearer',
-            'chef'       => $chef,
-            'role'       => 'chef_departement',
+            'chef' => $chef,
+            'role' => 'chef_departement',
         ]);
     }
 
@@ -102,12 +102,12 @@ class AuthController extends Controller
         }
 
         $request->validate([
-            'matricule'             => 'required|string', 
-            'nom'                   => 'required|string|max:100',
-            'prenom'                => 'required|string|max:100',
-            'filiere_id'            => 'required|integer|exists:filieres,id',
-            'email'                 => 'nullable|email', 
-            'telephone'             => 'nullable|string|max:20',
+            'matricule' => 'required|string',
+            'nom' => 'required|string|max:100',
+            'prenom' => 'required|string|max:100',
+            'filiere_id' => 'required|integer|exists:filieres,id',
+            'email' => 'nullable|email',
+            'telephone' => 'nullable|string|max:20',
         ]);
 
         if ($isChef) {
@@ -120,28 +120,28 @@ class AuthController extends Controller
         $user = User::updateOrCreate(
             ['matricule' => $request->matricule],
             [
-                'nom'              => $request->nom,
-                'prenom'           => $request->prenom,
-                'filiere_id'       => $request->filiere_id,
-                'email'            => $request->email,
-                'telephone'        => $request->telephone,
-                'is_active'        => true, 
-                'annee_admission'  => date('Y'),
-                'password'         => Hash::make($request->matricule), 
+                'nom' => $request->nom,
+                'prenom' => $request->prenom,
+                'filiere_id' => $request->filiere_id,
+                'email' => $request->email,
+                'telephone' => $request->telephone,
+                'is_active' => true,
+                'annee_admission' => date('Y'),
+                'password' => Hash::make($request->matricule),
             ]
         );
 
         return response()->json([
             'message' => 'Étudiant enregistré avec succès.',
-            'user'    => $user->load('filiere'),
+            'user' => $user->load('filiere'),
         ], 201);
     }
     public function studentActivate(Request $request)
     {
         $request->validate([
             'matricule' => 'required|string|exists:users,matricule',
-            'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|string|min:8|confirmed',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::where('matricule', $request->matricule)->first();
@@ -153,27 +153,29 @@ class AuthController extends Controller
         }
 
         $user->update([
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
             'is_active' => true,
         ]);
 
         return response()->json([
             'message' => 'Compte activé avec succès. Vous pouvez maintenant vous connecter.',
-            'user'    => $user->load('filiere'),
+            'user' => $user->load('filiere'),
         ]);
     }
 
     public function studentLogin(Request $request)
     {
-
         $request->validate([
-            'email'    => 'required|email',
+            'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
         $user = User::with('filiere.departement')
-            ->where('email', $request->email)
+            ->where(function ($query) use ($request) {
+                $query->where('email', $request->login)
+                    ->orWhere('matricule', $request->login);
+            })
             ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -189,10 +191,10 @@ class AuthController extends Controller
         $token = $user->createToken('student-token')->plainTextToken;
 
         return response()->json([
-            'token'      => $token,
+            'token' => $token,
             'token_type' => 'Bearer',
-            'user'       => $user,
-            'role'       => 'student',
+            'user' => $user,
+            'role' => 'student',
         ]);
     }
 
@@ -206,12 +208,12 @@ class AuthController extends Controller
     public function adminRegister(Request $request)
     {
         $validated = $request->validate([
-            'nom'       => 'required|string|max:100',
-            'prenom'    => 'required|string|max:100',
-            'email'     => 'required|email|unique:super_admins,email',
-            'password'  => 'required|string|min:8|confirmed',
+            'nom' => 'required|string|max:100',
+            'prenom' => 'required|string|max:100',
+            'email' => 'required|email|unique:super_admins,email',
+            'password' => 'required|string|min:8|confirmed',
             'telephone' => 'nullable|string|max:20',
-            'photo'     => 'nullable|string|max:255',
+            'photo' => 'nullable|string|max:255',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -220,7 +222,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Super Administrateur créé avec succès.',
-            'admin'   => $admin,
+            'admin' => $admin,
         ], 201);
     }
 
@@ -230,19 +232,19 @@ class AuthController extends Controller
 
         if ($user instanceof Admin) {
             return response()->json([
-                'type'   => 'super_admin',
+                'type' => 'super_admin',
                 'profil' => $user,
             ]);
         }
 
         if ($user instanceof ChefDepartement) {
             return response()->json([
-                'type'   => 'chef_departement',
+                'type' => 'chef_departement',
                 'profil' => $user->load('departement'),
             ]);
         }
         return response()->json([
-            'type'   => 'student',
+            'type' => 'student',
             'profil' => $user->load('filiere.departement'),
         ]);
     }

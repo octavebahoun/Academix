@@ -3,8 +3,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('notes', function (Blueprint $table) {
@@ -19,7 +18,7 @@ return new class extends Migration
             $table->enum('semestre', ['S1', 'S2']);
             $table->string('annee_academique', 20);
             $table->foreignId('import_id')->nullable()->constrained('import_logs')->onDelete('set null');
-            $table->foreignId('created_by_admin_id')->nullable()->constrained('super_admins')->onDelete('set null');
+            $table->unsignedBigInteger('created_by_admin_id')->nullable();
             $table->timestamps();
 
             $table->index(['user_id', 'matiere_id', 'semestre']);

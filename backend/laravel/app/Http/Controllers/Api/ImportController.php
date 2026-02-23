@@ -69,8 +69,8 @@ class ImportController extends Controller
                         'prenom' => $record['prenom'],
                         'filiere_id' => $filiere->id,
                         'annee_admission' => $record['annee_admission'] ?? date('Y'),
-                        'password' => Hash::make(Str::random(16)),
-                        'is_active' => false,
+                        'password' => Hash::make($record['matricule']),
+                        'is_active' => true,
                     ]);
                     $valides++;
                 } catch (\Exception $e) {
