@@ -13,14 +13,46 @@ import { useState, useEffect } from "react";
 import { laravelApiClient } from "../../api/client";
 import AddFiliereModal from "./AddFiliereModal";
 import ImportEtudiantsModal from "./ImportEtudiantsModal";
+import ImportEmploiModal from "./ImportEmploiModal";
 
 export default function ChefFilieres() {
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isImportEmploiModalOpen, setIsImportEmploiModalOpen] = useState(false);
   const [selectedFiliere, setSelectedFiliere] = useState(null);
   const [activeTab, setActiveTab] = useState("matieres");
+  const [tabData, setTabData] = useState({
+    matieres: [],
+    etudiants: [],
+    emploi: [],
+    loading: false,
+  });
+
+  useEffect(() => {
+    if (selectedFiliere) {
+      fetchTabData(selectedFiliere.id, activeTab);
+    }
+  }, [selectedFiliere, activeTab]);
+
+  const fetchTabData = async (filiereId, type) => {
+    if (type === "emploi") type = "emploi-temps";
+    setTabData((prev) => ({ ...prev, loading: true }));
+    try {
+      const response = await laravelApiClient.get(
+        `/departement/filieres/${filiereId}/${type}`,
+      );
+      // L'API etudiants retourne une pagination (response.data.data), matieres retourne un tableau (response.data)
+      const data =
+        type === "etudiants" ? response.data.data || [] : response.data || [];
+      const stateKey = type === "emploi-temps" ? "emploi" : type;
+      setTabData((prev) => ({ ...prev, [stateKey]: data, loading: false }));
+    } catch (error) {
+      console.error(`Erreur chargement ${type}:`, error);
+      setTabData((prev) => ({ ...prev, loading: false }));
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -219,24 +251,122 @@ export default function ChefFilieres() {
                         </button>
                       </div>
 
-                      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-4 min-h-[100px] flex items-center justify-center">
-                        {activeTab === "emploi" ? (
-                          <div className="text-center space-y-4">
+                      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-4 min-h-[100px]">
+                        {tabData.loading ? (
+                          <div className="flex justify-center items-center h-full pt-4">
+                            <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                          </div>
+                        ) : activeTab === "emploi" &&
+                          tabData.emploi.length === 0 ? (
+                          <div className="text-center space-y-4 pt-4">
                             <p className="text-[10px] font-bold text-slate-400 uppercase italic">
                               Aucun emploi du temps publié
                             </p>
-                            <button className="flex items-center justify-center gap-2 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-emerald-600 transition-all mx-auto">
+                            <button
+                              onClick={() => setIsImportEmploiModalOpen(true)}
+                              className="flex items-center justify-center gap-2 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-emerald-600 transition-all mx-auto"
+                            >
                               <Upload size={14} /> Upload Planning
                             </button>
                           </div>
                         ) : (
-                          <p className="text-[10px] font-bold text-slate-400 uppercase italic">
-                            Chargement des{" "}
-                            {activeTab === "matieres"
-                              ? "matières"
-                              : "étudiants"}
-                            ...
-                          </p>
+                          <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                            {activeTab === "etudiants" &&
+                              tabData.etudiants.length === 0 && (
+                                <p className="text-[10px] text-center font-bold text-slate-400 py-4">
+                                  Aucun étudiant inscrit.
+                                </p>
+                              )}
+                            {activeTab === "matieres" &&
+                              tabData.matieres.length === 0 && (
+                                <p className="text-[10px] text-center font-bold text-slate-400 py-4">
+                                  Aucune matière assignée.
+                                </p>
+                              )}
+
+                            {activeTab === "emploi" && (
+                              <div className="flex justify-between items-center mb-2">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase">
+                                  Planning Actuel
+                                </p>
+                                <button
+                                  onClick={() =>
+                                    setIsImportEmploiModalOpen(true)
+                                  }
+                                  className="text-[10px] font-bold text-emerald-500 hover:text-emerald-600 uppercase flex items-center gap-1"
+                                >
+                                  <Upload size={12} /> Remplacer CSV
+                                </button>
+                              </div>
+                            )}
+
+                            {activeTab === "emploi" &&
+                              tabData.emploi.map((cours) => (
+                                <div
+                                  key={cours.id}
+                                  className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-sm"
+                                >
+                                  <div className="flex flex-col">
+                                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                                      {cours.matiere?.nom || "Matière Inconnue"}{" "}
+                                      •{" "}
+                                      <span className="text-emerald-500">
+                                        {cours.type_cours}
+                                      </span>
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                                      {cours.jour} |{" "}
+                                      {cours.heure_debut.slice(0, 5)} -{" "}
+                                      {cours.heure_fin.slice(0, 5)} | Salle:{" "}
+                                      {cours.salle || "N/A"}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+
+                            {activeTab === "etudiants" &&
+                              tabData.etudiants.map((etud) => (
+                                <div
+                                  key={etud.id}
+                                  className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-sm"
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 font-bold text-xs">
+                                      {etud.nom.charAt(0)}
+                                      {etud.prenom.charAt(0)}
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                                        {etud.nom} {etud.prenom}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">
+                                        {etud.matricule}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <span className="text-[9px] px-2 py-1 rounded-full font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10">
+                                    Actif
+                                  </span>
+                                </div>
+                              ))}
+
+                            {activeTab === "matieres" &&
+                              tabData.matieres.map((mat) => (
+                                <div
+                                  key={mat.id}
+                                  className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-sm"
+                                >
+                                  <div className="flex flex-col">
+                                    <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                                      {mat.nom}
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">
+                                      {mat.code}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
                         )}
                       </div>
                     </motion.div>
@@ -258,6 +388,16 @@ export default function ChefFilieres() {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={fetchFilieres}
+      />
+
+      <ImportEmploiModal
+        isOpen={isImportEmploiModalOpen}
+        onClose={() => setIsImportEmploiModalOpen(false)}
+        onSuccess={() => {
+          if (selectedFiliere) {
+            fetchTabData(selectedFiliere.id, "emploi-temps");
+          }
+        }}
       />
     </>
   );

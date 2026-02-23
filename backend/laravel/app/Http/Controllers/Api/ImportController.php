@@ -24,17 +24,17 @@ class ImportController extends Controller
         $admin = $request->user();
 
         $log = ImportLog::create([
-            'admin_id'    => $admin->id,
+            'admin_id' => $admin->id,
             'type_import' => 'etudiants',
             'fichier_nom' => $request->file('file')->getClientOriginalName(),
-            'total_lignes'=> 0,
+            'total_lignes' => 0,
             'lignes_valides' => 0,
-            'lignes_erreur'  => 0,
-            'statut'      => 'en_cours',
+            'lignes_erreur' => 0,
+            'statut' => 'en_cours',
         ]);
 
         $csv = Reader::createFromPath($request->file('file')->getRealPath());
-        $csv->setHeaderOffset(0); 
+        $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
         $erreurs = [];
@@ -64,13 +64,13 @@ class ImportController extends Controller
                     }
 
                     User::create([
-                        'matricule'       => $record['matricule'],
-                        'nom'             => $record['nom'],
-                        'prenom'          => $record['prenom'],
-                        'filiere_id'      => $filiere->id,
+                        'matricule' => $record['matricule'],
+                        'nom' => $record['nom'],
+                        'prenom' => $record['prenom'],
+                        'filiere_id' => $filiere->id,
                         'annee_admission' => $record['annee_admission'] ?? date('Y'),
-                        'password'        => Hash::make(Str::random(16)), 
-                        'is_active'       => false, 
+                        'password' => Hash::make(Str::random(16)),
+                        'is_active' => false,
                     ]);
                     $valides++;
                 } catch (\Exception $e) {
@@ -85,19 +85,19 @@ class ImportController extends Controller
         }
 
         $log->update([
-            'total_lignes'   => $valides + count($erreurs),
+            'total_lignes' => $valides + count($erreurs),
             'lignes_valides' => $valides,
-            'lignes_erreur'  => count($erreurs),
-            'erreurs_details'=> empty($erreurs) ? null : json_encode($erreurs),
-            'statut'         => 'termine',
-            'completed_at'   => now(),
+            'lignes_erreur' => count($erreurs),
+            'erreurs_details' => empty($erreurs) ? null : $erreurs,
+            'statut' => 'termine',
+            'completed_at' => now(),
         ]);
 
         return response()->json([
             'import_id' => $log->id,
-            'total'     => $valides + count($erreurs),
-            'valides'   => $valides,
-            'erreurs'   => count($erreurs),
+            'total' => $valides + count($erreurs),
+            'valides' => $valides,
+            'erreurs' => count($erreurs),
             'erreurs_details' => $erreurs
         ]);
     }
@@ -109,17 +109,17 @@ class ImportController extends Controller
         $admin = $request->user();
 
         $log = ImportLog::create([
-            'admin_id'    => $admin->id,
+            'admin_id' => $admin->id,
             'type_import' => 'notes',
             'fichier_nom' => $request->file('file')->getClientOriginalName(),
-            'total_lignes'=> 0,
+            'total_lignes' => 0,
             'lignes_valides' => 0,
-            'lignes_erreur'  => 0,
-            'statut'      => 'en_cours',
+            'lignes_erreur' => 0,
+            'statut' => 'en_cours',
         ]);
 
         $csv = Reader::createFromPath($request->file('file')->getRealPath());
-        $csv->setHeaderOffset(0); 
+        $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
 
         $erreurs = [];
@@ -133,7 +133,28 @@ class ImportController extends Controller
                 try {
                     $user = User::with('filiere')->where('matricule', $record['matricule'])->first();
                     if (!$user) {
-                        throw new \Exception("Étudiant avec matricule '{$record['matricule']}' introuvable.");
+                        if (empty($record['filiere_code'])) {
+                            throw new \Exception("Étudiant introuvable et aucun 'filiere_code' fourni pour le créer.");
+                        }
+
+                        $filiereCreate = Filiere::where('code', $record['filiere_code'])->first();
+                        if (!$filiereCreate) {
+                            throw new \Exception("Impossible de créer l'étudiant: Filière '{$record['filiere_code']}' introuvable.");
+                        }
+                        if ($isChef && $filiereCreate->departement_id !== $admin->departement_id) {
+                            throw new \Exception("La filière '{$record['filiere_code']}' n'appartient pas à votre département.");
+                        }
+
+                        $user = User::create([
+                            'matricule' => $record['matricule'],
+                            'nom' => $record['nom'] ?? 'N/A',
+                            'prenom' => $record['prenom'] ?? 'N/A',
+                            'filiere_id' => $filiereCreate->id,
+                            'annee_admission' => date('Y'),
+                            'password' => Hash::make(Str::random(16)),
+                            'is_active' => false,
+                        ]);
+                        $user->load('filiere');
                     }
 
                     if ($isChef && $user->filiere && $user->filiere->departement_id !== $admin->departement_id) {
@@ -145,8 +166,8 @@ class ImportController extends Controller
                         throw new \Exception("Matière '{$record['matiere_code']}' introuvable.");
                     }
 
-                    $noteFloat = (float)$record['note'];
-                    $noteMaxFloat = isset($record['note_max']) ? (float)$record['note_max'] : 20.0;
+                    $noteFloat = (float) $record['note'];
+                    $noteMaxFloat = isset($record['note_max']) ? (float) $record['note_max'] : 20.0;
                     if ($noteFloat < 0 || $noteFloat > $noteMaxFloat) {
                         throw new \Exception("Note invalide ({$noteFloat}) selon le barème ({$noteMaxFloat}).");
                     }
@@ -162,16 +183,16 @@ class ImportController extends Controller
                     }
 
                     Note::create([
-                        'user_id'          => $user->id,
-                        'matiere_id'       => $matiere->id,
-                        'note'             => $noteFloat,
-                        'note_max'         => $noteMaxFloat,
-                        'type_evaluation'  => $record['type_evaluation'],
-                        'coefficient'      => isset($record['coefficient']) ? (int)$record['coefficient'] : 1,
-                        'date_evaluation'  => $record['date_evaluation'],
-                        'semestre'         => $record['semestre'],
+                        'user_id' => $user->id,
+                        'matiere_id' => $matiere->id,
+                        'note' => $noteFloat,
+                        'note_max' => $noteMaxFloat,
+                        'type_evaluation' => $record['type_evaluation'],
+                        'coefficient' => isset($record['coefficient']) ? (int) $record['coefficient'] : 1,
+                        'date_evaluation' => $record['date_evaluation'],
+                        'semestre' => $record['semestre'],
                         'annee_academique' => $record['annee_academique'],
-                        'import_id'        => $log->id,
+                        'import_id' => $log->id,
                         'created_by_admin_id' => $admin->id,
                     ]);
                     $valides++;
@@ -187,19 +208,130 @@ class ImportController extends Controller
         }
 
         $log->update([
-            'total_lignes'   => $valides + count($erreurs),
+            'total_lignes' => $valides + count($erreurs),
             'lignes_valides' => $valides,
-            'lignes_erreur'  => count($erreurs),
-            'erreurs_details'=> empty($erreurs) ? null : json_encode($erreurs),
-            'statut'         => 'termine',
-            'completed_at'   => now(),
+            'lignes_erreur' => count($erreurs),
+            'erreurs_details' => empty($erreurs) ? null : $erreurs,
+            'statut' => 'termine',
+            'completed_at' => now(),
         ]);
 
         return response()->json([
             'import_id' => $log->id,
-            'total'     => $valides + count($erreurs),
-            'valides'   => $valides,
-            'erreurs'   => count($erreurs),
+            'total' => $valides + count($erreurs),
+            'valides' => $valides,
+            'erreurs' => count($erreurs),
+            'erreurs_details' => $erreurs
+        ]);
+    }
+
+    public function importEmploiTemps(Request $request)
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt|max:5120']);
+
+        $admin = $request->user();
+
+        $log = ImportLog::create([
+            'admin_id' => $admin->id,
+            'type_import' => 'emploi_temps',
+            'fichier_nom' => $request->file('file')->getClientOriginalName(),
+            'total_lignes' => 0,
+            'lignes_valides' => 0,
+            'lignes_erreur' => 0,
+            'statut' => 'en_cours',
+        ]);
+
+        $csv = Reader::createFromPath($request->file('file')->getRealPath());
+        $csv->setHeaderOffset(0);
+        $records = $csv->getRecords();
+
+        $erreurs = [];
+        $valides = 0;
+
+        $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
+
+        DB::beginTransaction();
+        try {
+            foreach ($records as $index => $record) {
+                try {
+                    $filiere = Filiere::where('code', $record['filiere_code'])->first();
+                    if (!$filiere) {
+                        throw new \Exception("Filière '{$record['filiere_code']}' introuvable.");
+                    }
+
+                    if ($isChef && $filiere->departement_id !== $admin->departement_id) {
+                        throw new \Exception("La filière '{$record['filiere_code']}' n'appartient pas à votre département.");
+                    }
+
+                    $matiere = Matiere::where('code', $record['matiere_code'])->first();
+                    if (!$matiere) {
+                        throw new \Exception("Matière '{$record['matiere_code']}' introuvable.");
+                    }
+
+                    $matiereLiee = DB::table('filiere_matieres')
+                        ->where('filiere_id', $filiere->id)
+                        ->where('matiere_id', $matiere->id)
+                        ->exists();
+
+                    if (!$matiereLiee) {
+                        // On l'ajoute automatiquement si elle n'y est pas
+                        $filiere->matieres()->attach($matiere->id, ['semestre' => $record['semestre']]);
+                    }
+
+                    if (!in_array($record['jour'], ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'])) {
+                        throw new \Exception("Jour '{$record['jour']}' invalide.");
+                    }
+
+                    if (!empty($record['salle'])) {
+                        $conflit = \App\Models\EmploiTempsFiliere::where('jour', $record['jour'])
+                            ->where('salle', $record['salle'])
+                            ->where('semestre', $record['semestre'])
+                            ->where('heure_debut', '<', $record['heure_fin'])
+                            ->where('heure_fin', '>', $record['heure_debut'])
+                            ->exists();
+
+                        if ($conflit) {
+                            throw new \Exception("Conflit de salle ({$record['salle']} à {$record['heure_debut']}).");
+                        }
+                    }
+
+                    \App\Models\EmploiTempsFiliere::create([
+                        'filiere_id' => $filiere->id,
+                        'matiere_id' => $matiere->id,
+                        'jour' => $record['jour'],
+                        'heure_debut' => $record['heure_debut'],
+                        'heure_fin' => $record['heure_fin'],
+                        'salle' => $record['salle'] ?? null,
+                        'type_cours' => $record['type_cours'] ?? 'CM',
+                        'enseignant' => $record['enseignant'] ?? null,
+                        'semestre' => $record['semestre'],
+                    ]);
+                    $valides++;
+                } catch (\Exception $e) {
+                    $erreurs[] = ['ligne' => $index + 2, 'raison' => $e->getMessage()];
+                }
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $log->update(['statut' => 'echoue', 'completed_at' => now(), 'erreurs_details' => $e->getMessage()]);
+            return response()->json(['message' => 'Erreur critique lors de l\'import.', 'error' => $e->getMessage()], 500);
+        }
+
+        $log->update([
+            'total_lignes' => $valides + count($erreurs),
+            'lignes_valides' => $valides,
+            'lignes_erreur' => count($erreurs),
+            'erreurs_details' => empty($erreurs) ? null : $erreurs,
+            'statut' => 'termine',
+            'completed_at' => now(),
+        ]);
+
+        return response()->json([
+            'import_id' => $log->id,
+            'total' => $valides + count($erreurs),
+            'valides' => $valides,
+            'erreurs' => count($erreurs),
             'erreurs_details' => $erreurs
         ]);
     }
@@ -210,7 +342,7 @@ class ImportController extends Controller
         $isChef = method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement();
 
         $imports = ImportLog::with('admin:id,nom,prenom')
-            ->when($isChef, function($query) use ($admin) {
+            ->when($isChef, function ($query) use ($admin) {
                 $query->where('admin_id', $admin->id);
             })
             ->latest()
@@ -229,9 +361,6 @@ class ImportController extends Controller
             return response()->json(['message' => 'Accès refusé'], 403);
         }
 
-        if (is_string($import->erreurs_details)) {
-            $import->erreurs_details = json_decode($import->erreurs_details, true);
-        }
 
         return response()->json($import);
     }
@@ -243,7 +372,7 @@ class ImportController extends Controller
         $csv->insertOne(['ETU001', 'DUPONT', 'Jean', 'L1-INFO-2026', '2025']);
 
         return response($csv->toString(), 200, [
-            'Content-Type'        => 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_etudiants.csv"',
         ]);
     }
@@ -251,12 +380,25 @@ class ImportController extends Controller
     public function templateNotes()
     {
         $csv = Writer::createFromString();
-        $csv->insertOne(['matricule','matiere_code','note','note_max','type_evaluation','coefficient','date_evaluation','semestre','annee_academique']);
-        $csv->insertOne(['ETU001','ALGO101','14.5','20','Devoir','2','2025-11-15','S1','2025-2026']);
+        $csv->insertOne(['matricule', 'nom', 'prenom', 'filiere_code', 'matiere_code', 'note', 'note_max', 'type_evaluation', 'coefficient', 'date_evaluation', 'semestre', 'annee_academique']);
+        $csv->insertOne(['ETU002', 'SMITH', 'Alice', 'L1-INFO-2026', 'ALGO101', '14.5', '20', 'Devoir', '2', '2025-11-15', 'S1', '2025-2026']);
 
         return response($csv->toString(), 200, [
-            'Content-Type'        => 'text/csv',
+            'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_notes.csv"',
         ]);
     }
+    public function templateEmploiTemps()
+    {
+        $csv = Writer::createFromString();
+        $csv->insertOne(['filiere_code', 'matiere_code', 'jour', 'heure_debut', 'heure_fin', 'salle', 'type_cours', 'enseignant', 'semestre']);
+        $csv->insertOne(['L1-INFO-2026', 'ALGO101', 'Lundi', '08:00', '10:00', 'Amphi A', 'CM', 'Dr. MARTIN', 'S1']);
+        $csv->insertOne(['L1-INFO-2026', 'ALGO101', 'Lundi', '10:15', '12:15', 'Salle 102', 'TD', 'M. BERNARD', 'S1']);
+
+        return response($csv->toString(), 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_emploi_temps.csv"',
+        ]);
+    }
 }
+

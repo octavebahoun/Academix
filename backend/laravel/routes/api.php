@@ -17,9 +17,9 @@ use App\Http\Controllers\Api\ChefDepartementController;
 Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
 
-        Route::post('admin/register', [AuthController::class, 'adminRegister']); 
-        Route::post('admin/login', [AuthController::class, 'adminLogin']); 
-        Route::post('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum'); 
+        Route::post('admin/register', [AuthController::class, 'adminRegister']);
+        Route::post('admin/login', [AuthController::class, 'adminLogin']);
+        Route::post('admin/logout', [AuthController::class, 'adminLogout'])->middleware('auth:sanctum');
 
         Route::post('chef/login', [AuthController::class, 'chefLogin']);
         Route::post('chef/logout', [AuthController::class, 'chefLogout'])->middleware('auth:sanctum');
@@ -35,21 +35,21 @@ Route::prefix('v1')->group(function () {
     Route::prefix('admin')->middleware(['auth:sanctum', 'super.admin'])->group(function () {
 
         Route::prefix('departements')->group(function () {
-            Route::get('', [DepartementController::class, 'index']);   
-            Route::post('', [DepartementController::class, 'store']);   
-            Route::get('{id}', [DepartementController::class, 'show']);    
-            Route::put('{id}', [DepartementController::class, 'update']);  
-            Route::delete('{id}', [DepartementController::class, 'destroy']); 
-            Route::get('{id}/stats', [StatistiqueController::class, 'departement']);   
+            Route::get('', [DepartementController::class, 'index']);
+            Route::post('', [DepartementController::class, 'store']);
+            Route::get('{id}', [DepartementController::class, 'show']);
+            Route::put('{id}', [DepartementController::class, 'update']);
+            Route::delete('{id}', [DepartementController::class, 'destroy']);
+            Route::get('{id}/stats', [StatistiqueController::class, 'departement']);
         });
 
         Route::prefix('chefs-departement')->group(function () {
-            Route::get('', [ChefDepartementController::class, 'index']);   
-            Route::post('', [ChefDepartementController::class, 'store']);   
-            Route::get('{id}', [ChefDepartementController::class, 'show']);    
-            Route::put('{id}', [ChefDepartementController::class, 'update']);  
-            Route::delete('{id}', [ChefDepartementController::class, 'destroy']); 
-            Route::post('{id}/toggle', [ChefDepartementController::class, 'toggle']); 
+            Route::get('', [ChefDepartementController::class, 'index']);
+            Route::post('', [ChefDepartementController::class, 'store']);
+            Route::get('{id}', [ChefDepartementController::class, 'show']);
+            Route::put('{id}', [ChefDepartementController::class, 'update']);
+            Route::delete('{id}', [ChefDepartementController::class, 'destroy']);
+            Route::post('{id}/toggle', [ChefDepartementController::class, 'toggle']);
         });
 
         Route::get('stats/global', [StatistiqueController::class, 'global']);
@@ -101,6 +101,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('{id}/matieres/{matiere_id}', [MatiereController::class, 'removeFromFiliere']);
 
             Route::get('{id}/etudiants', [FiliereController::class, 'etudiants']);
+            Route::get('{id}/matieres', [FiliereController::class, 'matieres']);
             Route::get('{id}/stats', [StatistiqueController::class, 'filiere']);
             Route::get('{id}/emploi-temps', [EmploiTempsController::class, 'index']);
         });
@@ -108,8 +109,10 @@ Route::prefix('v1')->group(function () {
         Route::get('etudiants', [StudentController::class, 'index']);
         Route::post('import/etudiants', [ImportController::class, 'importEtudiants']);
         Route::post('import/notes', [ImportController::class, 'importNotes']);
+        Route::post('import/emploi-temps', [ImportController::class, 'importEmploiTemps']);
         Route::get('import/template/etudiants', [ImportController::class, 'templateEtudiants']);
         Route::get('import/template/notes', [ImportController::class, 'templateNotes']);
+        Route::get('import/template/emploi-temps', [ImportController::class, 'templateEmploiTemps']);
         Route::get('import/history', [ImportController::class, 'history']);
 
         Route::apiResource('notes', NoteController::class)->names([
