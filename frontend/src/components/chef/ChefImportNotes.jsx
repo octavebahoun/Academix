@@ -5,9 +5,18 @@ import {
   UploadCloud,
   CheckCircle2,
   AlertTriangle,
+  FileSpreadsheet,
+  History,
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { laravelApiClient } from "../../api/client";
+import ImportNotesModal from "./ImportNotesModal";
 
 export default function ChefImportNotes() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -18,187 +27,172 @@ export default function ChefImportNotes() {
     visible: { opacity: 1, y: 0 },
   };
 
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      const response = await laravelApiClient.get("/admin/import/history");
+      // Filtrer pour n'avoir que les imports de type 'notes'
+      setHistory(
+        response.data.data.filter((log) => log.type_import === "notes"),
+      );
+    } catch (error) {
+      console.error("Erreur historique:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-4xl mx-auto space-y-6 pb-20"
-    >
-      {/* Instructions Box */}
+    <>
       <motion.div
-        variants={itemVariants}
-        className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-6 shadow-sm"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-5xl mx-auto space-y-6 pb-12"
       >
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-1">
-            <Info size={20} />
+        {/* Hero Section */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6 overflow-hidden relative"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+
+          <div className="relative z-10 text-center md:text-left">
+            <h2 className="text-xl font-black font-display text-slate-900 dark:text-white uppercase tracking-tight">
+              Importation des Notes
+            </h2>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 max-w-md">
+              Mise à jour massive des résultats académiques via fichier
+              structuré.
+            </p>
           </div>
-          <div>
-            <h3 className="text-sm font-black text-slate-900 dark:text-blue-100 uppercase tracking-tight mb-3">
-              Instructions d'import CSV
-            </h3>
-            <ol className="text-sm text-slate-700 dark:text-blue-200/80 space-y-2 mb-4 leading-relaxed font-medium">
-              <li>
-                <strong className="text-slate-900 dark:text-white">
-                  1. Format requis :
-                </strong>{" "}
-                Le fichier CSV doit contenir les colonnes : Matricule, Nom,
-                Prénom, Matière, Note
-              </li>
-              <li>
-                <strong className="text-slate-900 dark:text-white">
-                  2. Sélection :
-                </strong>{" "}
-                Choisissez d'abord la filière et l'année académique avant
-                d'importer
-              </li>
-              <li>
-                <strong className="text-slate-900 dark:text-white">
-                  3. Validation :
-                </strong>{" "}
-                Vérifiez les données avant de confirmer l'import final
-              </li>
-            </ol>
-            <button className="bg-blue-500 text-white font-bold text-sm px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-md active:scale-95">
-              <Download size={16} /> Télécharger Modèle CSV
-            </button>
-          </div>
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="relative z-10 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold uppercase tracking-widest px-6 py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-600 hover:text-white transition-all shadow-lg active:scale-95 whitespace-nowrap group text-xs"
+          >
+            <UploadCloud size={18} />
+            Importer un CSV
+          </button>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left: Instructions */}
+          <motion.div
+            variants={itemVariants}
+            className="lg:col-span-1 space-y-6"
+          >
+            <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-6 shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-md mb-4">
+                <Info size={20} />
+              </div>
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4">
+                Guide d'utilisation
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  "Utilisez obligatoirement le modèle CSV fourni.",
+                  "Vérifiez les matricules avant l'envoi.",
+                  "Les doublons sont automatiquement rejetés.",
+                  "Format date : AAAA-MM-JJ.",
+                ].map((text, i) => (
+                  <li
+                    key={i}
+                    className="flex gap-3 text-sm font-bold text-slate-600 dark:text-slate-400"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                    {text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+
+          {/* Right: History */}
+          <motion.div
+            variants={itemVariants}
+            className="lg:col-span-2 space-y-6"
+          >
+            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Historique Récent
+                  </h3>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                    Suivi des derniers imports effectués
+                  </p>
+                </div>
+                <History size={20} className="text-slate-200" />
+              </div>
+
+              {loading ? (
+                <div className="flex justify-center py-10">
+                  <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                </div>
+              ) : history.length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                  <FileSpreadsheet
+                    size={40}
+                    className="mx-auto text-slate-300 mb-3"
+                  />
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    Aucun import trouvé
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {history.map((log) => (
+                    <div
+                      key={log.id}
+                      className="flex items-center justify-between p-5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-800 group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={cn(
+                            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                            log.statut === "termine"
+                              ? "bg-emerald-50 text-emerald-500"
+                              : "bg-rose-50 text-rose-500",
+                          )}
+                        >
+                          {log.statut === "termine" ? (
+                            <CheckCircle2 size={24} />
+                          ) : (
+                            <AlertTriangle size={24} />
+                          )}
+                        </div>
+                        <div>
+                          <h4 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-tight italic">
+                            {log.fichier_nom}
+                          </h4>
+                          <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">
+                            {new Date(log.created_at).toLocaleString()} •{" "}
+                            {log.lignes_valides} validés / {log.total_lignes}
+                          </p>
+                        </div>
+                      </div>
+                      <button className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-blue-600 hover:text-white transition-all group-hover:scale-110">
+                        <Download size={18} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
         </div>
       </motion.div>
 
-      {/* Step 1: Selection */}
-      <motion.div
-        variants={itemVariants}
-        className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm"
-      >
-        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4">
-          1. Sélection de la filière
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">
-              Filière *
-            </label>
-            <select className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 outline-none font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
-              <option value="">Choisir une filière</option>
-              <option value="l-info">Licence Informatique</option>
-              <option value="m-info">Master Informatique</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">
-              Année d'études *
-            </label>
-            <select className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 outline-none font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
-              <option value="">Choisir une année</option>
-              <option value="l1">Première Année (L1)</option>
-              <option value="l2">Deuxième Année (L2)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">
-              Période
-            </label>
-            <select className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 outline-none font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
-              <option value="semestre1">Semestre 1</option>
-              <option value="semestre2">Semestre 2</option>
-            </select>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Step 2: Upload dropzone */}
-      <motion.div
-        variants={itemVariants}
-        className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm"
-      >
-        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4">
-          2. Import du fichier CSV
-        </h3>
-
-        <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-12 flex flex-col items-center justify-center text-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-          <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
-            <UploadCloud size={28} />
-          </div>
-          <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2">
-            Cliquez pour sélectionner ou glissez-déposez
-          </h4>
-          <p className="text-sm text-slate-500 font-medium">
-            Formats acceptés : .csv (Max 5MB)
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Historique */}
-      <motion.div
-        variants={itemVariants}
-        className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-sm"
-      >
-        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4">
-          Historique des imports
-        </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 size={20} />
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                  Notes Licence L1 - Semestre 1
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                  15 décembre 2024, 14:30 • 52 étudiants • 6 matières
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 text-xs px-3 py-1 rounded-full font-bold">
-                Succès
-              </span>
-              <button className="w-8 h-8 rounded-full flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
-                <Download size={16} />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle size={20} />
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm">
-                  Notes BTS 2 - Programmation
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                  10 décembre 2024, 09:15 • 45 étudiants • 3 erreurs
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="bg-orange-50 text-orange-600 dark:bg-orange-500/10 text-xs px-3 py-1 rounded-full font-bold">
-                Partiel
-              </span>
-              <button className="w-8 h-8 rounded-full flex items-center justify-center text-blue-500 hover:bg-blue-50 transition-colors">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4"
-                >
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+      <ImportNotesModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchHistory}
+      />
+    </>
   );
 }

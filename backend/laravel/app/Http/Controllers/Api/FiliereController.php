@@ -15,10 +15,10 @@ class FiliereController extends Controller
         $admin = $request->user();
         $filieres = Filiere::with('departement')
             ->withCount('users')
-            ->when($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement(), function($query) use ($admin) {
+            ->when($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement(), function ($query) use ($admin) {
                 $query->where('departement_id', $admin->departement_id);
             })
-            ->when($request->niveau, function($query, $niveau) {
+            ->when($request->niveau, function ($query, $niveau) {
                 $query->where('niveau', $niveau);
             })
             ->orderBy('departement_id')
@@ -29,7 +29,7 @@ class FiliereController extends Controller
     }
 
     public function store(Request $request)
-    {       
+    {
         $admin = $request->user();
         if ($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement()) {
             $request->merge(['departement_id' => $admin->departement_id]);
@@ -37,9 +37,9 @@ class FiliereController extends Controller
 
         $validated = $request->validate([
             'departement_id' => 'required|integer|exists:departements,id',
-            'nom'  => 'required|string|max:100',
-            'niveau'  => 'required|in:L1,L2,L3,M1,M2',
-            'code'  => 'required|string|max:20|unique:filieres,code',
+            'nom' => 'required|string|max:100',
+            'niveau' => 'required|in:L1,L2,L3,M1,M2',
+            'code' => 'required|string|max:20|unique:filieres,code',
             'annee_academique' => 'required|string|max:20',
             'description' => 'nullable|string',
         ]);
@@ -76,11 +76,11 @@ class FiliereController extends Controller
         }
 
         $validated = $request->validate([
-            'nom'              => 'sometimes|string|max:100',
-            'niveau'           => 'sometimes|in:L1,L2,L3,M1,M2',
-            'code'             => ['sometimes', 'string', 'max:20', Rule::unique('filieres','code')->ignore($id)],
+            'nom' => 'sometimes|string|max:100',
+            'niveau' => 'sometimes|in:L1,L2,L3,M1,M2',
+            'code' => ['sometimes', 'string', 'max:20', Rule::unique('filieres', 'code')->ignore($id)],
             'annee_academique' => 'sometimes|string|max:20',
-            'description'      => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
 
         $filiere->update($validated);
@@ -119,14 +119,14 @@ class FiliereController extends Controller
             }
         }
 
-        $etudiants = User::select(['id','matricule','nom','prenom','email','telephone','is_active','annee_admission','last_login'])
+        $etudiants = User::select(['id', 'matricule', 'nom', 'prenom', 'email', 'telephone', 'is_active', 'annee_admission', 'last_login'])
             ->where('filiere_id', $id)
-            ->when($request->search, function($query, $search) {
+            ->when($request->search, function ($query, $search) {
                 $query->where('nom', 'like', "%{$search}%")
-                      ->orWhere('prenom', 'like', "%{$search}%")
-                      ->orWhere('matricule', 'like', "%{$search}%");
+                    ->orWhere('prenom', 'like', "%{$search}%")
+                    ->orWhere('matricule', 'like', "%{$search}%");
             })
-            ->when($request->has('is_active'), function($query) use ($request) {
+            ->when($request->has('is_active'), function ($query) use ($request) {
                 $query->where('is_active', $request->is_active);
             })
             ->orderBy('nom')
@@ -150,5 +150,18 @@ class FiliereController extends Controller
             'message' => 'Statistiques en cours de construction.',
             'filiere_id' => $filiere->id
         ]);
+    }
+    public function matieres(Request $request, $id)
+    {
+        $filiere = Filiere::with('matieres')->findOrFail($id);
+        $admin = $request->user();
+
+        if ($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement()) {
+            if ($filiere->departement_id !== $admin->departement_id) {
+                return response()->json(['message' => 'Accès refusé.'], 403);
+            }
+        }
+
+        return response()->json($filiere->matieres);
     }
 }

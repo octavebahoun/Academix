@@ -108,6 +108,9 @@ Route::prefix('v1')->group(function () {
         Route::get('etudiants', [StudentController::class, 'index']);
         Route::post('import/etudiants', [ImportController::class, 'importEtudiants']);
         Route::post('import/notes', [ImportController::class, 'importNotes']);
+        Route::get('import/template/etudiants', [ImportController::class, 'templateEtudiants']);
+        Route::get('import/template/notes', [ImportController::class, 'templateNotes']);
+        Route::get('import/history', [ImportController::class, 'history']);
 
         Route::apiResource('notes', NoteController::class)->names([
             'index' => 'departement.notes.index',
