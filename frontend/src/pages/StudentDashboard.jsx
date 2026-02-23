@@ -36,12 +36,14 @@ export default function StudentDashboard() {
     window.location.href = "/login";
   };
 
+  const user = authService.getCurrentUser();
+
   const getPageTitles = () => {
     switch (activeTab) {
       case "dashboard":
         return {
-          title: "Bon retour, Sophie !",
-          subtitle: "S2 • Génie Électrique et Informatique",
+          title: `Bon retour, ${user?.prenom || "Sophie"} !`,
+          subtitle: `${user?.niveau || "S2"} • ${user?.filiere?.nom || "Génie Électrique et Informatique"}`,
         };
       case "sessions":
         return {
@@ -63,8 +65,8 @@ export default function StudentDashboard() {
         return { title: "Mon Profil", subtitle: "" };
       default:
         return {
-          title: "Bon retour, Sophie !",
-          subtitle: "S2 • Génie Électrique et Informatique",
+          title: `Bon retour, ${user?.prenom || "Sophie"} !`,
+          subtitle: `${user?.niveau || "S2"} • ${user?.filiere?.nom || "Génie Électrique et Informatique"}`,
         };
     }
   };

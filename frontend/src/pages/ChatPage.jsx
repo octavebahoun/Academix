@@ -16,12 +16,17 @@ import {
 } from "../api/notifications";
 import sessionSocketService from "../services/sessionSocket";
 
+import { authService } from "../services/authService";
+
+const AUTH_USER = authService.getCurrentUser();
 const CURRENT_USER = {
-  id: 1,
-  nom: "Dupont",
-  prenom: "Jean",
-  avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jean",
-  role: "participant",
+  id: AUTH_USER?.id || 1,
+  nom: AUTH_USER?.nom || "Dupont",
+  prenom: AUTH_USER?.prenom || "Jean",
+  avatar_url:
+    AUTH_USER?.avatar_url ||
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${AUTH_USER?.prenom || "Jean"}`,
+  role: authService.getRole() || "participant",
 };
 
 const SESSION_GOAL = {
