@@ -134,6 +134,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::prefix('student')->middleware(['auth:sanctum', 'student'])->group(function () {
         Route::get('profil', [StudentController::class, 'profil']);
+        Route::get('moyennes', [StudentController::class, 'moyennes']);
         Route::get('notes', [StudentController::class, 'notes']);
         Route::get('emploi-temps', [StudentController::class, 'emploiTemps']);
 
