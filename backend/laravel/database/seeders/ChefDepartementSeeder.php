@@ -19,7 +19,7 @@ class ChefDepartementSeeder extends Seeder
             'nom' => 'FOLARIN',
             'prenom' => 'Mourchid',
             'email' => 'mourchid@academix.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('mourchid2026'),
             'departement_id' => Departement::where('code', 'INFO')->first()?->id ?? 1,
             'created_by_admin' => $admin->id,
             'is_active' => true,

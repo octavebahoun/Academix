@@ -406,35 +406,35 @@ socket.on("notification", (notif) => {
 
 **Jours 3-4: Core Features**
 
-- [ ] CRUD Matières, Tâches, Notes
-- [ ] Calcul moyennes
-- [ ] Frontend Dashboard basique
+- [x] CRUD Matières, Tâches, Notes
+- [x] Calcul moyennes
+- [x] Frontend Dashboard basique
 
 **Jours 5-7: IA & Collaboration**
 
-- [ ] Intégration OpenAI (fiches + quiz)
-- [ ] Sessions collaboratives
-- [ ] WebSocket notifications
+- [x] Intégration OpenAI (fiches + quiz)
+- [x] Sessions collaboratives
+- [x] WebSocket notifications
 
 ### Semaine 2 (Jours 8-14)
 
 **Jours 8-10: Features Avancées**
 
-- [ ] Quiz temps réel (WebSocket)
-- [ ] Early Warning System
-- [ ] Extraction PDF tâches
+- [x] Quiz temps réel (WebSocket)
+- [x] Early Warning System
+- [x] Extraction PDF tâches
 
 **Jours 11-13: Différenciateurs**
 
-- [ ] Matching intelligent
-- [ ] Planning adaptatif
-- [ ] Bibliothèque collaborative
+- [x] Matching intelligent
+- [x] Planning adaptatif
+- [x] Bibliothèque collaborative
 
 **Jour 14: Polish & Démo**
 
-- [ ] Corrections bugs
-- [ ] UI/UX finitions
-- [ ] Préparation présentation
+- [x] Corrections bugs
+- [x] UI/UX finitions
+- [x] Préparation présentation
 
 ---
 
@@ -515,5 +515,5 @@ Ces fonctionnalités sont **reportées après le MVP** :
 
 ---
 
-**Dernière mise à jour**: 16 février 2026  
+**Dernière mise à jour**: 24 février 2026  
 **Version**: 1.0.0 MVP

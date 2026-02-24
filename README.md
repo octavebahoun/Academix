@@ -1,18 +1,53 @@
 # 🚀 AcademiX Platform
 
-Plateforme académique intelligente avec IA générative pour étudiants.
+Plateforme académique intelligente avec IA générative pour gérer et optimiser la vie des établissements scolaires, des formateurs et des étudiants.
+
+## 🌟 Démonstration en Ligne (Déploiement)
+
+Vous pouvez tester l'application directement en ligne. Nous avons mis en place **trois parcours (flux)** accessibles via le lien de connexion principal :
+
+### 1️⃣ Flux Administrateur Principal
+
+- **Lien de connexion** : [https://team-d-excellence-hackbyifri-2026.vercel.app/login](https://team-d-excellence-hackbyifri-2026.vercel.app/login)
+- **Email** : `admin@academix.com`
+- **Mot de passe** : `admin2026`
+  _(Ce flux permet la gestion globale de l'établissement: départements, configurations système, etc.)_
+
+<video src="./Présentation/presentation1.mp4" controls="controls" width="100%"></video>
+
+### 2️⃣ Flux Chef de Département
+
+- **Lien de connexion** : [https://team-d-excellence-hackbyifri-2026.vercel.app/login](https://team-d-excellence-hackbyifri-2026.vercel.app/login)
+- **Email** : `mourchid@academix.com`
+- **Mot de passe** : `mourchid2026`
+  _(Ce flux permet l'import et la gestion des étudiants d'une filière, ainsi que l'assignation des notes et emplois du temps.)_
+
+<video src="./Présentation/presentation2.mp4" controls="controls" width="100%"></video>
+
+### 3️⃣ Flux Étudiant
+
+- **Lien de connexion** : [https://team-d-excellence-hackbyifri-2026.vercel.app/login](https://team-d-excellence-hackbyifri-2026.vercel.app/login)
+- **Identifiant** : `ETU001`
+- **Mot de passe** : `ETU001`
+  _(Ce flux donne l'accès au tableau de bord de l'étudiant, avec ses notes, son emploi du temps et les modules d'Intelligence Artificielle.)_
+
+<video src="./Présentation/presentation3.mp4" controls="controls" width="100%"></video>
+
+---
 
 ## 🏗️ Architecture
 
 - **Frontend**: React 18 + Vite 5 + Tailwind CSS 3
-- **Backend API**: Laravel 11 (PHP 8.2) + Sanctum
+- **Backend API**: Laravel 12 (PHP 8.2) + Sanctum
 - **Backend WebSocket**: Node.js 20 + Socket.io + MongoDB
-- **Service IA**: Python 3.11 + FastAPI + OpenAI/Claude
+- **Service IA**: Python 3.11 + FastAPI + OpenRouter/HuggingFace/Groq
 - **Base de données**: MySQL 8.0
 
 ---
 
 ## 📦 Installation pour Développeurs
+
+Si vous souhaitez faire tourner toutes les briques de l'application en local :
 
 ### Prérequis
 
@@ -57,19 +92,13 @@ npm install
 # Configurer l'environnement
 cp .env.example .env
 
-# Éditer .env avec vos paramètres MySQL :
-# DB_DATABASE=academix
-# DB_USERNAME=academix_user
-# DB_PASSWORD=VotreMotDePasseSecurise!
+# Éditer .env avec vos paramètres MySQL (ex: DB_DATABASE=academix, DB_USERNAME, DB_PASSWORD)
 
 # Générer la clé d'application
 php artisan key:generate
 
-# Exécuter les migrations
-php artisan migrate
-
-# (Optionnel) Remplir avec des données de test
-php artisan db:seed
+# Exécuter les migrations et injecter les jeux de données (seeders)
+php artisan migrate --seed
 ```
 
 ### 4️⃣ Installation Service Node.js (WebSocket)
@@ -82,8 +111,6 @@ npm install
 
 # Configurer l'environnement
 cp .env.example .env
-
-# Éditer .env avec vos paramètres
 ```
 
 ### 5️⃣ Installation Service Python (IA)
@@ -100,14 +127,12 @@ pip install -r requirements.txt
 
 # Configurer l'environnement
 cp .env.example .env
-
-# Éditer .env avec vos clés API (OpenAI, Claude, etc.)
 ```
 
 ### 6️⃣ Installation Frontend React
 
 ```bash
-cd ../frontend
+cd ../../frontend
 
 # Installer les dépendances
 npm install
@@ -120,13 +145,7 @@ cp .env.example .env
 
 ## 🚀 Lancement des services
 
-### Méthode 1: Script automatique (recommandé)
-
-```bash
-./start-all.sh
-```
-
-### Méthode 2: Lancement manuel
+Chaque composant doit être démarré séparément dans son propre terminal.
 
 #### Terminal 1 - Laravel API (Port 8000)
 
@@ -157,13 +176,15 @@ cd frontend
 npm run dev
 ```
 
+---
+
 ## 📚 Documentation
 
-Consultez le dossier [/docs](./docs/) pour la documentation complète :
+Consultez le dossier [`/docs`](./docs/) pour la documentation complète :
 
 ### 🚀 Guides de Démarrage
 
-- **[README](./docs/README.md)** - Point d'entrée de la documentation
+- **[README](./docs/README.md)** - Point d'entrée de la documentation détaillée
 - **[Installation](./docs/INSTALLATION.md)** - Setup complet développement local
 - **[Fonctionnalités MVP](./docs/FEATURES_MVP.md)** - Features prioritaires et différenciateurs
 
@@ -176,21 +197,25 @@ Consultez le dossier [/docs](./docs/) pour la documentation complète :
 ### 📖 Guides Utilisateur & Déploiement
 
 - **[Parcours Utilisateur](./docs/USER_JOURNEY.md)** - Flow complet de l'étudiant
-- **[Déploiement](./docs/DEPLOYMENT.md)** - Guide production (VPS, Cloud)
-
-## 🎯 URLs en locale
-
-- Frontend: http://localhost:5173
-- Laravel API: http://localhost:8000
-- Node WebSocket: http://localhost:3001
-- Python IA: http://localhost:5000
-
-## 👥 Équipe
-
-- Hanna BIAOU - Frontend (React)
-- Mourchid FOLARIN - Backend (Laravel)
-- Octave BAHOUN-HOUTOUKPE - Backend (Node.js + Python IA)
 
 ---
 
-Projet Hackathon 2 semaines 🔥
+## 🎯 URLs en local
+
+- **Frontend** : http://localhost:5173
+- **Laravel API** : http://localhost:8000
+- **Node WebSocket** : http://localhost:3001
+- **Python IA** : http://localhost:5000
+
+---
+
+## 👥 Équipe "Team D'excellence"
+
+- **Hanna BIAOU** - Frontend & Designer(React)
+- **Mourchid FOLARIN** - Backend (Laravel)
+- **Octave BAHOUN-HOUTOUKPE** - Fullstack (Node.js + Python IA)
+
+---
+
+**Date de validation MVP** : 24 Février 2026
+Projet développé dans le cadre du **HackByIFRI 2026** par **Team D'excellence**.

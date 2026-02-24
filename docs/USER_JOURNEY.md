@@ -554,5 +554,5 @@ Après 2 semaines d'utilisation :
 
 ---
 
-**Dernière mise à jour**: 16 février 2026  
+**Dernière mise à jour**: 24 février 2026  
 **Version**: 1.0.0

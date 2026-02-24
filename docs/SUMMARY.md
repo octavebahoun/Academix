@@ -312,7 +312,7 @@ docs/
 ### Versionning
 
 - Version actuelle: **1.0.0**
-- Dernière mise à jour: **16 février 2026**
+- Dernière mise à jour: **24 février 2026**
 - Prochaine révision: Après MVP (fin février 2026)
 
 ---
@@ -362,6 +362,6 @@ docs/
 **Créé par**: Team D'Excellence  
 **Projet**: AcademiX Platform  
 **Hackathon**: IFRI 2026  
-**Date**: 16 février 2026
+**Date**: 24 février 2026
 
 🚀 **Prêts pour le développement !**

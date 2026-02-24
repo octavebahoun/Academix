@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
             'nom' => 'ADMIN',
             'prenom' => 'Super',
             'email' => 'admin@academix.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('admin2026'),
             'is_active' => true,
         ]);
     }
