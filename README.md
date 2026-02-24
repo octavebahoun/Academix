@@ -13,7 +13,7 @@ Vous pouvez tester l'application directement en ligne. Nous avons mis en place *
 - **Mot de passe** : `admin2026`
   _(Ce flux permet la gestion globale de l'établissement: départements, configurations système, etc.)_
 
-                      https://github.com/user-attachments/assets/02cf5b8d-6dbd-422a-b796-31fe51bf401f
+  https://github.com/user-attachments/assets/02cf5b8d-6dbd-422a-b796-31fe51bf401f
 
 
 
@@ -25,7 +25,7 @@ Vous pouvez tester l'application directement en ligne. Nous avons mis en place *
 - **Mot de passe** : `mourchid2026`
   _(Ce flux permet l'import et la gestion des étudiants d'une filière, ainsi que l'assignation des notes et emplois du temps.)_
 
-                    https://github.com/user-attachments/assets/2bca6ac0-dc22-40e8-a51d-d1c8c023d3f0
+  https://github.com/user-attachments/assets/2bca6ac0-dc22-40e8-a51d-d1c8c023d3f0
 
 
 
@@ -36,7 +36,7 @@ Vous pouvez tester l'application directement en ligne. Nous avons mis en place *
 - **Mot de passe** : `ETU001`
   _(Ce flux donne l'accès au tableau de bord de l'étudiant, avec ses notes, son emploi du temps et les modules d'Intelligence Artificielle.)_
 
-                          https://github.com/user-attachments/assets/b5c4a33e-2e9b-41ad-b384-f3311012edd5
+  https://github.com/user-attachments/assets/b5c4a33e-2e9b-41ad-b384-f3311012edd5
 
 
 
