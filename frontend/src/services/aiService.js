@@ -10,11 +10,24 @@ export const aiService = {
     generateSummary: async ({ file, level = 'medium', style = 'bullets', format = 'markdown', matiere }) => {
         const formData = new FormData();
         formData.append('file', file);
-        
+
         let url = `/summary/generate?level=${level}&style=${style}&format=${format}`;
         if (matiere) url += `&matiere=${encodeURIComponent(matiere)}`;
-        
+
         const response = await pythonApiClient.post(url, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+
+    /**
+     * Génère un podcast à partir d'un fichier
+     */
+    generatePodcast: async ({ file }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await pythonApiClient.post('/podcast/generate', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;
@@ -34,10 +47,10 @@ export const aiService = {
     generateQuiz: async ({ file, nbQuestions = 10, difficulty = 'medium', matiere }) => {
         const formData = new FormData();
         formData.append('file', file);
-        
+
         let url = `/quiz/generate?nb_questions=${nbQuestions}&difficulty=${difficulty}`;
         if (matiere) url += `&matiere=${encodeURIComponent(matiere)}`;
-        
+
         const response = await pythonApiClient.post(url, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -61,11 +74,11 @@ export const aiService = {
     generateExercises: async ({ file, nbExercises = 5, difficulty = 'progressive', matiere, chapitre }) => {
         const formData = new FormData();
         formData.append('file', file);
-        
+
         let url = `/exercises/generate?nb_exercises=${nbExercises}&difficulty=${difficulty}`;
         if (matiere) url += `&matiere=${encodeURIComponent(matiere)}`;
         if (chapitre) url += `&chapitre=${encodeURIComponent(chapitre)}`;
-        
+
         const response = await pythonApiClient.post(url, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
@@ -75,8 +88,8 @@ export const aiService = {
     /**
      * Pose une question au RAG (Chat IA)
      */
-    askChat: async (question) => {
-        const response = await pythonApiClient.post('/chat', { question });
+    askChat: async (question, history = []) => {
+        const response = await pythonApiClient.post('/chat', { question, history });
         return response.data;
     },
 

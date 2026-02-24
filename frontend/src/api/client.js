@@ -84,5 +84,4 @@ setupInterceptors(pythonApiClient);
 // Export par défaut 
 export default nodeApiClient;
 
-// Exports nommés
-export { nodeApiClient, laravelApiClient, pythonApiClient };
+export { nodeApiClient, laravelApiClient, pythonApiClient, PYTHON_API_URL };

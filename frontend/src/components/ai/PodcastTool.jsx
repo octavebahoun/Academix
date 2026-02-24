@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Headphones,
@@ -13,6 +13,8 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
+import { aiService } from "../../services/aiService";
+import { PYTHON_API_URL } from "../../api/client";
 
 export default function PodcastTool() {
   const [file, setFile] = useState(null);
@@ -20,16 +22,37 @@ export default function PodcastTool() {
   const [isGenerated, setIsGenerated] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const handleFileChange = (e) => setFile(e.target.files[0]);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const audioRef = React.useRef(null);
 
-  const handleGenerate = () => {
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setAudioUrl(null);
+  };
+
+  const handleGenerate = async () => {
     if (!file) return;
     setLoading(true);
-    // Mocking generation delay
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await aiService.generatePodcast({ file });
+      setAudioUrl(`${PYTHON_API_URL}${response.url}`);
       setIsGenerated(true);
-    }, 3000);
+    } catch (e) {
+      alert("Erreur lors de la génération du podcast.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
 
   return (
@@ -144,7 +167,7 @@ export default function PodcastTool() {
                   <SkipBack size={32} />
                 </button>
                 <button
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={togglePlay}
                   className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-2xl hover:scale-110 active:scale-95 transition-all"
                 >
                   {isPlaying ? (
@@ -157,6 +180,15 @@ export default function PodcastTool() {
                   <SkipForward size={32} />
                 </button>
               </div>
+
+              {audioUrl && (
+                <audio
+                  ref={audioRef}
+                  src={audioUrl}
+                  onEnded={() => setIsPlaying(false)}
+                  className="hidden"
+                />
+              )}
 
               <div className="flex items-center gap-4 text-slate-500 px-8">
                 <Volume2 size={20} />

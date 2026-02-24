@@ -13,6 +13,7 @@ class SummaryStyle(str, Enum):
     bullets = "bullets"
     narrative = "narrative"
     schema = "schema"
+    qa = "qa"
 
 
 class SummaryFormat(str, Enum):
@@ -20,9 +21,13 @@ class SummaryFormat(str, Enum):
     json = "json"
 
 
+class Message(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
     question: str
-    # j'ajouterai si le temps le permet 'history' ici pour la mémoire conversationnelle
+    history: List[Message] = []
 
 class ChatResponse(BaseModel):
     answer: str

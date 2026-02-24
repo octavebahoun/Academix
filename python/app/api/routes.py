@@ -13,7 +13,7 @@ async def chat_endpoint(request: ChatRequest, current_user: dict = Depends(get_c
 
     try:
         # On appelle le service RAG 
-        answer_text = await rag_service.ask_question(request.question)
+        answer_text = await rag_service.ask_question(request.question, request.history)
         
         # On renvoie la réponse formatée
         return ChatResponse(

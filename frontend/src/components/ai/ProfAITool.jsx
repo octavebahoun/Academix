@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, User, Loader2, Sparkles, BrainCircuit } from "lucide-react";
 import { aiService } from "../../services/aiService";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function ProfAITool() {
   const [messages, setMessages] = useState([
@@ -39,10 +41,18 @@ export default function ProfAITool() {
     setLoading(true);
 
     try {
-      const response = await aiService.askChat(userMsg.content);
+      const historyMsg = messages.map((msg) => ({
+        role: msg.role === "user" ? "user" : "ai",
+        content: msg.content,
+      }));
+      const response = await aiService.askChat(userMsg.content, historyMsg);
       const aiMsg = {
         role: "ai",
-        content: response.response || response.content || response,
+        content:
+          response.answer ||
+          response.response ||
+          response.content ||
+          (typeof response === "string" ? response : JSON.stringify(response)),
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -113,9 +123,11 @@ export default function ProfAITool() {
                   <div
                     className={`p-5 rounded-2xl shadow-sm ${msg.role === "user" ? "bg-indigo-600 text-white rounded-tr-none" : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none"}`}
                   >
-                    <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
-                      {msg.content}
-                    </p>
+                    <div className="text-sm font-medium leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                   <p
                     className={`text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest ${msg.role === "user" ? "text-right" : "text-left"}`}

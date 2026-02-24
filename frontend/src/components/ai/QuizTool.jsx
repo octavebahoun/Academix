@@ -176,6 +176,49 @@ export default function QuizTool() {
                 ? "Parfait ! Vous maîtrisez ce cours."
                 : "Pas mal ! Encore un peu d'entraînement."}
             </p>
+
+            {/* Answer Details */}
+            <div className="mt-8 text-left max-h-[400px] overflow-y-auto pr-4 space-y-6 scrollbar-hide">
+              <h3 className="text-xl font-bold mb-4 uppercase text-slate-900 dark:text-white">
+                Détail de vos réponses
+              </h3>
+              {quiz.questions.map((q, i) => {
+                const isCorrect = userAnswers[i] === (q.correct_answer || 0);
+                return (
+                  <div
+                    key={i}
+                    className={`p-6 rounded-[2rem] border-2 shadow-sm ${isCorrect ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-500/10" : "border-rose-500/50 bg-rose-50/50 dark:bg-rose-500/10"}`}
+                  >
+                    <p className="font-bold text-slate-800 dark:text-slate-200 mb-4">
+                      {i + 1}. {q.question}
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm">
+                        <span className="font-semibold uppercase text-[10px] tracking-widest text-slate-500">
+                          Votre réponse :
+                        </span>
+                        <br /> {q.options[userAnswers[i]]}
+                      </p>
+                      {!isCorrect && (
+                        <p className="text-sm mt-1 text-emerald-600 dark:text-emerald-400">
+                          <span className="font-semibold uppercase text-[10px] tracking-widest">
+                            Bonne réponse :
+                          </span>
+                          <br /> {q.options[q.correct_answer || 0]}
+                        </p>
+                      )}
+                    </div>
+                    {q.explanation && (
+                      <p className="text-sm mt-4 p-3 bg-white/50 dark:bg-black/20 rounded-xl italic text-slate-600 dark:text-slate-300">
+                        <span className="font-bold">💡 Explication :</span>{" "}
+                        {q.explanation}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
             <button
               onClick={() => {
                 setCurrentStep("upload");

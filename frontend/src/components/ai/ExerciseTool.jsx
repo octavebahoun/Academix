@@ -104,16 +104,45 @@ export default function ExerciseTool() {
                     <span className="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0">
                       EX{i + 1}
                     </span>
-                    <div>
+                    <div className="w-full">
                       <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
                         {ex.title || `Exercice ${i + 1}`}
                       </h4>
-                      <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                        {ex.instruction ||
-                          ex.content ||
-                          ex.statement ||
-                          (typeof ex === "string" ? ex : JSON.stringify(ex))}
-                      </p>
+                      {typeof ex === "string" ? (
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                          {ex}
+                        </p>
+                      ) : ex.enonce ? (
+                        <div className="space-y-4 w-full">
+                          <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 text-sm font-medium whitespace-pre-wrap">
+                            {ex.enonce}
+                          </div>
+                          {ex.indice && (
+                            <div className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 p-3 rounded-xl border border-amber-200 dark:border-amber-500/20">
+                              <span className="font-bold">Indice:</span>{" "}
+                              {ex.indice}
+                            </div>
+                          )}
+                          <details className="group">
+                            <summary className="cursor-pointer text-sm font-black text-purple-600 uppercase tracking-widest hover:text-purple-700 transition-colors list-none flex items-center gap-2 mt-4">
+                              <span className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                                +
+                              </span>
+                              Voir la correction
+                            </summary>
+                            <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-500/10 text-slate-800 dark:text-slate-200 text-sm rounded-2xl border border-purple-100 dark:border-purple-500/20 whitespace-pre-wrap leading-relaxed">
+                              {ex.correction}
+                            </div>
+                          </details>
+                        </div>
+                      ) : (
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                          {ex.instruction ||
+                            ex.content ||
+                            ex.statement ||
+                            JSON.stringify(ex)}
+                        </p>
+                      )}
                     </div>
                   </div>
 

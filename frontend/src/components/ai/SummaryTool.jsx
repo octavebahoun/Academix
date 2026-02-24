@@ -8,6 +8,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { aiService } from "../../services/aiService";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function SummaryTool() {
   const [file, setFile] = useState(null);
@@ -101,7 +103,7 @@ export default function SummaryTool() {
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
                 <option value="bullets">Liste à puces</option>
-                <option value="paragraphs">Paragraphes</option>
+                <option value="narrative">Paragraphes</option>
                 <option value="qa">Questions / Réponses</option>
               </select>
             </div>
@@ -141,10 +143,13 @@ export default function SummaryTool() {
             </button>
           </div>
 
-          <div className="prose prose-slate dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed font-serif text-lg">
+          <div className="prose prose-slate dark:prose-invert max-w-none text-left">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              className="text-slate-700 dark:text-slate-300 leading-relaxed text-lg"
+            >
               {result.content}
-            </div>
+            </ReactMarkdown>
           </div>
 
           <button

@@ -34,7 +34,8 @@ class TextSummarizer:
         style_instructions = {
             "bullets": "Utilise principalement des listes à puces et des points clés",
             "narrative": "Rédige de manière narrative et fluide, en paragraphes",
-            "schema": "Structure sous forme de schémas conceptuels avec hiérarchies"
+            "schema": "Structure sous forme de schémas conceptuels avec hiérarchies",
+            "qa": "Structure sous forme de questions et réponses (Q&A) pour faciliter la mémorisation"
         }
         
         matiere_context = f"\nMatière: {matiere}" if matiere else ""
