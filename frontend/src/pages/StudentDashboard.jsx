@@ -6,7 +6,6 @@ import StudentDashboardOverview from "../components/student/StudentDashboardOver
 import StudentSessions from "../components/student/StudentSessions";
 import StudentNotes from "../components/student/StudentNotes";
 import StudentEmploiTemps from "../components/student/StudentEmploiTemps";
-import StudentCoWorking from "../components/student/StudentCoWorking";
 import StudentAIRevision from "../components/student/StudentAIRevision";
 import StudentProfil from "../components/student/StudentProfil";
 import { authService } from "../services/authService";
@@ -56,9 +55,7 @@ export default function StudentDashboard() {
           subtitle: "Relevé de notes en temps réel",
         };
       case "emploi-temps":
-        return { title: "Emploie du temps", subtitle: "" };
-      case "co-working":
-        return { title: "Co-Working Space", subtitle: "4 Membres en ligne" };
+        return { title: "Emploi du temps", subtitle: "" };
       case "ai-revision":
         return { title: "AI Revision Portal", subtitle: "" };
       case "profil":
@@ -138,20 +135,6 @@ export default function StudentDashboard() {
                 transition={{ duration: 0.3 }}
               >
                 <StudentEmploiTemps />
-              </motion.div>
-            )}
-
-            {activeTab === "co-working" && (
-              // CoWorking uses its own flex layout inside
-              <motion.div
-                key="co-working"
-                className="h-full"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
-              >
-                <StudentCoWorking />
               </motion.div>
             )}
 

@@ -67,100 +67,108 @@ export default function StudentDashboardOverview() {
         variants={itemVariants}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        <div className="bg-emerald-500 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
-            <Award size={64} />
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 p-4 opacity-[0.03] dark:opacity-[0.02] group-hover:scale-110 transition-transform pointer-events-none">
+            <Award size={80} />
           </div>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-100">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1">
               Moyenne Générale
             </h3>
-            <div className="w-8 h-8 rounded-full bg-emerald-400 flex items-center justify-center shrink-0">
-              <Award size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Award size={14} className="text-emerald-500" />
             </div>
           </div>
-          <div>
-            <h2 className="text-4xl font-black font-display italic tracking-tight mb-2">
+          <div className="relative z-10">
+            <h2 className="text-3xl font-black font-display italic tracking-tight text-slate-900 dark:text-white mb-1">
               {moyenne.toFixed(2)}
             </h2>
-            <p className="text-xs font-bold text-emerald-100 uppercase tracking-widest flex gap-1 items-center">
-              <span>Objectif: {parseFloat(objectif).toFixed(2)}</span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Objectif: {parseFloat(objectif).toFixed(2)}
+              </span>
               {diff >= 0 ? (
-                <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] ml-2">
+                <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ml-auto">
                   +{diff}
                 </span>
               ) : (
-                <span className="bg-red-500/50 px-2 py-0.5 rounded-full text-[10px] ml-2 text-white">
+                <span className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest ml-auto">
                   {diff}
                 </span>
               )}
-            </p>
+            </div>
           </div>
         </div>
 
-        <div className="bg-blue-500 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
-            <Trophy size={64} />
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 p-4 opacity-[0.03] dark:opacity-[0.02] group-hover:scale-110 transition-transform pointer-events-none">
+            <Trophy size={80} />
           </div>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-blue-100">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1">
               Position Classe
             </h3>
-            <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center shrink-0">
-              <Trophy size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Trophy size={14} className="text-blue-500" />
             </div>
           </div>
-          <div>
-            <h2 className="text-4xl font-black font-display italic tracking-tight mb-2">
+          <div className="relative z-10">
+            <h2 className="text-3xl font-black font-display italic tracking-tight text-slate-900 dark:text-white mb-1">
               N/D
             </h2>
-            <p className="text-xs font-bold text-blue-100 uppercase tracking-widest">
-              Rang global
-            </p>
+            <div className="flex items-center mt-1">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Calcul en cours
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-purple-500 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
-            <Clock size={64} />
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 p-4 opacity-[0.03] dark:opacity-[0.02] group-hover:scale-110 transition-transform pointer-events-none">
+            <Clock size={80} />
           </div>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-purple-100">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1">
               Absences
             </h3>
-            <div className="w-8 h-8 rounded-full bg-purple-400 flex items-center justify-center shrink-0">
-              <Clock size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center shrink-0">
+              <Clock size={14} className="text-purple-500" />
             </div>
           </div>
-          <div>
-            <h2 className="text-4xl font-black font-display italic tracking-tight mb-2">
+          <div className="relative z-10">
+            <h2 className="text-3xl font-black font-display italic tracking-tight text-slate-900 dark:text-white mb-1">
               0
             </h2>
-            <p className="text-xs font-bold text-purple-100 uppercase tracking-widest">
-              Heures d'absences
-            </p>
+            <div className="flex items-center mt-1">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                Heures manquées
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-orange-500 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform">
-            <Medal size={64} />
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 p-4 opacity-[0.03] dark:opacity-[0.02] group-hover:scale-110 transition-transform pointer-events-none">
+            <Medal size={80} />
           </div>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-orange-100">
+          <div className="flex justify-between items-start mb-2 relative z-10">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-1">
               Crédits ECTS
             </h3>
-            <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center shrink-0">
-              <Medal size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center shrink-0">
+              <Medal size={14} className="text-orange-500" />
             </div>
           </div>
-          <div>
-            <h2 className="text-4xl font-black font-display italic tracking-tight mb-2">
+          <div className="relative z-10">
+            <h2 className="text-3xl font-black font-display italic tracking-tight text-slate-900 dark:text-white mb-1">
               -
             </h2>
-            <p className="text-xs font-bold text-orange-100 uppercase tracking-widest">
-              Calcul en cours
-            </p>
+            <div className="flex items-center mt-1">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                En attente
+              </span>
+            </div>
           </div>
         </div>
       </motion.div>

@@ -15,7 +15,6 @@ import {
   markNotificationAsRead,
 } from "../api/notifications";
 import sessionSocketService from "../services/sessionSocket";
-
 import { authService } from "../services/authService";
 
 const AUTH_USER = authService.getCurrentUser();
@@ -701,35 +700,60 @@ const ChatPage = ({ session, onLeave }) => {
   const dayLabel = messages.length > 0 ? formatTime(messages[0].createdAt) : "";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900">
-      <div className="pointer-events-none absolute -left-24 -top-28 h-72 w-72 rounded-full bg-blue-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-10 h-80 w-80 rounded-full bg-sky-200/40 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-indigo-100/60 blur-[120px]" />
+    <div className="relative min-h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors font-sans w-full">
+      <div className="pointer-events-none absolute -left-24 -top-28 h-72 w-72 rounded-full bg-emerald-200/40 dark:bg-emerald-900/20 blur-3xl z-0" />
+      <div className="pointer-events-none absolute right-0 top-10 h-80 w-80 rounded-full bg-sky-200/40 dark:bg-sky-900/20 blur-[120px] z-0" />
+      <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-indigo-100/60 dark:bg-indigo-900/20 blur-[120px] z-0" />
 
-      <div className="relative mx-auto flex h-screen max-w-350 gap-6 px-6 py-6">
-        <aside className="flex w-80 flex-col rounded-3xl border border-slate-200/70 bg-white/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)] backdrop-blur">
-          <div className="px-4 pt-4">
-            <div className="rounded-2xl border border-blue-100 bg-blue-50/80 px-4 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-blue-400">
+      {/* Tête de contrôle */}
+      <header className="relative z-50 w-full px-8 py-4 flex justify-between items-center bg-transparent">
+        <div className="text-xl font-black italic uppercase tracking-tighter text-emerald-500">
+          ACADEMIX
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={() => (window.location.href = "/etudiant")}
+            className="text-sm font-bold bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm"
+          >
+            Retours au Dashboard
+          </button>
+          <button
+            onClick={() => (window.location.href = "/login")}
+            className="text-sm font-bold text-rose-500 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 px-4 py-2 rounded-xl transition-all shadow-sm"
+          >
+            Déconnexion
+          </button>
+        </div>
+      </header>
+
+      <div className="relative mx-auto flex h-[calc(100vh-80px)] max-w-7xl gap-6 px-6 pb-6">
+        <aside className="relative z-10 flex w-80 flex-col rounded-3xl border border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)] dark:shadow-none backdrop-blur overflow-hidden">
+          <div className="px-4 pt-4 shrink-0">
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 dark:bg-emerald-900/20 dark:border-emerald-900/50 px-4 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-emerald-500">
                 Astuce
               </p>
-              <p className="mt-1 text-xs text-blue-700">{PRO_TIP}</p>
+              <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                {PRO_TIP}
+              </p>
             </div>
           </div>
-          <div className="flex items-center justify-between px-6 pt-4">
+          <div className="flex items-center justify-between px-6 pt-4 shrink-0">
             <div>
-              <h2 className="font-display text-lg font-semibold">
+              <h2 className="font-display text-base font-bold text-slate-900 dark:text-white">
                 Participants
               </h2>
-              <p className="text-sm text-slate-500">Membres actifs</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Membres actifs
+              </p>
             </div>
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               {activeParticipants} en ligne
             </span>
           </div>
 
-          <div className="px-6 pt-4">
-            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <div className="px-6 pt-4 shrink-0">
+            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
               <svg
                 viewBox="0 0 24 24"
                 className="h-4 w-4 text-slate-400"
@@ -744,22 +768,22 @@ const ChatPage = ({ session, onLeave }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Trouver un membre..."
-                className="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none"
+                className="w-full bg-transparent text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none"
               />
             </div>
             <div className="mt-3 flex gap-2">
               {[
                 { id: "all", label: "Tous" },
                 { id: "moderateur", label: "MOD" },
-                { id: "participant", label: "Participants" },
+                { id: "participant", label: "Partic." },
               ].map((filter) => (
                 <button
                   key={filter.id}
                   onClick={() => setActiveRoleFilter(filter.id)}
-                  className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                  className={`rounded-full px-2 py-1 text-[10px] font-semibold flex-1 ${
                     activeRoleFilter === filter.id
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 text-slate-600"
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                   }`}
                 >
                   {filter.label}
@@ -768,7 +792,7 @@ const ChatPage = ({ session, onLeave }) => {
             </div>
           </div>
 
-          <div className="mt-4 flex-1 overflow-y-auto px-3">
+          <div className="mt-4 flex-1 overflow-y-auto px-3 pb-4">
             <AnimatePresence>
               {filteredParticipants.map((participant, index) => {
                 const name =
@@ -799,7 +823,7 @@ const ChatPage = ({ session, onLeave }) => {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
                         {name}
                       </p>
                       <div className="mt-1 flex items-center gap-1">
@@ -823,14 +847,14 @@ const ChatPage = ({ session, onLeave }) => {
             </AnimatePresence>
           </div>
 
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-4 shrink-0 mx-2 mt-2">
             <button
               onClick={handleInvite}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-600"
+              className="flex w-full justify-center items-center gap-2 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[11px] uppercase tracking-wider py-3 rounded-xl transition-all border border-slate-200 dark:border-slate-700"
             >
               <span>Inviter un membre</span>
               {inviteCopied && (
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+                <span className="rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                   Lien copié
                 </span>
               )}
@@ -838,135 +862,53 @@ const ChatPage = ({ session, onLeave }) => {
           </div>
         </aside>
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-3xl border border-slate-200/70 bg-white/80 px-4 py-2 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.35)] backdrop-blur">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-base font-semibold text-white shadow shadow-blue-200">
-                E
-              </div>
-              <div>
-                <h1 className="font-display text-base font-semibold text-slate-900 leading-tight">
-                  {sessionTitle}
-                </h1>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs text-slate-500">{sessionSubtitle}</p>
-                  <span className="inline-flex rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
-                    {sessionRole === "moderateur" ? "MOD" : "Participant"}
-                  </span>
-                </div>
-              </div>
-            </div>
+        <section className="flex-1 flex flex-col min-w-0 min-h-0 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden h-full relative">
+          {/* Action Bar (Top of Chat) */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur shrink-0 z-10">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsWhiteboardOpen(true)}
-                className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow shadow-indigo-100 transition hover:bg-indigo-500"
+                className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
                 title="Tableau blanc partagé"
               >
-                W
+                <span className="text-sm font-black text-indigo-200">W</span>
+                Tableau Blanc
               </button>
-              <div className="relative">
-                <button
-                  onClick={handleOpenNotifications}
-                  className="relative rounded-full border border-slate-200 bg-white p-2 text-slate-600 transition hover:border-blue-200 hover:text-blue-600"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
-                    <path d="M9 17a3 3 0 0 0 6 0" />
-                  </svg>
-                  {notificationUnreadCount > 0 && (
-                    <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                      {notificationUnreadCount > 99
-                        ? "99+"
-                        : notificationUnreadCount}
-                    </span>
-                  )}
-                </button>
-
-                {notificationsOpen && (
-                  <div className="absolute right-0 top-12 z-20 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
-                    <div className="mb-2 flex items-center justify-between">
-                      <p className="text-sm font-semibold text-slate-800">
-                        Notifications
-                      </p>
-                      <button
-                        onClick={handleMarkAllNotificationsRead}
-                        className="text-xs font-semibold text-blue-600"
-                      >
-                        Tout lire
-                      </button>
-                    </div>
-                    <div className="max-h-72 space-y-2 overflow-y-auto">
-                      {notifications.length === 0 && (
-                        <p className="rounded-xl bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">
-                          Aucune notification
-                        </p>
-                      )}
-                      {notifications.map((notification) => (
-                        <button
-                          key={notification._id}
-                          onClick={() =>
-                            handleMarkNotificationRead(notification._id)
-                          }
-                          className={`w-full rounded-xl px-3 py-2 text-left transition ${
-                            notification.is_read ? "bg-slate-50" : "bg-blue-50"
-                          }`}
-                        >
-                          <p className="text-xs font-semibold text-slate-800">
-                            {notification.titre}
-                          </p>
-                          <p className="mt-1 text-xs text-slate-600">
-                            {notification.message}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-100 dark:border-slate-700">
                 <span
-                  className={`h-2 w-2 rounded-full ${
-                    activeParticipants > 0 ? "bg-emerald-500" : "bg-slate-300"
-                  }`}
+                  className={`w-2 h-2 rounded-full ${activeParticipants > 0 ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`}
                 />
                 {formatCountdown(timeLeft)}
-              </span>
+              </div>
               <button
                 onClick={onLeave}
-                className="rounded-full bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100"
+                className="bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 py-1.5 px-4 rounded-full text-xs font-bold transition-colors"
               >
-                Quitter la session
+                Quitter
               </button>
             </div>
           </div>
 
-          <div className="mt-2 flex-1 overflow-y-auto rounded-3xl border border-slate-200/70 bg-white/80 px-6 py-4 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.35)] backdrop-blur">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col min-h-0 relative z-0">
             {messages.length > 0 && (
-              <div className="flex justify-center">
-                <span className="rounded-full bg-slate-100 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <div className="flex justify-center mb-6">
+                <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-slate-200 dark:border-slate-700">
                   {dayLabel}
                 </span>
               </div>
             )}
-
-            <div className="mt-6 space-y-6">
+            <div className="space-y-6">
               {!isDemoSession && chatPagination.hasMore && (
                 <div className="flex justify-center">
                   <button
                     onClick={handleLoadMoreMessages}
                     disabled={isLoadingMore}
-                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-blue-200 hover:text-blue-600 disabled:opacity-60"
+                    className="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 shadow-sm"
                   >
-                    {isLoadingMore
-                      ? "Chargement..."
-                      : "Charger les messages précédents"}
+                    {isLoadingMore ? "Chargement..." : "Messages précédents"}
                   </button>
                 </div>
               )}
@@ -1025,7 +967,7 @@ const ChatPage = ({ session, onLeave }) => {
                         <div
                           className={`rounded-2xl px-4 py-3 shadow-sm ${
                             isMe
-                              ? "bg-blue-600 text-white"
+                              ? "bg-emerald-600 text-white"
                               : "bg-white text-slate-800"
                           }`}
                         >
@@ -1058,7 +1000,7 @@ const ChatPage = ({ session, onLeave }) => {
                               className={`mt-2 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-xs font-semibold ${
                                 isMe
                                   ? "bg-white/20 text-white"
-                                  : "bg-slate-100 text-blue-700"
+                                  : "bg-slate-100 text-emerald-700"
                               }`}
                             >
                               📎 {message.file_meta?.name || "Fichier joint"}
@@ -1084,7 +1026,7 @@ const ChatPage = ({ session, onLeave }) => {
                         </div>
                       </div>
                       {isMe && (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700">
                           {getInitials(CURRENT_USER.prenom, CURRENT_USER.nom)}
                         </div>
                       )}
@@ -1121,8 +1063,9 @@ const ChatPage = ({ session, onLeave }) => {
             </div>
           </div>
 
-          <div className="mt-2 rounded-3xl border border-slate-200/70 bg-white/80 px-4 py-2 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.35)] backdrop-blur">
-            <div className="flex items-center gap-2">
+          {/* Input Area (Bottom of Chat) */}
+          <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shrink-0 relative z-10 w-full">
+            <div className="flex items-center gap-3 w-full bg-slate-50 dark:bg-slate-800/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-700">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -1132,7 +1075,7 @@ const ChatPage = ({ session, onLeave }) => {
 
               <button
                 onClick={handleUploadClick}
-                className="rounded-xl border border-slate-200 bg-white p-2 text-slate-400 transition hover:border-blue-200 hover:text-blue-600"
+                className="rounded-xl border border-slate-200 bg-white p-2 text-slate-400 transition hover:border-emerald-200 hover:text-emerald-600"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -1144,7 +1087,7 @@ const ChatPage = ({ session, onLeave }) => {
                   <path d="M21.44 11.05l-8.49 8.49a5 5 0 0 1-7.07-7.07l8.49-8.49a3.5 3.5 0 0 1 4.95 4.95l-8.49 8.49a2 2 0 0 1-2.83-2.83l7.78-7.78" />
                 </svg>
               </button>
-              <button className="rounded-xl border border-slate-200 bg-white p-2 text-slate-400 transition hover:border-blue-200 hover:text-blue-600">
+              <button className="rounded-xl border border-slate-200 bg-white p-2 text-slate-400 transition hover:border-emerald-200 hover:text-emerald-600">
                 <svg
                   viewBox="0 0 24 24"
                   className="h-5 w-5"
@@ -1198,7 +1141,7 @@ const ChatPage = ({ session, onLeave }) => {
                   }}
                   placeholder="Écris un message… (Entrée pour envoyer, @ pour mentionner)"
                   rows={1}
-                  className="h-9 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  className="h-9 w-full resize-none rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 />
                 {pendingUploadName && (
                   <p className="mt-0.5 text-[10px] text-slate-400">
@@ -1219,7 +1162,7 @@ const ChatPage = ({ session, onLeave }) => {
                         onClick={() => applyMentionSuggestion(suggestion)}
                         className={`flex w-full items-center justify-between rounded-lg px-2 py-1 text-left text-xs ${
                           selectedMentionIndex === index
-                            ? "bg-blue-50 text-blue-700"
+                            ? "bg-emerald-50 text-emerald-700"
                             : "text-slate-700"
                         }`}
                       >
@@ -1237,7 +1180,7 @@ const ChatPage = ({ session, onLeave }) => {
               <button
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim()}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow shadow-blue-200 transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow shadow-emerald-200 transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -1252,7 +1195,7 @@ const ChatPage = ({ session, onLeave }) => {
               </button>
             </div>
           </div>
-        </main>
+        </section>
       </div>
 
       {isWhiteboardOpen && (

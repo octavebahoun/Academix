@@ -143,11 +143,8 @@ export default function SummaryTool() {
             </button>
           </div>
 
-          <div className="prose prose-slate dark:prose-invert max-w-none text-left">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              className="text-slate-700 dark:text-slate-300 leading-relaxed text-lg"
-            >
+          <div className="prose prose-slate dark:prose-invert max-w-none text-left text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {result.content}
             </ReactMarkdown>
           </div>

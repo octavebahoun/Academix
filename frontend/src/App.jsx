@@ -14,7 +14,7 @@ import AIToolsPage from "./pages/AIToolsPage";
 import ChatPage from "./pages/ChatPage";
 import SessionsFeedPage from "./pages/SessionsFeedPage";
 import { authService } from "./services/authService";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 
@@ -31,12 +31,22 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
 };
 
 function AppContent() {
-  const [activeSession, setActiveSession] = useState(null);
   const location = useLocation();
+  const [activeSession, setActiveSession] = useState(
+    location.state?.session || null,
+  );
+
   const hideGlobalNavbar =
     location.pathname.startsWith("/chef") ||
     location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/etudiant"); // Added condition for /etudiant
+    location.pathname.startsWith("/etudiant") ||
+    location.pathname.startsWith("/chat"); // Added condition for /etudiant and /chat
+
+  useEffect(() => {
+    if (location.state?.session) {
+      setActiveSession(location.state.session);
+    }
+  }, [location.state?.session]);
 
   const handleJoinSession = (session) => {
     setActiveSession(session);

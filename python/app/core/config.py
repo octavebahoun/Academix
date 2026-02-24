@@ -8,21 +8,21 @@ class Settings(BaseSettings):
     
     # Configuration API
     API_HOST: str = Field(default="0.0.0.0")
-    API_PORT: int = Field(default=int(os.environ.get("PORT")))
+    API_PORT: int = Field(default=int(os.environ.get("PORT", "5000")))
     API_RELOAD: bool = Field(default=True)
     API_KEY: str = Field(default="your_secret_api_key_change_this")
     
     # Clés API - OBLIGATOIRES pour le fonctionnement
-    GROQ_API_KEY: str = Field(default=(os.environ.get("GROQ_API_KEY")))
-    HF_TOKEN: str = Field(default=(os.environ.get("HF_TOKEN")))
-    OPENROUTER_API_KEY: str = Field(default=(os.environ.get("OPENROUTER_API_KEY")))
+    GROQ_API_KEY: str | None = Field(default=(os.environ.get("GROQ_API_KEY")))
+    HF_TOKEN: str | None = Field(default=(os.environ.get("HF_TOKEN")))
+    OPENROUTER_API_KEY: str | None = Field(default=(os.environ.get("OPENROUTER_API_KEY")))
     
     # Configuration Base de données (MySQL)
-    DB_HOST: str = Field(default=(os.environ.get("DB_HOST")))
-    DB_PORT: int = Field(default=(os.environ.get("DB_PORT")))
-    DB_NAME: str = Field(default=(os.environ.get("DB_NAME")))
-    DB_USER: str = Field(default=(os.environ.get("DB_USER")))
-    DB_PASSWORD: str = Field(default=(os.environ.get("DB_PASSWORD")))
+    DB_HOST: str | None = Field(default=(os.environ.get("DB_HOST")))
+    DB_PORT: int = Field(default=int(os.environ.get("DB_PORT", "3306")))
+    DB_NAME: str | None = Field(default=(os.environ.get("DB_NAME")))
+    DB_USER: str | None = Field(default=(os.environ.get("DB_USER")))
+    DB_PASSWORD: str | None = Field(default=(os.environ.get("DB_PASSWORD")))
     
 
     # Configuration uploads

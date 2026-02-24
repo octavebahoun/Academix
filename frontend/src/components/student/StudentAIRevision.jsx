@@ -159,21 +159,6 @@ export default function StudentAIRevision() {
           >
             {/* Header / Intro */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-3 text-indigo-500 mb-2">
-                  <Sparkles size={20} className="animate-spin-slow" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">
-                    IA Cognitive AcademiX
-                  </span>
-                </div>
-                <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter leading-none">
-                  AI Revision
-                  <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-blue-500">
-                    Center
-                  </span>
-                </h1>
-              </div>
               <p className="text-slate-500 text-sm font-medium max-w-xs border-l-2 border-indigo-500 pl-4 py-1">
                 Optimisez chaque minute de votre temps avec nos puissants
                 moteurs d'intelligence artificielle pédagogique.

@@ -3,12 +3,12 @@
  * @description Middleware d'authentification Node.js branché sur Laravel Sanctum.
  *
  * Fonctionnement :
- *   1. Le client envoie : Authorization: Bearer {id}|{plainToken}
- *   2. On extrait l'ID et le plainToken
- *   3. On cherche la ligne dans personal_access_tokens par ID
- *   4. On compare SHA-256(plainToken) avec la colonne `token`
- *   5. On retrouve l'utilisateur selon tokenable_type/tokenable_id
- *   6. On attache user + role à req.user
+ * 1. Le client envoie : Authorization: Bearer {id}|{plainToken}
+ * 2. On extrait l'ID et le plainToken
+ * 3. On cherche la ligne dans personal_access_tokens par ID
+ * 4. On compare SHA-256(plainToken) avec la colonne `token`
+ * 5. On retrouve l'utilisateur selon tokenable_type/tokenable_id
+ * 6. On attache user + role à req.user
  */
 
 const crypto = require('crypto');
@@ -48,7 +48,10 @@ const MODEL_MAP = {
     'App\\Models\\User': {
         table : 'users',
         role  : 'student',
-        fields: 'id, nom, prenom, email, avatar_url, filiere_id, niveau',
+        // --- CORRECTION ICI ---
+        // Remplacement de 'avatar_url' par 'photo' pour corriger l'erreur SQL "Unknown column".
+        // Si ta table `users` n'a pas de colonne pour la photo, retire simplement "photo," de la liste.
+        fields: 'id, nom, prenom, email,filiere_id',
     },
 };
 
@@ -171,8 +174,8 @@ module.exports = async (req, res, next) => {
 /**
  * Middleware Socket.io — même logique mais pour les connexions WebSocket.
  * Utilisation :
- *   const { socketAuth } = require('./middleware/auth');
- *   io.use(socketAuth);
+ * const { socketAuth } = require('./middleware/auth');
+ * io.use(socketAuth);
  */
 module.exports.socketAuth = async (socket, next) => {
     try {

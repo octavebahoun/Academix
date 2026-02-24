@@ -4,7 +4,6 @@ import {
   GraduationCap,
   FileText,
   Calendar,
-  MessageSquare,
   BrainCircuit,
   User,
   LogOut,
@@ -16,8 +15,7 @@ export default function StudentSidebar({ activeTab, onTabChange, onLogout }) {
     { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
     { id: "sessions", label: "Sessions", icon: GraduationCap },
     { id: "notes", label: "Notes", icon: FileText },
-    { id: "emploi-temps", label: "Emploie du temps", icon: Calendar },
-    { id: "co-working", label: "Co-Working", icon: MessageSquare },
+    { id: "emploi-temps", label: "Emploi du temps", icon: Calendar },
     { id: "ai-revision", label: "AI Revision", icon: BrainCircuit },
     { id: "profil", label: "Profil", icon: User },
   ];

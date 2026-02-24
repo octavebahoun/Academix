@@ -1,4 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Background -->
+  <rect width="100" height="100" rx="16" fill="#000000"/>
+  
   <!-- Green letter I -->
   <!-- Top bar -->
   <rect x="28" y="42" width="44" height="10" rx="3" fill="#22c55e"/>

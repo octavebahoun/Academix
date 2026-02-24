@@ -10,7 +10,7 @@ export default function StudentHeader({
   return (
     <header className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-3xl font-black font-display italic uppercase text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl font-black font-display text-slate-900 dark:text-white tracking-tight capitalize">
           {title}
         </h1>
         {subtitle && (
