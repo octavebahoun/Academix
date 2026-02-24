@@ -12,7 +12,7 @@ import {
 import { cn } from "../../utils/cn";
 import { authService } from "../../services/authService";
 
-export default function ChefOverview({ data }) {
+export default function ChefOverview({ data, onTabChange }) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -223,13 +223,22 @@ export default function ChefOverview({ data }) {
               Actions Rapides
             </h3>
             <div className="space-y-3">
-              <button className="w-full bg-slate-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors">
+              <button
+                onClick={() => onTabChange("import")}
+                className="w-full bg-slate-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors"
+              >
                 <Download size={16} /> Import CSV
               </button>
-              <button className="w-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-purple-100 transition-colors">
+              <button
+                onClick={() => onTabChange("emploi-temps")}
+                className="w-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-purple-100 transition-colors"
+              >
                 <Calendar size={16} /> Emploi du Temps
               </button>
-              <button className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors">
+              <button
+                onClick={() => window.print()}
+                className="w-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
+              >
                 <FileText size={16} /> Rapports
               </button>
             </div>
@@ -246,7 +255,10 @@ export default function ChefOverview({ data }) {
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 mb-4">
               Créer une nouvelle filière dans ce département
             </p>
-            <button className="w-full bg-emerald-500 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-md active:scale-95">
+            <button
+              onClick={() => onTabChange("filieres")}
+              className="w-full bg-emerald-500 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-md active:scale-95"
+            >
               <Plus size={16} /> Nouvelle Filière
             </button>
           </motion.div>

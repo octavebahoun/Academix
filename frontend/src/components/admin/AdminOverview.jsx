@@ -140,7 +140,10 @@ export default function AdminOverview() {
               Activités globales de la plateforme
             </p>
           </div>
-          <button className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-[10px] px-5 py-3 rounded-xl uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-lg active:scale-95">
+          <button
+            onClick={() => window.print()}
+            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-[10px] px-5 py-3 rounded-xl uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-lg active:scale-95"
+          >
             Exporter PDF
           </button>
         </div>
