@@ -1,7 +1,7 @@
 import os
 import shutil
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -14,8 +14,12 @@ class RagService:
     def __init__(self):
         self.vector_store = None
         self.chain = None
-        # 1. On charge le modèle d'embedding (transforme le texte en maths)
-        self.embeddings = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+        # 1. On charge le modèle d'embedding (via l'API HuggingFace pour éviter PyTorch)
+        self.embeddings = HuggingFaceEndpointEmbeddings(
+            model=settings.EMBEDDING_MODEL,
+            task="feature-extraction",
+            huggingfacehub_api_token=settings.HF_TOKEN
+        )
         
         # 2. Si la base de données existe déjà, on la charge
         if os.path.exists(settings.CHROMA_DB_DIR):

@@ -30,5 +30,4 @@ langchain-huggingface
 langchain-groq
 langchain-openai
 chromadb>=0.4.24
-sentence-transformers>=2.2.2
 gunicorn>=21.2.0
