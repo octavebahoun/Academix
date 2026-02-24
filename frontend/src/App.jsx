@@ -40,7 +40,7 @@ function AppContent() {
     location.pathname.startsWith("/chef") ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/etudiant") ||
-    location.pathname.startsWith("/chat"); // Added condition for /etudiant and /chat
+    location.pathname.startsWith("/chat");
 
   useEffect(() => {
     if (location.state?.session) {

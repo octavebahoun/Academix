@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import WhiteboardCanvas from "../components/WhiteboardCanvas";
 import {
@@ -117,6 +118,12 @@ const MOCK_MESSAGES = [
 ];
 
 const ChatPage = ({ session, onLeave }) => {
+  const navigate = useNavigate();
+  const [theme, setTheme] = useState(() => {
+    return document.documentElement.classList.contains("dark")
+      ? "dark"
+      : "light";
+  });
   const [participants, setParticipants] = useState([]);
   const [messages, setMessages] = useState([]);
   const [chatPagination, setChatPagination] = useState({
@@ -721,15 +728,68 @@ const ChatPage = ({ session, onLeave }) => {
             className="h-10 w-auto hidden dark:block"
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3 items-center">
+          {/* Theme Toggle */}
           <button
-            onClick={() => (window.location.href = "/etudiant")}
+            onClick={() => {
+              const newTheme = theme === "light" ? "dark" : "light";
+              setTheme(newTheme);
+              if (newTheme === "dark") {
+                document.documentElement.classList.add("dark");
+              } else {
+                document.documentElement.classList.remove("dark");
+              }
+            }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm text-slate-700 dark:text-slate-200"
+            title={theme === "light" ? "Mode sombre" : "Mode clair"}
+          >
+            {theme === "light" ? (
+              <svg
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => {
+              if (onLeave) onLeave();
+              navigate("/etudiant", { state: { activeTab: "sessions" } });
+            }}
             className="text-sm font-bold bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm"
           >
             Retours au Dashboard
           </button>
           <button
-            onClick={() => (window.location.href = "/login")}
+            onClick={() => {
+              authService.logout();
+            }}
             className="text-sm font-bold text-rose-500 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 px-4 py-2 rounded-xl transition-all shadow-sm"
           >
             Déconnexion
@@ -894,7 +954,10 @@ const ChatPage = ({ session, onLeave }) => {
                 {formatCountdown(timeLeft)}
               </div>
               <button
-                onClick={onLeave}
+                onClick={() => {
+                  if (onLeave) onLeave();
+                  navigate("/etudiant", { state: { activeTab: "sessions" } });
+                }}
                 className="bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 py-1.5 px-4 rounded-full text-xs font-bold transition-colors"
               >
                 Quitter

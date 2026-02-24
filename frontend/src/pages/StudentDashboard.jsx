@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import StudentSidebar from "../components/student/StudentSidebar";
 import StudentHeader from "../components/student/StudentHeader";
@@ -11,7 +12,10 @@ import StudentProfil from "../components/student/StudentProfil";
 import { authService } from "../services/authService";
 
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(
+    location.state?.activeTab || "dashboard",
+  );
   const [theme, setTheme] = useState("light");
 
   // Initialisation du thème
