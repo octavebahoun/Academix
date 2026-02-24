@@ -8,24 +8,23 @@ class Settings(BaseSettings):
     
     # Configuration API
     API_HOST: str = Field(default="0.0.0.0")
-    API_PORT: int = Field(default=int(os.environ.get("PORT", 5000)))
+    API_PORT: int = Field(default=int(os.environ.get("PORT")))
     API_RELOAD: bool = Field(default=True)
     API_KEY: str = Field(default="your_secret_api_key_change_this")
     
     # Clés API - OBLIGATOIRES pour le fonctionnement
-    GROQ_API_KEY: str = Field(default="")
-    OPENAI_API_KEY: str = Field(default="")
-    ANTHROPIC_API_KEY: str = Field(default="")
-    HF_TOKEN: str = Field(default="")
-    OPENROUTER_API_KEY: str = Field(default="")
+    GROQ_API_KEY: str = Field(default=(os.environ.get("GROQ_API_KEY")))
+    HF_TOKEN: str = Field(default=(os.environ.get("HF_TOKEN")))
+    OPENROUTER_API_KEY: str = Field(default=(os.environ.get("OPENROUTER_API_KEY")))
     
     # Configuration Base de données (MySQL)
-    DB_HOST: str = Field(default="127.0.0.1")
-    DB_PORT: int = Field(default=3306)
-    DB_NAME: str = Field(default="academix")
-    DB_USER: str = Field(default="root")
-    DB_PASSWORD: str = Field(default="")
+    DB_HOST: str = Field(default=(os.environ.get("DB_HOST")))
+    DB_PORT: int = Field(default=(os.environ.get("DB_PORT")))
+    DB_NAME: str = Field(default=(os.environ.get("DB_NAME")))
+    DB_USER: str = Field(default=(os.environ.get("DB_USER")))
+    DB_PASSWORD: str = Field(default=(os.environ.get("DB_PASSWORD")))
     
+
     # Configuration uploads
     MAX_UPLOAD_SIZE: int = Field(default=10485760)  # 10MB
     ALLOWED_EXTENSIONS: str = Field(default=".pdf,.txt,.md,.docs")
