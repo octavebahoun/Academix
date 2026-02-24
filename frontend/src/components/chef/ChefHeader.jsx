@@ -4,7 +4,7 @@ export default function ChefHeader({ title, subtitle, theme, onThemeToggle }) {
   return (
     <header className="flex items-center justify-between mb-8">
       <div>
-        <h1 className="text-3xl font-black font-display italic uppercase text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl font-black font-display italic text-slate-900 dark:text-white tracking-tight">
           {title}
         </h1>
         <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">

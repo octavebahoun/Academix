@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Plus, Edit3, Eye, ArrowRight } from "lucide-react";
+import { Plus, Edit3, Eye, ArrowRight, Trash2 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { useState, useEffect } from "react";
 import { laravelApiClient } from "../../api/client";
@@ -57,18 +57,7 @@ export default function AdminDepartements() {
         className="space-y-8 pb-20"
       >
         {/* Header with New Button */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-        >
-          <div>
-            <h2 className="text-xl font-black font-display text-slate-900 dark:text-white uppercase tracking-tight">
-              Gestion des Départements
-            </h2>
-            <p className="text-sm font-bold text-emerald-500 uppercase tracking-widest mt-1">
-              {departements.length} DÉPARTEMENTS ENREGISTRÉS
-            </p>
-          </div>
+        <motion.div variants={itemVariants} className="flex justify-end mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-emerald-500 text-white font-black text-xs uppercase tracking-wider px-6 py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap"
@@ -105,11 +94,51 @@ export default function AdminDepartements() {
                       {dept.nom.charAt(0)}
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                      <button
+                        onClick={() => {
+                          const nouveauNom = window.prompt(
+                            "Nouveau nom du département :",
+                            dept.nom,
+                          );
+                          if (!nouveauNom) return;
+                          laravelApiClient
+                            .put(`/admin/departements/${dept.id}`, {
+                              nom: nouveauNom,
+                            })
+                            .then(() => fetchDepartements())
+                            .catch((err) =>
+                              alert(
+                                "Erreur lors de la mise à jour: " +
+                                  (err.response?.data?.message || err.message),
+                              ),
+                            );
+                        }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                      >
                         <Edit3 size={16} />
                       </button>
-                      <button className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-                        <Eye size={16} />
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Êtes-vous sûr de vouloir supprimer le département ${dept.nom} ?`,
+                            )
+                          ) {
+                            laravelApiClient
+                              .delete(`/admin/departements/${dept.id}`)
+                              .then(() => fetchDepartements())
+                              .catch((err) =>
+                                alert(
+                                  "Impossible de supprimer : " +
+                                    (err.response?.data?.message ||
+                                      err.message),
+                                ),
+                              );
+                          }
+                        }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+                      >
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>

@@ -10,6 +10,7 @@ import {
   Plus,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
+import { authService } from "../../services/authService";
 
 export default function ChefOverview({ data }) {
   const containerVariants = {
@@ -22,58 +23,34 @@ export default function ChefOverview({ data }) {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Mocks matching the screenshot
+  const dept = data?.resume?.departement || {};
+  const resume = data?.resume || {};
+  const filieres = data?.filieres || [];
+
   const stats = [
     {
       label: "FILIÈRES",
-      value: 8,
+      value: resume.total_filieres || 0,
       icon: BookOpen,
       color: "bg-blue-50 text-blue-500",
     },
     {
       label: "ÉTUDIANTS",
-      value: 456,
+      value: resume.total_etudiants || 0,
       icon: Users,
       color: "bg-purple-50 text-purple-500",
     },
     {
       label: "MATIÈRES",
-      value: 47,
+      value: resume.total_matieres || 0,
       icon: LayoutList,
       color: "bg-orange-50 text-orange-500",
     },
     {
       label: "MOYENNE GÉNÉRALE",
-      value: "14.2/20",
+      value: `${resume.moyenne_generale || 0}/20`,
       icon: TrendingUp,
       color: "bg-emerald-50 text-emerald-500",
-    },
-  ];
-
-  const filieres = [
-    {
-      name: "Licence Informatique",
-      years: 3,
-      students: 156,
-      matieres: 18,
-      color: "bg-blue-100 text-blue-600",
-      initial: "L",
-    },
-    {
-      name: "Master Informatique",
-      years: 2,
-      students: 84,
-      matieres: 15,
-      color: "bg-purple-100 text-purple-600",
-      initial: "M",
-    },
-    {
-      name: "BTS Informatique de Gestion",
-      years: 2,
-      students: 216,
-      matieres: 14,
-      color: "bg-emerald-100 text-emerald-600",
-      initial: "BTS",
     },
   ];
 
@@ -91,10 +68,12 @@ export default function ChefOverview({ data }) {
       >
         <div>
           <h2 className="text-3xl font-bold font-display">
-            Département Informatique
+            Département {dept.nom || "Chargement..."}
           </h2>
           <p className="opacity-90 mt-1 font-medium">
-            Code: INFO • Chef: Dr. Bamoy Octave
+            Code: {dept.code || "..."} • Chef:{" "}
+            {authService.getCurrentUser()?.prenom}{" "}
+            {authService.getCurrentUser()?.nom}
           </p>
         </div>
         <div className="text-right">
@@ -143,7 +122,8 @@ export default function ChefOverview({ data }) {
               Filières du Département
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              8 filières actives - 456 étudiants au total
+              {resume.total_filieres || 0} filières actives -{" "}
+              {resume.total_etudiants || 0} étudiants au total
             </p>
           </div>
           <div className="space-y-4">
@@ -215,7 +195,9 @@ export default function ChefOverview({ data }) {
                 <span className="text-slate-500 dark:text-slate-400 font-medium">
                   Moyenne Générale
                 </span>
-                <span className="font-bold text-blue-500">14.2/20</span>
+                <span className="font-bold text-blue-500">
+                  {resume.moyenne_generale || 0}/20
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500 dark:text-slate-400 font-medium">

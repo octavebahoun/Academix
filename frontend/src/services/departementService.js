@@ -74,6 +74,11 @@ export const departementService = {
         return response.data;
     },
 
+    getFiliereMatieres: async (filiereId) => {
+        const response = await laravelApiClient.get(`/departement/filieres/${filiereId}/matieres`);
+        return response.data;
+    },
+
     getFiliereStats: async (filiereId) => {
         const response = await laravelApiClient.get(`/departement/filieres/${filiereId}/stats`);
         return response.data;

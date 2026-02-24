@@ -37,11 +37,11 @@ class StatistiqueController extends Controller
 
         $stats = [
             'total_departements' => Departement::count(),
-            'total_filieres'     => Filiere::count(),
-            'total_etudiants'    => User::where('is_active', true)->count(),
-            'moyenne_generale'   => round((float)$moyenneGenerale, 2),
-            'taux_reussite'      => $tauxReussite,
-            'departements'       => $departements,
+            'total_filieres' => Filiere::count(),
+            'total_etudiants' => User::where('is_active', true)->count(),
+            'moyenne_generale' => round((float) $moyenneGenerale, 2),
+            'taux_reussite' => $tauxReussite,
+            'departements' => $departements,
         ];
 
         return response()->json($stats);
@@ -72,7 +72,7 @@ class StatistiqueController extends Controller
                 ->select(DB::raw('SUM(notes.note * matieres.coefficient) / SUM(matieres.coefficient) as moyenne'))
                 ->value('moyenne');
 
-             $usersAvecMoyenne = Note::whereIn('user_id', $userIds)
+            $usersAvecMoyenne = Note::whereIn('user_id', $userIds)
                 ->join('matieres', 'notes.matiere_id', '=', 'matieres.id')
                 ->select('user_id', DB::raw('SUM(notes.note * matieres.coefficient) / SUM(matieres.coefficient) as moyenne'))
                 ->groupBy('user_id')
@@ -80,8 +80,8 @@ class StatistiqueController extends Controller
 
             $totalUsersNote = $usersAvecMoyenne->count();
             if ($totalUsersNote > 0) {
-                 $usersReussite = $usersAvecMoyenne->where('moyenne', '>=', 10)->count();
-                 $tauxReussite = round(($usersReussite / $totalUsersNote) * 100, 2);
+                $usersReussite = $usersAvecMoyenne->where('moyenne', '>=', 10)->count();
+                $tauxReussite = round(($usersReussite / $totalUsersNote) * 100, 2);
             }
         }
 
@@ -89,7 +89,7 @@ class StatistiqueController extends Controller
             'departement' => $departement,
             'total_filieres' => $filiereIds->count(),
             'total_etudiants' => $total_etudiants,
-            'moyenne_generale' => round((float)$moyenneGenerale, 2),
+            'moyenne_generale' => round((float) $moyenneGenerale, 2),
             'taux_reussite' => $tauxReussite,
         ]);
     }
@@ -148,9 +148,10 @@ class StatistiqueController extends Controller
                 'role' => 'super_admin',
                 'resume' => [
                     'total_departements' => Departement::count(),
-                    'total_filieres'     => Filiere::count(),
-                    'total_etudiants'    => User::where('is_active', true)->count(),
-                    'moyenne_generale'   => round((float)$moyenneGenerale, 2),
+                    'total_filieres' => Filiere::count(),
+                    'total_etudiants' => User::where('is_active', true)->count(),
+                    'total_chefs' => \App\Models\ChefDepartement::count(),
+                    'moyenne_generale' => round((float) $moyenneGenerale, 2),
                 ],
 
                 'derniers_imports' => ImportLog::with('admin:id,nom,prenom')->latest()->take(5)->get(),
@@ -173,7 +174,7 @@ class StatistiqueController extends Controller
 
             $etudiantsDifficulte = [];
             if ($userIds->isNotEmpty()) {
-                 $usersMoyenne = Note::whereIn('user_id', $userIds)
+                $usersMoyenne = Note::whereIn('user_id', $userIds)
                     ->join('matieres', 'notes.matiere_id', '=', 'matieres.id')
                     ->select('user_id', DB::raw('SUM(notes.note * matieres.coefficient) / SUM(matieres.coefficient) as moyenne'))
                     ->groupBy('user_id')
@@ -181,23 +182,54 @@ class StatistiqueController extends Controller
                     ->take(10)
                     ->get();
 
-                 if ($usersMoyenne->isNotEmpty()) {
-                     $uIds = $usersMoyenne->pluck('user_id');
-                     $etudiantsDifficulte = User::whereIn('id', $uIds)->get()->map(function($u) use ($usersMoyenne) {
-                         $u->moyenne = $usersMoyenne->firstWhere('user_id', $u->id)->moyenne;
-                         return $u;
-                     });
-                 }
+                if ($usersMoyenne->isNotEmpty()) {
+                    $uIds = $usersMoyenne->pluck('user_id');
+                    $etudiantsDifficulte = User::whereIn('id', $uIds)->get()->map(function ($u) use ($usersMoyenne) {
+                        $u->moyenne = $usersMoyenne->firstWhere('user_id', $u->id)->moyenne;
+                        return $u;
+                    });
+                }
             }
+
+            $totalMatieres = DB::table('filiere_matieres')
+                ->whereIn('filiere_id', $filiereIds)
+                ->distinct('matiere_id')
+                ->count('matiere_id');
+
+            $filieresDetails = Filiere::where('departement_id', $deptId)
+                ->withCount('matieres')
+                ->withCount([
+                    'users as etudiants_count' => function ($query) {
+                        $query->where('is_active', true);
+                    }
+                ])
+                ->withCount('emploiTemps')
+                ->get()
+                ->map(function ($f) {
+                    return [
+                        'id' => $f->id,
+                        'name' => $f->nom,
+                        'niveau' => $f->niveau,
+                        'years' => ($f->niveau == 'L1' || $f->niveau == 'L2' || $f->niveau == 'L3') ? 3 : (($f->niveau == 'M1' || $f->niveau == 'M2') ? 2 : 1),
+                        'students' => $f->etudiants_count,
+                        'matieres' => $f->matieres_count,
+                        'color' => 'bg-emerald-100 text-emerald-600',
+                        'initial' => substr($f->nom, 0, 1),
+                        'is_active' => true,
+                        'has_emploi_temps' => $f->emploi_temps_count > 0,
+                    ];
+                });
 
             $data = [
                 'role' => 'chef_departement',
                 'resume' => [
-                    'departement'      => Departement::find($deptId),
-                    'total_filieres'   => $filiereIds->count(),
-                    'total_etudiants'  => $userIds->count(),
-                    'moyenne_generale' => round((float)$moyenneGenerale, 2),
+                    'departement' => Departement::find($deptId),
+                    'total_filieres' => $filiereIds->count(),
+                    'total_etudiants' => $userIds->count(),
+                    'moyenne_generale' => round((float) $moyenneGenerale, 2),
+                    'total_matieres' => $totalMatieres,
                 ],
+                'filieres' => $filieresDetails,
                 'etudiants_difficulte' => $etudiantsDifficulte,
                 'derniers_imports' => ImportLog::where('admin_id', $admin->id)->latest()->take(5)->get(),
             ];

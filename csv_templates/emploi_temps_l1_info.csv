@@ -1,0 +1,7 @@
+filiere_code,matiere_code,jour,heure_debut,heure_fin,salle,type_cours,enseignant,semestre
+L1-INFO-2026,ALGO101,Lundi,08:30,10:30,Amphi A,CM,Dr. BAH,S1
+L1-INFO-2026,MATH101,Lundi,10:45,12:45,Salle 102,TD,M. ADJOVI,S1
+L1-INFO-2026,ALGO101,Mardi,14:00,16:00,Labo 1,TP,Dr. BAH,S1
+L1-INFO-2026,WEB201,Mercredi,08:30,12:30,Salle 104,CM,Mme. SOGLO,S1
+L1-INFO-2026,BDD201,Jeudi,08:30,10:30,Amphi B,CM,M. TOSSOU,S1
+L1-INFO-2026,ALGO101,Vendredi,10:00,12:00,Salle 102,TD,Dr. BAH,S1

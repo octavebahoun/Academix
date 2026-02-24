@@ -55,18 +55,7 @@ export default function AdminChefs() {
         className="space-y-8 pb-20"
       >
         {/* Search & Actions Header */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-        >
-          <div>
-            <h2 className="text-xl font-black font-display text-slate-900 dark:text-white uppercase tracking-tight">
-              Chefs de Département
-            </h2>
-            <p className="text-sm font-bold text-emerald-500 uppercase tracking-widest mt-1">
-              Gestion & Assignation
-            </p>
-          </div>
+        <motion.div variants={itemVariants} className="flex justify-end mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-emerald-500 text-white font-black text-xs uppercase tracking-wider px-6 py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap"
@@ -198,12 +187,48 @@ export default function AdminChefs() {
                       <td className="py-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            onClick={() => {
+                              const tel = window.prompt(
+                                `Modifier le téléphone pour ${chef.nom} :`,
+                                chef.telephone || "",
+                              );
+                              if (tel !== null) {
+                                laravelApiClient
+                                  .put(`/admin/chefs-departement/${chef.id}`, {
+                                    telephone: tel,
+                                  })
+                                  .then(() => fetchChefs())
+                                  .catch((err) =>
+                                    alert(
+                                      "Erreur de mise à jour: " +
+                                        (err.response?.data?.message ||
+                                          err.message),
+                                    ),
+                                  );
+                              }
+                            }}
                             className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-500 transition-all border border-transparent hover:border-blue-100"
                             title="Editer"
                           >
                             <Edit3 size={18} />
                           </button>
                           <button
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Voulez-vous vraiment révoquer le chef ${chef.prenom} ${chef.nom} ?`,
+                                )
+                              ) {
+                                laravelApiClient
+                                  .delete(`/admin/chefs-departement/${chef.id}`)
+                                  .then(() => fetchChefs())
+                                  .catch((err) =>
+                                    alert(
+                                      "Erreur lors de la révocation du chef",
+                                    ),
+                                  );
+                              }
+                            }}
                             className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 transition-all border border-transparent hover:border-rose-100"
                             title="Révoquer"
                           >

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { laravelApiClient } from "../../api/client";
+import { cn } from "../../utils/cn";
 import ImportNotesModal from "./ImportNotesModal";
 
 export default function ChefImportNotes() {
@@ -34,7 +35,9 @@ export default function ChefImportNotes() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const response = await laravelApiClient.get("/admin/import/history");
+      const response = await laravelApiClient.get(
+        "/departement/import/history",
+      );
       // Filtrer pour n'avoir que les imports de type 'notes'
       setHistory(
         response.data.data.filter((log) => log.type_import === "notes"),
@@ -176,7 +179,35 @@ export default function ChefImportNotes() {
                           </p>
                         </div>
                       </div>
-                      <button className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-blue-600 hover:text-white transition-all group-hover:scale-110">
+                      <button
+                        onClick={async () => {
+                          try {
+                            const response = await laravelApiClient.get(
+                              `/departement/import/history/${log.id}/download`,
+                              {
+                                responseType: "blob",
+                              },
+                            );
+                            const url = window.URL.createObjectURL(
+                              new Blob([response.data]),
+                            );
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.setAttribute(
+                              "download",
+                              `rapport_${log.fichier_nom}`,
+                            );
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                          } catch (error) {
+                            console.error("Erreur téléchargement:", error);
+                            alert("Impossible de télécharger le rapport.");
+                          }
+                        }}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-blue-600 hover:text-white transition-all group-hover:scale-110"
+                        title="Télécharger le rapport d'importation"
+                      >
                         <Download size={18} />
                       </button>
                     </div>

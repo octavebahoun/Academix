@@ -43,25 +43,25 @@ export default function AdminOverview() {
   const stats = [
     {
       label: "DÉPARTEMENTS ACTIFS",
-      value: dashboardData?.stats?.departements_count || 0,
+      value: dashboardData?.resume?.total_departements || 0,
       icon: Building2,
       color: "bg-emerald-50 text-emerald-500",
     },
     {
       label: "TOTAL ÉTUDIANTS",
-      value: dashboardData?.stats?.etudiants_count || 0,
+      value: dashboardData?.resume?.total_etudiants || 0,
       icon: GraduationCap,
       color: "bg-blue-50 text-blue-500",
     },
     {
       label: "FILIÈRES TOTAL",
-      value: dashboardData?.stats?.filieres_count || 0,
+      value: dashboardData?.resume?.total_filieres || 0,
       icon: FiliereIcon,
       color: "bg-orange-50 text-orange-500",
     },
     {
       label: "CHEFS DE DÉPT",
-      value: dashboardData?.stats?.chefs_count || 0,
+      value: dashboardData?.resume?.total_chefs || 0,
       icon: Users,
       color: "bg-purple-50 text-purple-500",
     },

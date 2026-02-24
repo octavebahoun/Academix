@@ -114,6 +114,7 @@ Route::prefix('v1')->group(function () {
         Route::get('import/template/notes', [ImportController::class, 'templateNotes']);
         Route::get('import/template/emploi-temps', [ImportController::class, 'templateEmploiTemps']);
         Route::get('import/history', [ImportController::class, 'history']);
+        Route::get('import/history/{id}/download', [\App\Http\Controllers\Api\DownloadImportLogController::class, 'download']);
 
         Route::apiResource('notes', NoteController::class)->names([
             'index' => 'departement.notes.index',

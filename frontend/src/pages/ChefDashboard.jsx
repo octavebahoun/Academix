@@ -5,7 +5,7 @@ import ChefHeader from "../components/chef/ChefHeader";
 import ChefOverview from "../components/chef/ChefOverview";
 import ChefFilieres from "../components/chef/ChefFilieres";
 import ChefImportNotes from "../components/chef/ChefImportNotes";
-import ChefEmploiTemps from "../components/chef/ChefEmploiTemps";
+import { ChefEmploiTemps } from "../components/chef/ChefTimetable.jsx";
 import useDepartementData from "../hooks/useDepartementData";
 import { authService } from "../services/authService";
 
@@ -13,7 +13,9 @@ export default function ChefDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [theme, setTheme] = useState("light");
   const deptId = 1; // Simulation
-  const { data, loading, error } = useDepartementData(deptId);
+  const departmentState = useDepartementData(deptId);
+  const { loading, error } = departmentState;
+  const data = departmentState; // This will now contain filieres, stats, etc.
 
   // Initialisation du thème
   useEffect(() => {
@@ -37,31 +39,34 @@ export default function ChefDashboard() {
   };
 
   const getPageTitles = () => {
+    const deptName = data?.resume?.departement?.nom
+      ? `Département ${data.resume.departement.nom}`
+      : "Département ...";
     switch (activeTab) {
       case "overview":
         return {
           title: "Management Board",
-          subtitle: "Département Informatique",
+          subtitle: deptName,
         };
       case "filieres":
         return {
           title: "Gestion des Filières",
-          subtitle: "Département Informatique",
+          subtitle: deptName,
         };
       case "import":
         return {
           title: "Import CSV - Notes",
-          subtitle: "Département Informatique",
+          subtitle: deptName,
         };
       case "emploi-temps":
         return {
           title: "Emploi du Temps",
-          subtitle: "Département Informatique",
+          subtitle: deptName,
         };
       default:
         return {
           title: "Management Board",
-          subtitle: "Département Informatique",
+          subtitle: deptName,
         };
     }
   };
@@ -132,7 +137,7 @@ export default function ChefDashboard() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                <ChefEmploiTemps />
+                <ChefEmploiTemps data={data} />
               </motion.div>
             )}
           </AnimatePresence>
