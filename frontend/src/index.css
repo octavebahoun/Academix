@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --font-display: "Outfit", "Inter", sans-serif;
   --font-body: "Manrope", "Inter", sans-serif;
@@ -20,7 +21,7 @@
   --text-muted: #64748b;
 
   /* Status Colors */
-  --success: #22c55e;
+  --success: #1035cb;
   --warning: #f59e0b;
   --error: #ef4444;
   --info: #3b82f6;

@@ -1,0 +1,5 @@
+filiere_code,matiere_code,semestre,jour,salle,heure_debut,heure_fin,type_cours,enseignant
+L1-GC-2026,RDM201,S1,Lundi,Amphi B,08:00:00,12:00:00,CM,Pr. LOKO
+L1-GC-2026,RDM201,S1,Mardi,Salle TP1,14:00:00,18:00:00,TP,Pr. LOKO
+L1-GC-2026,BA301,S1,Jeudi,Amphi B,08:00:00,10:00:00,CM,Dr. MENSAH
+L1-GC-2026,BA301,S2,Vendredi,Salle 203,10:00:00,12:00:00,TD,Dr. MENSAH

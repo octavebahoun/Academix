@@ -9,7 +9,7 @@ return new class extends Migration {
         Schema::create('import_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('admin_id');
-            $table->enum('type_import', ['etudiants', 'notes']);
+            $table->enum('type_import', ['etudiants', 'notes', 'emploi_temps']);
             $table->string('fichier_nom');
             $table->string('fichier_path')->nullable();
             $table->integer('total_lignes');

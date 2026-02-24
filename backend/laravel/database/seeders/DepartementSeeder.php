@@ -15,7 +15,19 @@ class DepartementSeeder extends Seeder
             ['nom' => 'Physique', 'code' => 'PHY', 'description' => 'Département de Physique'],
         ];
 
+        // Ensure at least one admin exists
+        $admin = \App\Models\Admin::first();
+        if (!$admin) {
+            $admin = \App\Models\Admin::create([
+                'nom' => 'System',
+                'prenom' => 'Auto',
+                'email' => 'system@auto.com',
+                'password' => \Hash::make('password'),
+            ]);
+        }
+
         foreach ($departements as $dept) {
+            $dept['created_by'] = $admin->id;
             Departement::create($dept);
         }
     }

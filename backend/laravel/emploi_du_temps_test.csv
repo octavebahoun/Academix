@@ -1,0 +1,9 @@
+filiere_code,matiere_code,semestre,jour,salle,heure_debut,heure_fin,type_cours,enseignant
+L1-GC-2026,ALGO101,S1,Lundi,Salle 101,08:00:00,10:00:00,CM,Dr. AKANDE
+L1-GC-2026,ALGO101,S1,Mardi,Salle 102,10:00:00,12:00:00,TD,Dr. AKANDE
+L1-GC-2026,MATH101,S1,Lundi,Salle 101,13:00:00,15:00:00,CM,Pr. KOUTON
+L1-GC-2026,WEB201,S2,Mercredi,Labo A,14:00:00,18:00:00,TP,M. FOLARIN
+L1-GC-2026,BDD201,S2,Jeudi,Salle 205,08:00:00,10:00:00,CM,Pr. KOUTON
+L1-GC-2026,RX301,S1,Vendredi,Salle 302,10:00:00,12:00:00,CM,Dr. BIAOU
+L1-GC-2026,RX301,S1,Vendredi,Labo Reseau,14:00:00,17:00:00,TP,Dr. BIAOU
+L1-GC-2026,ALGO101,S2,Jeudi,Amphi A,08:00:00,12:00:00,CM,Dr. AKANDE

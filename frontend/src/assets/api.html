@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>API Docs — Hackaton IFRI 2026</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0f1117;
+            --sidebar: #161b27;
+            --card: #1a2035;
+            --border: #2a3350;
+            --accent: #6366f1;
+            --accent2: #22d3ee;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --blue: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh
+        }
+
+        /* SIDEBAR */
+        nav {
+            width: 260px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 10
+        }
+
+        nav .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px
+        }
+
+        nav .logo h1 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent)
+        }
+
+        nav .logo p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        nav a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: .2s;
+            border-left: 2px solid transparent
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--text);
+            background: rgba(99, 102, 241, .08);
+            border-left-color: var(--accent)
+        }
+
+        nav .group {
+            padding: 16px 20px 6px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted)
+        }
+
+        /* MAIN */
+        main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 40px;
+            max-width: 920px
+        }
+
+        h2.section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 48px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        h2.section-title:first-of-type {
+            margin-top: 0
+        }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, var(--card), #1e1b4b);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6
+        }
+
+        .hero .meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500
+        }
+
+        .tag.url {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent)
+        }
+
+        .tag.auth {
+            background: rgba(34, 211, 238, .1);
+            color: var(--accent2)
+        }
+
+        .tag.format {
+            background: rgba(16, 185, 129, .1);
+            color: var(--green)
+        }
+
+        /* ENDPOINT CARD */
+        .endpoint {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .endpoint-header:hover {
+            background: rgba(255, 255, 255, .02)
+        }
+
+        .method {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            min-width: 52px;
+            text-align: center
+        }
+
+        .GET {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green)
+        }
+
+        .POST {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent)
+        }
+
+        .PUT {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow)
+        }
+
+        .DELETE {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red)
+        }
+
+        .PATCH {
+            background: rgba(59, 130, 246, .15);
+            color: var(--blue)
+        }
+
+        .path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text);
+            flex: 1
+        }
+
+        .summary {
+            font-size: 12px;
+            color: var(--muted);
+            margin-left: auto
+        }
+
+        .arrow {
+            color: var(--muted);
+            font-size: 12px;
+            transition: .3s
+        }
+
+        .endpoint-body {
+            display: none;
+            padding: 0 18px 18px;
+            border-top: 1px solid var(--border)
+        }
+
+        .endpoint-body.open {
+            display: block
+        }
+
+        /* SECTIONS INSIDE ENDPOINT */
+        .body-section {
+            margin-top: 14px
+        }
+
+        .body-section h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: 8px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px
+        }
+
+        th {
+            text-align: left;
+            padding: 7px 10px;
+            background: rgba(255, 255, 255, .03);
+            color: var(--muted);
+            font-weight: 500;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        td {
+            padding: 7px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            vertical-align: top
+        }
+
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent2)
+        }
+
+        pre {
+            background: #0a0d14;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 12px;
+            overflow-x: auto;
+            line-height: 1.6;
+            color: #a5b4fc
+        }
+
+        .badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500
+        }
+
+        .badge-200 {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green)
+        }
+
+        .badge-201 {
+            background: rgba(99, 102, 241, .15);
+            color: var(--accent)
+        }
+
+        .badge-204 {
+            background: rgba(100, 116, 139, .15);
+            color: var(--muted)
+        }
+
+        .badge-401 {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow)
+        }
+
+        .badge-403 {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red)
+        }
+
+        .badge-404 {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red)
+        }
+
+        .badge-409 {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red)
+        }
+
+        .badge-422 {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow)
+        }
+
+        .access-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(99, 102, 241, .1);
+            color: var(--accent);
+            margin-bottom: 10px
+        }
+
+        /* SEARCH */
+        .search-wrap {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 8px
+        }
+
+        .search-wrap input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-size: 12px;
+            outline: none
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--accent)
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px
+        }
+
+        /* ERRORS TABLE */
+        .errors-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 13px
+        }
+
+        .errors-grid div {
+            background: var(--card);
+            padding: 8px 12px
+        }
+
+        .errors-grid .hd {
+            background: rgba(255, 255, 255, .04);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 500
+        }
+
+        @media(max-width:768px) {
+            nav {
+                display: none
+            }
+
+            main {
+                margin-left: 0;
+                padding: 20px
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <nav id="sidebar">
+        <div class="logo">
+            <h1>⚡ API Docs</h1>
+            <p>Hackaton BYIFRI 2026 · v1</p>
+        </div>
+        <div class="search-wrap">
+            <input type="text" id="navSearch" placeholder="Rechercher..." oninput="filterNav(this.value)">
+        </div>
+        <div id="navLinks"></div>
+    </nav>
+
+    <main id="main"></main>
+
+    <script>
+        const API = [
+            {
+                group: "🔐 Authentification", id: "auth",
+                endpoints: [
+                    {
+                        method: "POST", path: "/auth/admin/login", title: "Connexion Admin", access: "Public",
+                        body: [["email", "string", "✅", "Email admin"], ["password", "string", "✅", "Mot de passe"]],
+                        response: `{"token":"1|xxx","token_type":"Bearer","admin":{"id":1,"nom":"ADMIN","role":"super_admin","departement":{...}}}`,
+                        codes: ["200", "401", "403"]
+                    },
+                    {
+                        method: "POST", path: "/auth/admin/logout", title: "Déconnexion Admin", access: "auth:sanctum",
+                        response: `{"message":"Déconnecté avec succès"}`, codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/auth/student/register", title: "Inscription Étudiant", access: "Public",
+                        body: [["matricule", "string", "✅", "Matricule existant"], ["email", "string", "✅", "Email unique"], ["password", "string", "✅", "min:8"], ["password_confirmation", "string", "✅", "Confirmation"], ["telephone", "string", "❌", "Optionnel"]],
+                        response: `{"token":"2|xxx","token_type":"Bearer","user":{"id":5,"matricule":"ETU001","filiere":{...}}}`,
+                        codes: ["201", "422", "409"],
+                        note: "Le matricule doit exister (importé via CSV par un admin)"
+                    },
+                    {
+                        method: "POST", path: "/auth/student/login", title: "Connexion Étudiant", access: "Public",
+                        body: [["email", "string", "✅", "Email"], ["password", "string", "✅", "Mot de passe"]],
+                        response: `{"token":"2|xxx","token_type":"Bearer","user":{"id":5,"matricule":"ETU001",...}}`,
+                        codes: ["200", "401", "403"]
+                    },
+                    {
+                        method: "POST", path: "/auth/student/logout", title: "Déconnexion Étudiant", access: "auth:sanctum",
+                        response: `{"message":"Déconnecté avec succès"}`, codes: ["200"]
+                    },
+                    {
+                        method: "GET", path: "/auth/me", title: "Profil connecté", access: "auth:sanctum",
+                        response: `{"type":"admin|student","profil":{...relations chargées...}}`, codes: ["200", "401"]
+                    },
+                ]
+            },
+            {
+                group: "🏢 Départements", id: "departements",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/departements", title: "Liste des départements", access: "super_admin",
+                        params: [["search", "string", "Filtrer par nom ou code"]],
+                        response: `[{"id":1,"nom":"Informatique","code":"INFO","filieres_count":4,"admins_count":2}]`, codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/admin/departements", title: "Créer un département", access: "super_admin",
+                        body: [["nom", "string", "✅", "max:100"], ["code", "string", "✅", "max:10, unique"], ["description", "string", "❌", "Optionnel"]],
+                        response: `{"id":1,"nom":"Génie Civil","code":"GC"}`, codes: ["201", "422"]
+                    },
+                    {
+                        method: "GET", path: "/admin/departements/{id}", title: "Détails d'un département", access: "super_admin",
+                        response: `{"id":1,"nom":"Info","filieres":[...],"admins":[...]}`, codes: ["200", "404"]
+                    },
+                    {
+                        method: "PUT", path: "/admin/departements/{id}", title: "Modifier un département", access: "super_admin",
+                        body: [["nom", "string", "❌", "sometimes"], ["code", "string", "❌", "sometimes, unique sauf soi-même"], ["description", "string", "❌", "nullable"]],
+                        codes: ["200", "422", "404"]
+                    },
+                    {
+                        method: "DELETE", path: "/admin/departements/{id}", title: "Supprimer un département", access: "super_admin",
+                        note: "⚠️ Bloqué si des filières actives sont liées", codes: ["204", "409", "404"]
+                    },
+                    {
+                        method: "GET", path: "/admin/departements/{id}/stats", title: "Statistiques d'un département", access: "super_admin",
+                        response: `{"total_filieres":4,"total_etudiants":120,"moyenne_generale":12.5,"taux_reussite":68.5,"filieres":[...]}`, codes: ["200", "404"]
+                    },
+                ]
+            },
+            {
+                group: "👤 Chefs de Département", id: "chefs",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/chefs-departement", title: "Liste des chefs", access: "super_admin",
+                        response: `[{"id":2,"nom":"MARTIN","role":"chef_departement","is_active":true,"departement":{...}}]`, codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/admin/chefs-departement", title: "Créer un chef", access: "super_admin",
+                        body: [["nom", "string", "✅", "max:100"], ["prenom", "string", "✅", "max:100"], ["email", "string", "✅", "email unique"], ["password", "string", "✅", "min:8"], ["telephone", "string", "❌", "max:20"], ["departement_id", "integer", "✅", "exists:departements"]],
+                        codes: ["201", "409", "422"], note: "409 si un chef actif existe déjà pour ce département"
+                    },
+                    {
+                        method: "GET", path: "/admin/chefs-departement/{id}", title: "Détails d'un chef", access: "super_admin",
+                        response: `{...chef + departement + 10 derniers imports}`, codes: ["200", "404"]
+                    },
+                    {
+                        method: "PUT", path: "/admin/chefs-departement/{id}", title: "Modifier un chef", access: "super_admin",
+                        body: [["nom/prenom/email", "string", "❌", "sometimes"], ["password", "string", "❌", "hashé si fourni"], ["departement_id", "integer", "❌", "sometimes"]],
+                        codes: ["200", "422", "404"]
+                    },
+                    {
+                        method: "DELETE", path: "/admin/chefs-departement/{id}", title: "Supprimer un chef", access: "super_admin",
+                        note: "⚠️ Bloqué si un import est en cours. Préférer toggle().", codes: ["204", "409", "404"]
+                    },
+                    {
+                        method: "POST", path: "/admin/chefs-departement/{id}/toggle", title: "Activer / Désactiver", access: "super_admin",
+                        response: `{"message":"Compte désactivé","is_active":false}`, codes: ["200", "404"]
+                    },
+                ]
+            },
+            {
+                group: "📚 Filières", id: "filieres",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/filieres", title: "Liste des filières", access: "admin",
+                        params: [["niveau", "string", "L1,L2,L3,M1,M2"], ["annee_academique", "string", "ex: 2025-2026"]],
+                        response: `[{"id":1,"nom":"L1 Info","code":"L1-INFO-2026","niveau":"L1","users_count":45,"departement":{...}}]`, codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/admin/filieres", title: "Créer une filière", access: "admin",
+                        body: [["departement_id", "integer", "✅", "exists:departements"], ["nom", "string", "✅", "max:100"], ["niveau", "string", "✅", "L1-M2"], ["code", "string", "✅", "unique"], ["annee_academique", "string", "✅", "ex: 2025-2026"], ["description", "string", "❌", "nullable"]],
+                        codes: ["201", "422"], note: "Chef: ne peut créer que dans son département"
+                    },
+                    { method: "GET", path: "/admin/filieres/{id}", title: "Détails d'une filière", access: "admin", codes: ["200", "403", "404"] },
+                    {
+                        method: "PUT", path: "/admin/filieres/{id}", title: "Modifier une filière", access: "admin",
+                        note: "departement_id non modifiable ici", codes: ["200", "422", "404"]
+                    },
+                    {
+                        method: "DELETE", path: "/admin/filieres/{id}", title: "Supprimer une filière", access: "admin",
+                        note: "⚠️ Bloqué si des étudiants sont inscrits", codes: ["204", "409", "404"]
+                    },
+                    {
+                        method: "GET", path: "/admin/filieres/{id}/etudiants", title: "Étudiants d'une filière", access: "admin",
+                        params: [["search", "string", "nom, prénom ou matricule"], ["is_active", "0|1", "Filtrer par statut"]],
+                        response: `{"data":[{"id":5,"matricule":"ETU001","nom":"DUPONT",...}],"total":45}`, codes: ["200"]
+                    },
+                    { method: "GET", path: "/admin/filieres/{id}/stats", title: "Statistiques filière", access: "admin", codes: ["200", "403", "404"] },
+                ]
+            },
+            {
+                group: "📖 Matières", id: "matieres",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/matieres", title: "Liste des matières", access: "admin",
+                        params: [["search", "string", "Filtrer par nom ou code"]],
+                        response: `[{"id":1,"nom":"Algorithmique","code":"ALGO101","coefficient":3,"filieres_count":2}]`, codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/admin/matieres", title: "Créer une matière", access: "admin",
+                        body: [["nom", "string", "✅", "max:100"], ["code", "string", "✅", "unique"], ["coefficient", "integer", "❌", "1-10, défaut:1"], ["description", "string", "❌", ""], ["enseignant", "string", "❌", "max:100"]],
+                        codes: ["201", "422"], note: "Créée dans un pool global, à assigner ensuite via filiere"
+                    },
+                    { method: "PUT", path: "/admin/matieres/{id}", title: "Modifier une matière", access: "admin", codes: ["200", "422", "404"] },
+                    {
+                        method: "DELETE", path: "/admin/matieres/{id}", title: "Supprimer une matière", access: "super_admin",
+                        note: "⚠️ Bloqué si des notes existent", codes: ["204", "409", "404"]
+                    },
+                    {
+                        method: "POST", path: "/admin/filieres/{filiereId}/matieres", title: "Assigner à une filière", access: "admin",
+                        body: [["matiere_id", "integer", "✅", "exists:matieres"], ["semestre", "string", "✅", "S1 ou S2"]],
+                        response: `{"message":"Matière assignée avec succès","semestre":"S1"}`, codes: ["201", "409"]
+                    },
+                    {
+                        method: "DELETE", path: "/admin/filieres/{filiereId}/matieres/{matiereId}", title: "Retirer d'une filière", access: "admin",
+                        note: "⚠️ Bloqué si notes étudiants existent", codes: ["204", "409", "404"]
+                    },
+                ]
+            },
+            {
+                group: "📥 Import CSV", id: "import",
+                endpoints: [
+                    {
+                        method: "POST", path: "/admin/import/etudiants", title: "Importer des étudiants", access: "admin",
+                        note: "Content-Type: multipart/form-data · Champ: file (CSV, max 5MB)\nFormat CSV: matricule,nom,prenom,filiere_code,annee_admission",
+                        response: `{"import_id":5,"total":100,"valides":98,"erreurs":2,"erreurs_details":[{"ligne":3,"raison":"Filière introuvable"}]}`,
+                        codes: ["200", "422"]
+                    },
+                    {
+                        method: "POST", path: "/admin/import/notes", title: "Importer des notes", access: "admin",
+                        note: "Format CSV: matricule,matiere_code,note,note_max,type_evaluation,coefficient,date_evaluation,semestre,annee_academique",
+                        codes: ["200", "422"]
+                    },
+                    {
+                        method: "GET", path: "/admin/import/history", title: "Historique des imports", access: "admin",
+                        response: `{"data":[{"id":5,"type_import":"etudiants","total_lignes":100,"statut":"termine","admin":{...}}]}`, codes: ["200"]
+                    },
+                    { method: "GET", path: "/admin/import/{id}", title: "Détails d'un import", access: "admin", codes: ["200", "403", "404"] },
+                    {
+                        method: "GET", path: "/admin/import/template/etudiants", title: "Template CSV Étudiants", access: "admin",
+                        note: "Télécharge template_etudiants.csv", codes: ["200"]
+                    },
+                    {
+                        method: "GET", path: "/admin/import/template/notes", title: "Template CSV Notes", access: "admin",
+                        note: "Télécharge template_notes.csv", codes: ["200"]
+                    },
+                ]
+            },
+            {
+                group: "🗓 Emploi du Temps", id: "edt",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/emploi-temps/filieres/{id}", title: "EDT d'une filière", access: "admin",
+                        params: [["semestre", "S1|S2", "Filtrer"], ["jour", "Lundi...Samedi", "Filtrer"]],
+                        response: `[{"id":1,"jour":"Lundi","heure_debut":"08:00","heure_fin":"10:00","matiere":{...},"salle":"B201","type_cours":"CM"}]`,
+                        codes: ["200", "403", "404"]
+                    },
+                    {
+                        method: "POST", path: "/admin/emploi-temps", title: "Ajouter un cours", access: "admin",
+                        body: [["filiere_id", "integer", "✅", "exists:filieres"], ["matiere_id", "integer", "✅", "doit être dans la filière"], ["jour", "string", "✅", "Lundi-Samedi"], ["heure_debut", "string", "✅", "H:i (08:00)"], ["heure_fin", "string", "✅", "H:i, après debut"], ["salle", "string", "❌", "max:50"], ["type_cours", "string", "✅", "CM,TD,TP"], ["enseignant", "string", "❌", "max:100"], ["semestre", "string", "✅", "S1|S2"]],
+                        codes: ["201", "409", "422"], note: "409 si conflit de salle détecté"
+                    },
+                    {
+                        method: "PUT", path: "/admin/emploi-temps/{id}", title: "Modifier un cours", access: "admin",
+                        note: "Tous les champs optionnels. filiere_id non modifiable.", codes: ["200", "422", "404"]
+                    },
+                    { method: "DELETE", path: "/admin/emploi-temps/{id}", title: "Supprimer un cours", access: "admin", codes: ["204", "404"] },
+                ]
+            },
+            {
+                group: "📊 Statistiques", id: "stats",
+                endpoints: [
+                    {
+                        method: "GET", path: "/admin/stats/global", title: "Statistiques globales", access: "super_admin",
+                        response: `{"total_departements":4,"total_filieres":12,"total_etudiants":350,"moyenne_generale":12.45,"taux_reussite":68.5,"departements":[...]}`,
+                        codes: ["200", "403"]
+                    },
+                    {
+                        method: "GET", path: "/admin/stats/departement/{id}", title: "Stats d'un département", access: "admin",
+                        note: "Chef: son département uniquement", codes: ["200", "403", "404"]
+                    },
+                    {
+                        method: "GET", path: "/admin/stats/filiere/{id}", title: "Stats d'une filière", access: "admin",
+                        response: `{"filiere":{...},"total_etudiants":45,"moyenne_s1":12.8,"taux_reussite_s1":70,"matieres":[...]}`,
+                        codes: ["200", "403", "404"]
+                    },
+                    {
+                        method: "GET", path: "/admin/stats/dashboard", title: "Dashboard personnalisé", access: "admin",
+                        note: "Contenu adapté : super_admin → vue globale, chef → son département", codes: ["200"]
+                    },
+                ]
+            },
+            {
+                group: "🎓 Étudiant — Profil", id: "student-profil",
+                endpoints: [
+                    {
+                        method: "GET", path: "/student/profil", title: "Voir mon profil", access: "étudiant",
+                        response: `{"id":5,"matricule":"ETU001","nom":"DUPONT","objectif_moyenne":14,"filiere":{...,"departement":{...}}}`,
+                        codes: ["200"]
+                    },
+                    {
+                        method: "PUT", path: "/student/profil", title: "Modifier mon profil", access: "étudiant",
+                        body: [["telephone", "string", "❌", "max:20"], ["photo", "string (url)", "❌", "URL valide"], ["objectif_moyenne", "numeric", "❌", "0-20"], ["style_apprentissage", "string", "❌", "visuel|auditif|kinesthesique"]],
+                        note: "⚠️ matricule, nom, email, filiere_id ne sont PAS modifiables", codes: ["200", "422"]
+                    },
+                ]
+            },
+            {
+                group: "📝 Étudiant — Notes", id: "student-notes",
+                endpoints: [
+                    {
+                        method: "GET", path: "/student/notes", title: "Mes notes", access: "étudiant",
+                        params: [["semestre", "S1|S2", "Filtrer"], ["annee_academique", "string", "ex: 2025-2026"]],
+                        response: `[{"id":1,"note":14.5,"type_evaluation":"Devoir","semestre":"S1","matiere":{"nom":"Algo","coefficient":3}}]`,
+                        codes: ["200"]
+                    },
+                    {
+                        method: "GET", path: "/student/moyennes", title: "Mes moyennes", access: "étudiant",
+                        response: `{"semestres":{"S1":{"moyenne":13.5,"matieres":[...]},"S2":{...}},"moyenne_generale":12.75,"objectif_moyenne":14,"ecart_objectif":-1.25}`,
+                        codes: ["200"]
+                    },
+                    {
+                        method: "GET", path: "/student/emploi-temps", title: "Mon emploi du temps", access: "étudiant",
+                        params: [["semestre", "S1|S2", ""], ["jour", "Lundi...", ""]], codes: ["200"]
+                    },
+                    {
+                        method: "GET", path: "/student/matieres", title: "Mes matières", access: "étudiant",
+                        response: `[{"id":1,"nom":"Algorithmique","coefficient":3,"pivot":{"semestre":"S1"}}]`, codes: ["200"]
+                    },
+                ]
+            },
+            {
+                group: "✅ Étudiant — Tâches", id: "student-taches",
+                endpoints: [
+                    {
+                        method: "GET", path: "/student/taches", title: "Mes tâches", access: "étudiant",
+                        params: [["statut", "a_faire|en_cours|terminee", ""], ["priorite", "basse|moyenne|haute", ""], ["matiere_id", "integer", ""]],
+                        response: `[{"id":1,"titre":"Réviser ch.3","date_limite":"...","priorite":"haute","statut":"a_faire","matiere":{...}}]`, codes: ["200"]
+                    },
+                    {
+                        method: "POST", path: "/student/taches", title: "Créer une tâche", access: "étudiant",
+                        body: [["titre", "string", "✅", "max:255"], ["description", "string", "❌", ""], ["matiere_id", "integer", "❌", "nullable"], ["date_limite", "datetime", "✅", "date future"], ["priorite", "string", "❌", "défaut: moyenne"]],
+                        codes: ["201", "422"]
+                    },
+                    {
+                        method: "PUT", path: "/student/taches/{id}", title: "Modifier une tâche", access: "étudiant",
+                        note: "Propriétaire uniquement (403 sinon)", codes: ["200", "403", "404"]
+                    },
+                    { method: "DELETE", path: "/student/taches/{id}", title: "Supprimer une tâche", access: "étudiant", codes: ["204", "403", "404"] },
+                    {
+                        method: "PATCH", path: "/student/taches/{id}/complete", title: "Marquer comme terminée", access: "étudiant",
+                        response: `{"message":"Tâche marquée comme terminée","tache":{...}}`, codes: ["200", "403", "404"]
+                    },
+                ]
+            },
+            {
+                group: "🔔 Étudiant — Alertes", id: "student-alertes",
+                endpoints: [
+                    {
+                        method: "GET", path: "/student/alertes", title: "Mes alertes", access: "étudiant",
+                        params: [["lues", "0|1", "Filtrer par statut lecture"], ["type", "moyenne_faible|deadline_proche|note_faible|absence", ""]],
+                        response: `{"total":5,"non_lues":3,"alertes":[{"type_alerte":"moyenne_faible","niveau_severite":"eleve","est_lue":false,...}]}`, codes: ["200"]
+                    },
+                    {
+                        method: "PATCH", path: "/student/alertes/{id}/read", title: "Marquer comme lue", access: "étudiant",
+                        note: "Idempotent. Propriétaire uniquement.", codes: ["200", "403", "404"]
+                    },
+                ]
+            },
+        ];
+
+        const HTTP_CODES = {
+            "200": { label: "200 OK", cls: "badge-200" },
+            "201": { label: "201 Created", cls: "badge-201" },
+            "204": { label: "204 No Content", cls: "badge-204" },
+            "401": { label: "401 Unauthorized", cls: "badge-401" },
+            "403": { label: "403 Forbidden", cls: "badge-403" },
+            "404": { label: "404 Not Found", cls: "badge-404" },
+            "409": { label: "409 Conflict", cls: "badge-409" },
+            "422": { label: "422 Unprocessable", cls: "badge-422" },
+        };
+
+        function badge(code) { const c = HTTP_CODES[code] || { label: code, cls: "" }; return `<span class="badge ${c.cls}">${c.label}</span>`; }
+
+        function renderEndpoint(ep, idx) {
+            const bodyRows = (ep.body || []).map(([f, t, r, d]) => `<tr><td>${f}</td><td>${t}</td><td style="text-align:center">${r}</td><td style="color:var(--muted)">${d}</td></tr>`).join('');
+            const paramRows = (ep.params || []).map(([f, t, d]) => `<tr><td>${f}</td><td>${t}</td><td style="color:var(--muted)">${d}</td></tr>`).join('');
+            return `
+  <div class="endpoint" id="ep-${idx}">
+    <div class="endpoint-header" onclick="toggle('ep-${idx}')">
+      <span class="method ${ep.method}">${ep.method}</span>
+      <span class="path">${ep.path}</span>
+      <span class="summary">${ep.title}</span>
+      <span class="arrow" id="arrow-ep-${idx}">▼</span>
+    </div>
+    <div class="endpoint-body" id="body-ep-${idx}">
+      <div style="margin-top:12px"><span class="access-badge">🔒 ${ep.access}</span></div>
+      ${ep.note ? `<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:12px">${ep.note.replace(/\n/g, '<br>')}</div>` : ''}
+      ${paramRows ? `<div class="body-section"><h4>Query Params</h4><table><thead><tr><th>Param</th><th>Valeurs</th><th>Description</th></tr></thead><tbody>${paramRows}</tbody></table></div>` : ''}
+      ${bodyRows ? `<div class="body-section"><h4>Body (JSON)</h4><table><thead><tr><th>Champ</th><th>Type</th><th>Requis</th><th>Description</th></tr></thead><tbody>${bodyRows}</tbody></table></div>` : ''}
+      ${ep.response ? `<div class="body-section"><h4>Exemple de réponse</h4><pre>${ep.response}</pre></div>` : ''}
+      <div class="body-section"><h4>Codes retour</h4><div class="badges">${(ep.codes || []).map(badge).join('')}</div></div>
+    </div>
+  </div>`;
+        }
+
+        function render() {
+            const nav = document.getElementById('navLinks');
+            const main = document.getElementById('main');
+            let navHtml = '';
+            let mainHtml = `
+  <div class="hero">
+    <h1>⚡ Documentation API</h1>
+    <p>Hackaton BYIFRI 2026 · Laravel + Sanctum · REST JSON API<br>
+    Tous les endpoints protégés nécessitent <code style="color:var(--accent2)">Authorization: Bearer {token}</code></p>
+    <div class="meta">
+      <span class="tag url">🌐 Base URL: <b>http://localhost:8000/api/v1</b></span>
+      <span class="tag auth">🔑 Bearer Token (Sanctum)</span>
+      <span class="tag format">📦 JSON</span>
+    </div>
+  </div>`;
+
+            let idx = 0;
+            API.forEach(group => {
+                navHtml += `<div class="group">${group.group}</div>`;
+                navHtml += `<a href="#sec-${group.id}" onclick="scrollTo('sec-${group.id}')">${group.group}</a>`;
+                mainHtml += `<h2 class="section-title" id="sec-${group.id}">${group.group}</h2>`;
+                group.endpoints.forEach(ep => {
+                    mainHtml += renderEndpoint(ep, idx);
+                    idx++;
+                });
+            });
+
+            // Error codes section
+            mainHtml += `<h2 class="section-title" id="sec-errors">🚨 Codes d'erreur</h2>
+  <div class="errors-grid">
+    <div class="hd">Code</div><div class="hd">Signification</div><div class="hd">Cas typique</div>
+    <div><span class="badge badge-200">200</span></div><div>OK</div><div>GET, PUT, PATCH réussis</div>
+    <div><span class="badge badge-201">201</span></div><div>Created</div><div>Ressource créée (POST)</div>
+    <div><span class="badge badge-204">204</span></div><div>No Content</div><div>DELETE réussi</div>
+    <div><span class="badge badge-401">401</span></div><div>Unauthorized</div><div>Token manquant/invalide</div>
+    <div><span class="badge badge-403">403</span></div><div>Forbidden</div><div>Rôle insuffisant</div>
+    <div><span class="badge badge-404">404</span></div><div>Not Found</div><div>ID inexistant</div>
+    <div><span class="badge badge-409">409</span></div><div>Conflict</div><div>Doublon, dépendances actives</div>
+    <div><span class="badge badge-422">422</span></div><div>Unprocessable</div><div>Validation échouée</div>
+  </div>
+  <div class="body-section" style="margin-top:20px"><h4>Format d'erreur</h4>
+  <pre>{"message":"The given data was invalid.","errors":{"email":["The email field is required."]}}</pre></div>`;
+
+            nav.innerHTML = navHtml;
+            main.innerHTML = mainHtml;
+        }
+
+        function toggle(id) {
+            const body = document.getElementById('body-' + id);
+            const arrow = document.getElementById('arrow-' + id);
+            body.classList.toggle('open');
+            arrow.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+        }
+
+        function scrollTo(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+        function filterNav(q) {
+            document.querySelectorAll('#navLinks a').forEach(a => {
+                a.style.display = a.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        render();
+    </script>
+</body>
+
+</html>
