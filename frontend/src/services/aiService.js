@@ -14,9 +14,7 @@ export const aiService = {
         let url = `/summary/generate?level=${level}&style=${style}&format=${format}`;
         if (matiere) url += `&matiere=${encodeURIComponent(matiere)}`;
 
-        const response = await pythonApiClient.post(url, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await pythonApiClient.post(url, formData);
         return response.data;
     },
 
@@ -27,9 +25,7 @@ export const aiService = {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await pythonApiClient.post('/podcast/generate', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await pythonApiClient.post('/podcast/generate', formData);
         return response.data;
     },
 
@@ -51,9 +47,7 @@ export const aiService = {
         let url = `/quiz/generate?nb_questions=${nbQuestions}&difficulty=${difficulty}`;
         if (matiere) url += `&matiere=${encodeURIComponent(matiere)}`;
 
-        const response = await pythonApiClient.post(url, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await pythonApiClient.post(url, formData);
         return response.data;
     },
 
@@ -79,9 +73,7 @@ export const aiService = {
         if (matiere) url += `&matiere=${encodeURIComponent(matiere)}`;
         if (chapitre) url += `&chapitre=${encodeURIComponent(chapitre)}`;
 
-        const response = await pythonApiClient.post(url, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await pythonApiClient.post(url, formData);
         return response.data;
     },
 
@@ -99,9 +91,7 @@ export const aiService = {
     uploadForRAG: async (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        const response = await pythonApiClient.post('/upload', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await pythonApiClient.post('/upload', formData);
         return response.data;
     },
 

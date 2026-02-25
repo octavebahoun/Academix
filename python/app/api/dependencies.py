@@ -51,6 +51,7 @@ async def get_current_user(authorization: str = Header(None)):
     Vérifie le token Sanctum de Laravel dans la base MySQL.
     """
     if not authorization or not authorization.startswith("Bearer "):
+        print(f"DEBUG AUTH: Header Authorization manquant ou invalide. Reçu: {authorization}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token d'authentification manquant ou invalide"
@@ -60,6 +61,7 @@ async def get_current_user(authorization: str = Header(None)):
     
     # Format Sanctum : "{id}|{plain_text_token}"
     if "|" not in token_str:
+        print(f"DEBUG AUTH: Format de token invalide (pas de |). Token: {token_str}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Format de token invalide"
@@ -87,6 +89,7 @@ async def get_current_user(authorization: str = Header(None)):
             token_record = await cur.fetchone()
 
             if not token_record:
+                print(f"DEBUG AUTH: Token introuvable en base. ID: {token_id}, HASH: {hashed_token}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token invalide ou expiré"
@@ -95,6 +98,7 @@ async def get_current_user(authorization: str = Header(None)):
             # 2. Vérifier l'utilisateur associé
             model_info = MODEL_MAP.get(token_record['tokenable_type'])
             if not model_info:
+                print(f"DEBUG AUTH: Type d'utilisateur non supporté: {token_record['tokenable_type']}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=f"Type d'utilisateur non supporté : {token_record['tokenable_type']}"
@@ -105,6 +109,7 @@ async def get_current_user(authorization: str = Header(None)):
             user = await cur.fetchone()
 
             if not user:
+                print(f"DEBUG AUTH: Utilisateur introuvable pour ID: {token_record['tokenable_id']} et table {model_info['table']}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Utilisateur introuvable"
