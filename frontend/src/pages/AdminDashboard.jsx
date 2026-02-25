@@ -10,6 +10,7 @@ import { authService } from "../services/authService";
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [theme, setTheme] = useState("light");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Initialisation du thème
   useEffect(() => {
@@ -55,20 +56,23 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors font-sans">
-      {/* Sidebar - fixed on the left */}
+      {/* Sidebar - fixed on the left (responsive) */}
       <AdminSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onLogout={handleLogout}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-64 px-8 py-6">
+      <div className="flex-1 md:ml-64 px-4 py-4 md:px-8 md:py-6 overflow-x-hidden min-w-0">
         <AdminHeader
           title={title}
           subtitle={subtitle}
           theme={theme}
           onThemeToggle={handleThemeToggle}
+          onMenuToggle={() => setIsMobileMenuOpen(true)}
         />
 
         <main className="relative">

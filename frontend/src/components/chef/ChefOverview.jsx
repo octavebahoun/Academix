@@ -64,7 +64,7 @@ export default function ChefOverview({ data, onTabChange }) {
       {/* Banner */}
       <motion.div
         variants={itemVariants}
-        className="w-full bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl p-8 flex justify-between items-center text-white shadow-lg"
+        className="w-full bg-gradient-to-r from-emerald-500 to-blue-600 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4 text-white shadow-lg"
       >
         <div>
           <h2 className="text-3xl font-bold font-display">
@@ -76,7 +76,7 @@ export default function ChefOverview({ data, onTabChange }) {
             {authService.getCurrentUser()?.nom}
           </p>
         </div>
-        <div className="text-right">
+        <div className="text-center md:text-right mt-4 md:mt-0">
           <p className="text-sm opacity-80 uppercase tracking-widest font-bold">
             Année académique
           </p>

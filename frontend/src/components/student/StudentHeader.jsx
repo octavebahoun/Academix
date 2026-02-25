@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 
 export default function StudentHeader({
   title,
@@ -6,21 +6,31 @@ export default function StudentHeader({
   theme,
   onThemeToggle,
   rightAction,
+  onMenuToggle,
 }) {
   return (
-    <header className="flex items-center justify-between mb-6">
-      <div>
-        <h1 className="text-3xl font-black font-display text-slate-900 dark:text-white tracking-tight capitalize">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">
-            {subtitle}
-          </p>
-        )}
+    <header className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onMenuToggle}
+          className="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          aria-label="Toggle menu"
+        >
+          <Menu size={24} />
+        </button>
+        <div>
+          <h1 className="text-3xl font-black font-display text-slate-900 dark:text-white tracking-tight capitalize">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center self-end md:self-auto gap-4">
         {rightAction}
         {onThemeToggle && (
           <button

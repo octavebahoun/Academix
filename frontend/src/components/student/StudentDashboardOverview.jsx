@@ -180,7 +180,7 @@ export default function StudentDashboardOverview() {
           variants={itemVariants}
           className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 shadow-sm flex flex-col"
         >
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
               <h3 className="text-lg font-black font-display uppercase italic tracking-tight text-slate-900 dark:text-white mb-1">
                 Évolution Mensuelle

@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 
 export default function AdminHeader({
   title,
@@ -6,19 +6,29 @@ export default function AdminHeader({
   theme,
   onThemeToggle,
   rightAction,
+  onMenuToggle,
 }) {
   return (
-    <header className="flex items-center justify-between mb-8">
-      <div>
-        <h1 className="text-2xl font-black font-display italic text-slate-900 dark:text-white tracking-tight">
-          {title}
-        </h1>
-        <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">
-          {subtitle}
-        </p>
+    <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onMenuToggle}
+          className="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          aria-label="Toggle menu"
+        >
+          <Menu size={24} />
+        </button>
+        <div>
+          <h1 className="text-2xl font-black font-display italic text-slate-900 dark:text-white tracking-tight">
+            {title}
+          </h1>
+          <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">
+            {subtitle}
+          </p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center self-end md:self-auto gap-4">
         {rightAction}
         <button
           onClick={onThemeToggle}

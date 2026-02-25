@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@remotion/transitions": "^4.0.428",
+    "lucide-react": "^0.575.0"
+  }
+}

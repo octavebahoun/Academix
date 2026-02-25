@@ -131,7 +131,7 @@ export default function AdminOverview() {
         variants={itemVariants}
         className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-8 shadow-sm"
       >
-        <div className="flex justify-between items-center mb-8 border-b border-slate-100 dark:border-slate-800 pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-100 dark:border-slate-800 pb-6">
           <div>
             <h2 className="text-2xl font-black font-display text-slate-900 dark:text-white uppercase tracking-tight italic">
               Journal de Bord
