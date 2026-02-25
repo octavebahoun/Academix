@@ -1,3 +1,5 @@
+
+https://github.com/user-attachments/assets/5d52b0b9-f747-48f3-8241-776be3f248c5
 <div align="center">
   <h1>🚀 AcademiX Platform</h1>
   <p><em>L'assistant académique indispensable propulsé par l'IA</em></p>
@@ -16,7 +18,7 @@ AcademiX est une plateforme académique tout-en-un qui combine organisation inte
 **Video de présentation de la solution**:
 
 https://github.com/user-attachments/assets/605575f4-60c2-4e1d-841c-1c5e182d0db6
-- **Lien de connexion** : https://drive.google.com/file/d/1v_0wWAZrGHXexBTI-7_gWSbs9kTB-yby/view?usp=sharing
+- **Lien de la video** : https://drive.google.com/file/d/1v_0wWAZrGHXexBTI-7_gWSbs9kTB-yby/view?usp=sharing
 
 
 
@@ -32,8 +34,7 @@ Vous pouvez tester l'application directement en ligne. Nous avons mis en place *
 - **Mot de passe** : `admin2026`
   _(Ce flux permet la gestion globale de l'établissement: départements, configurations système, etc.)_
 
-  _🎬 Aperçu vidéo du parcours :_
-  https://github.com/user-attachments/assets/02cf5b8d-6dbd-422a-b796-31fe51bf401f
+https://github.com/user-attachments/assets/02cf5b8d-6dbd-422a-b796-31fe51bf401f
 
 ### 2️⃣ Flux Chef de Département
 
@@ -42,8 +43,7 @@ Vous pouvez tester l'application directement en ligne. Nous avons mis en place *
 - **Mot de passe** : `mourchid2026`
   _(Ce flux permet l'import et la gestion des étudiants d'une filière, ainsi que l'assignation des notes et emplois du temps.)_
 
-  _🎬 Aperçu vidéo du parcours :_
-  https://github.com/user-attachments/assets/2bca6ac0-dc22-40e8-a51d-d1c8c023d3f0
+https://github.com/user-attachments/assets/2bca6ac0-dc22-40e8-a51d-d1c8c023d3f0
 
 ### 3️⃣ Flux Étudiant
 
@@ -52,8 +52,7 @@ Vous pouvez tester l'application directement en ligne. Nous avons mis en place *
 - **Mot de passe** : `ETU002`
   _(Ce flux donne l'accès au tableau de bord de l'étudiant, avec ses notes, son emploi du temps et les modules d'Intelligence Artificielle.)_
 
-  _🎬 Aperçu vidéo du parcours :_
-  https://github.com/user-attachments/assets/b5c4a33e-2e9b-41ad-b384-f3311012edd5
+https://github.com/user-attachments/assets/b5c4a33e-2e9b-41ad-b384-f3311012edd5
 
 ---
 
