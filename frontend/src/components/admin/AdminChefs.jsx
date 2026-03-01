@@ -14,11 +14,14 @@ import { cn } from "../../utils/cn";
 import { useState, useEffect } from "react";
 import { laravelApiClient } from "../../api/client";
 import AddChefModal from "./AddChefModal";
+import EditChefModal from "./EditChefModal";
 
 export default function AdminChefs() {
   const [chefs, setChefs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditChefOpen, setIsEditChefOpen] = useState(false);
+  const [chefToEdit, setChefToEdit] = useState(null);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -106,10 +109,10 @@ export default function AdminChefs() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
               <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                Liste des Responsables
+                Chefs de Département
               </h3>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                Gérez les comptes et les accès
+                Responsables académiques par département
               </p>
             </div>
           </div>
@@ -188,27 +191,11 @@ export default function AdminChefs() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
-                              const tel = window.prompt(
-                                `Modifier le téléphone pour ${chef.nom} :`,
-                                chef.telephone || "",
-                              );
-                              if (tel !== null) {
-                                laravelApiClient
-                                  .put(`/admin/chefs-departement/${chef.id}`, {
-                                    telephone: tel,
-                                  })
-                                  .then(() => fetchChefs())
-                                  .catch((err) =>
-                                    alert(
-                                      "Erreur de mise à jour: " +
-                                        (err.response?.data?.message ||
-                                          err.message),
-                                    ),
-                                  );
-                              }
+                              setChefToEdit(chef);
+                              setIsEditChefOpen(true);
                             }}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-500 transition-all border border-transparent hover:border-blue-100"
-                            title="Editer"
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-500 transition-all border border-transparent hover:border-amber-100"
+                            title="Modifier"
                           >
                             <Edit3 size={18} />
                           </button>
@@ -248,6 +235,13 @@ export default function AdminChefs() {
       <AddChefModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchChefs}
+      />
+
+      <EditChefModal
+        isOpen={isEditChefOpen}
+        onClose={() => setIsEditChefOpen(false)}
+        chef={chefToEdit}
         onSuccess={fetchChefs}
       />
     </>

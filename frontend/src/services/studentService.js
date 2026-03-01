@@ -64,5 +64,11 @@ export const studentService = {
     markAlerteAsRead: async (id) => {
         const response = await laravelApiClient.patch(`/student/alertes/${id}/read`);
         return response.data;
-    }
+    },
+
+    // Profil — champs supportés : telephone, photo (url), objectif_moyenne, style_apprentissage
+    updateProfil: async (data) => {
+        const response = await laravelApiClient.put('/student/profil', data);
+        return response.data;
+    },
 };

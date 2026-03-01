@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BrainCircuit,
   FileText,
   ClipboardCheck,
   Headphones,
@@ -10,17 +9,123 @@ import {
   Bot,
   ArrowLeft,
   Sparkles,
+  Zap,
+  BookOpen,
+  BrainCircuit,
   ChevronRight,
 } from "lucide-react";
-import { aiService } from "../../services/aiService";
+import { cn } from "../../utils/cn";
 
-// Import des composants d'outils
 import SummaryTool from "../ai/SummaryTool";
 import QuizTool from "../ai/QuizTool";
 import PodcastTool from "../ai/PodcastTool";
 import ExerciseTool from "../ai/ExerciseTool";
 import ImageTool from "../ai/ImageTool";
 import ProfAITool from "../ai/ProfAITool";
+
+// ─── Constantes ───────────────────────────────────────────────────────────────
+
+const TOOLS = [
+  {
+    id: "summary",
+    num: "01",
+    title: "Résumés",
+    description: "Transformez vos notes en fiches synthétiques intelligentes.",
+    icon: FileText,
+    gradient: "from-blue-500 to-indigo-600",
+    accent: "border-blue-500",
+    tag: "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
+    label: "Cours & PDF",
+  },
+  {
+    id: "quiz",
+    num: "02",
+    title: "Quiz",
+    description: "Mémorisez plus vite avec des QCM personnalisés sur vos PDF.",
+    icon: ClipboardCheck,
+    gradient: "from-emerald-500 to-teal-600",
+    accent: "border-emerald-500",
+    tag: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
+    label: "Mémorisation",
+  },
+  {
+    id: "podcast",
+    num: "03",
+    title: "Podcasts IA",
+    description: "Écoutez vos révisions en format audio immersif.",
+    icon: Headphones,
+    gradient: "from-rose-500 to-orange-500",
+    accent: "border-rose-500",
+    tag: "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400",
+    label: "Audio",
+  },
+  {
+    id: "exercises",
+    num: "04",
+    title: "Exercices",
+    description: "Entraînez-vous avec des séries d'exercices progressifs.",
+    icon: Dumbbell,
+    gradient: "from-violet-500 to-purple-600",
+    accent: "border-violet-500",
+    tag: "bg-violet-100 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400",
+    label: "Pratique",
+  },
+  {
+    id: "image",
+    num: "05",
+    title: "Visualisation",
+    description: "Créez des schémas et illustrations pour mieux comprendre.",
+    icon: ImageIcon,
+    gradient: "from-amber-500 to-yellow-500",
+    accent: "border-amber-500",
+    tag: "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+    label: "Visuel",
+  },
+  {
+    id: "prof",
+    num: "06",
+    title: "Prof IA",
+    description: "Posez toutes vos questions à votre tuteur personnel IA.",
+    icon: Bot,
+    gradient: "from-slate-700 to-slate-900",
+    accent: "border-slate-500",
+    tag: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    label: "Tuteur",
+  },
+];
+
+const STATS = [
+  {
+    icon: BookOpen,
+    label: "Outils IA",
+    value: "6",
+    color: "text-emerald-500",
+    bg: "bg-emerald-50 dark:bg-emerald-500/10",
+  },
+  {
+    icon: Zap,
+    label: "Toujours dispo",
+    value: "24/7",
+    color: "text-blue-500",
+    bg: "bg-blue-50 dark:bg-blue-500/10",
+  },
+  {
+    icon: BrainCircuit,
+    label: "Modèles actifs",
+    value: "3",
+    color: "text-violet-500",
+    bg: "bg-violet-50 dark:bg-violet-500/10",
+  },
+  {
+    icon: Sparkles,
+    label: "Générations/jour",
+    value: "∞",
+    color: "text-amber-500",
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+  },
+];
+
+// ─── ToolView ────────────────────────────────────────────────────────────────
 
 const ToolView = ({ tool, onBack }) => {
   const renderTool = () => {
@@ -49,161 +154,223 @@ const ToolView = ({ tool, onBack }) => {
       exit={{ opacity: 0, x: -20 }}
       className="space-y-8"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-6">
-          <button
-            onClick={onBack}
-            className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all text-slate-500 hover:text-indigo-500"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex items-center gap-4">
-            <div
-              className={`p-4 rounded-2xl bg-gradient-to-br ${tool.color} text-white shadow-lg`}
+      {/* Header outil */}
+      <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 to-slate-800 shadow-lg">
+        {/* dot pattern */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+        >
+          <svg width="100%" height="100%">
+            <defs>
+              <pattern
+                id="toolDots"
+                width="20"
+                height="20"
+                patternUnits="userSpaceOnUse"
+              >
+                <circle cx="2" cy="2" r="1.2" fill="white" opacity="0.07" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#toolDots)" />
+          </svg>
+        </div>
+        <div
+          className="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 px-6 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-5">
+            <button
+              onClick={onBack}
+              className="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
             >
-              <tool.icon size={28} />
+              <ArrowLeft size={18} />
+            </button>
+            <div
+              className={`p-3 rounded-2xl bg-linear-to-br ${tool.gradient} text-white shadow-lg`}
+            >
+              <tool.icon size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight italic leading-none mb-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-0.5">
+                {tool.label}
+              </p>
+              <h2 className="text-xl font-black text-white uppercase tracking-tight leading-none">
                 {tool.title}
               </h2>
-              <p className="text-slate-500 text-xs font-medium">
-                {tool.description}
-              </p>
             </div>
           </div>
-        </div>
-
-        <div className="hidden lg:flex items-center gap-3 bg-indigo-50 dark:bg-indigo-500/10 px-4 py-2 rounded-xl">
-          <Sparkles size={16} className="text-indigo-500" />
-          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest leading-none">
-            Intelligence Artificielle Activée
-          </span>
+          <div className="flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 px-4 py-2 rounded-xl">
+            <Sparkles size={14} className="text-emerald-400" />
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+              IA Activée
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="bg-transparent min-h-[500px]">{renderTool()}</div>
+      <div className="min-h-125">{renderTool()}</div>
     </motion.div>
   );
 };
 
+// ─── Main ────────────────────────────────────────────────────────────────────
+
 export default function StudentAIRevision() {
   const [activeToolId, setActiveToolId] = useState(null);
-
-  const tools = [
-    {
-      id: "summary",
-      title: "Résumez vos cours",
-      description:
-        "Transformez vos notes en fiches synthétiques intelligentes.",
-      icon: FileText,
-      color: "from-blue-500 to-indigo-600",
-      delay: 0,
-    },
-    {
-      id: "quiz",
-      title: "Obtenez des quiz",
-      description:
-        "Mémorisez plus vite avec des QCM personnalisés sur vos PDF.",
-      icon: ClipboardCheck,
-      color: "from-emerald-500 to-teal-600",
-      delay: 0.1,
-    },
-    {
-      id: "podcast",
-      title: "Podcasts IA",
-      description: "Écoutez vos révisions en format audio immersif.",
-      icon: Headphones,
-      color: "from-rose-500 to-orange-600",
-      delay: 0.2,
-    },
-    {
-      id: "exercises",
-      title: "Exercices",
-      description: "Entraînez-vous avec des séries d'exercices progressifs.",
-      icon: Dumbbell,
-      color: "from-purple-500 to-pink-600",
-      delay: 0.3,
-    },
-    {
-      id: "image",
-      title: "Visualisez en images",
-      description:
-        "Créez des schémas et des illustrations pour mieux comprendre.",
-      icon: ImageIcon,
-      color: "from-amber-500 to-yellow-600",
-      delay: 0.4,
-    },
-    {
-      id: "prof",
-      title: "Prof IA",
-      description: "Posez toutes vos questions à votre tuteur personnel IA.",
-      icon: Bot,
-      color: "from-indigo-600 to-purple-800",
-      delay: 0.5,
-    },
-  ];
-
-  const activeTool = tools.find((t) => t.id === activeToolId);
+  const activeTool = TOOLS.find((t) => t.id === activeToolId);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto pb-20">
       <AnimatePresence mode="wait">
         {!activeToolId ? (
           <motion.div
             key="grid"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-12"
+            exit={{ opacity: 0, y: -16 }}
+            className="space-y-8"
           >
-            {/* Header / Intro */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <p className="text-slate-500 text-sm font-medium max-w-xs border-l-2 border-indigo-500 pl-4 py-1">
-                Optimisez chaque minute de votre temps avec nos puissants
-                moteurs d'intelligence artificielle pédagogique.
-              </p>
+            {/* ── Bannière hero ── */}
+            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 to-slate-800 shadow-lg">
+              {/* dot pattern */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                aria-hidden="true"
+              >
+                <svg width="100%" height="100%">
+                  <defs>
+                    <pattern
+                      id="aiDots"
+                      width="20"
+                      height="20"
+                      patternUnits="userSpaceOnUse"
+                    >
+                      <circle
+                        cx="2"
+                        cy="2"
+                        r="1.2"
+                        fill="white"
+                        opacity="0.07"
+                      />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#aiDots)" />
+                </svg>
+              </div>
+              <div className="absolute -top-16 -right-16 w-52 h-52 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+              <div className="relative z-10 px-8 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles size={14} className="text-emerald-400" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                      Intelligence Artificielle Pédagogique
+                    </span>
+                  </div>
+                  <h1 className="text-2xl font-black text-white uppercase tracking-tight leading-tight mb-2">
+                    Portail de Révision IA
+                  </h1>
+                  <p className="text-sm text-white/60 font-medium max-w-sm">
+                    6 outils IA pour optimiser chaque minute de vos révisions.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {["Résumés", "Quiz", "Podcasts", "Exercices"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white/10 text-white/70"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tools.map((tool) => (
+            {/* ── Stat cards ── */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {STATS.map(({ icon: Icon, label, value, color, bg }) => (
+                <motion.div
+                  key={label}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 flex items-center gap-4 shadow-sm"
+                >
+                  <div
+                    className={cn(
+                      "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+                      bg,
+                    )}
+                  >
+                    <Icon size={20} className={color} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">
+                      {label}
+                    </p>
+                    <p className={cn("text-2xl font-black", color)}>{value}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* ── Grille des outils ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {TOOLS.map((tool, i) => (
                 <motion.button
                   key={tool.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: tool.delay }}
-                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  transition={{ delay: i * 0.06 }}
+                  whileHover={{ y: -4, transition: { duration: 0.18 } }}
                   onClick={() => setActiveToolId(tool.id)}
-                  className="group relative bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl transition-all border border-slate-100 dark:border-slate-800 text-left overflow-hidden h-full flex flex-col justify-between"
+                  className={cn(
+                    "group relative bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all border-t-4 border border-slate-100 dark:border-slate-800 text-left overflow-hidden flex flex-col justify-between min-h-52",
+                    tool.accent,
+                  )}
                 >
-                  {/* Background Decoration */}
+                  {/* Glow bg */}
                   <div
-                    className={`absolute -right-8 -top-8 w-32 h-32 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-10 rounded-full transition-opacity duration-500 blur-2xl`}
-                  ></div>
+                    className={`absolute -right-8 -bottom-8 w-32 h-32 bg-linear-to-br ${tool.gradient} opacity-0 group-hover:opacity-8 rounded-full transition-opacity duration-500 blur-2xl`}
+                  />
+
+                  <div className="flex items-start justify-between mb-4">
+                    {/* Numéro */}
+                    <span className="text-[10px] font-black text-slate-300 dark:text-slate-700 tabular-nums">
+                      {tool.num}
+                    </span>
+                    {/* Badge */}
+                    <span
+                      className={cn(
+                        "text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg",
+                        tool.tag,
+                      )}
+                    >
+                      {tool.label}
+                    </span>
+                  </div>
 
                   <div>
                     <div
-                      className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white shadow-lg mb-8 group-hover:scale-110 transition-transform`}
+                      className={`w-12 h-12 rounded-2xl bg-linear-to-br ${tool.gradient} flex items-center justify-center text-white shadow-md mb-4 group-hover:scale-105 transition-transform`}
                     >
-                      <tool.icon size={28} />
+                      <tool.icon size={22} />
                     </div>
-
-                    <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight italic mb-3">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1.5">
                       {tool.title}
                     </h3>
-
-                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed font-medium">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
                       {tool.description}
                     </p>
                   </div>
 
-                  <div className="mt-8 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-500 transition-colors">
-                      Explorer l'outil
+                  <div className="mt-5 flex items-center justify-between">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                      Ouvrir
                     </span>
-                    <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                      <ChevronRight size={16} />
+                    <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                      <ChevronRight size={14} />
                     </div>
                   </div>
                 </motion.button>

@@ -11,6 +11,7 @@ import { authService } from "../services/authService";
 
 export default function ChefDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [initialFiliereId, setInitialFiliereId] = useState(null);
   const [theme, setTheme] = useState("light");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const deptId = 1; // Simulation
@@ -32,6 +33,11 @@ export default function ChefDashboard() {
     } else {
       document.documentElement.classList.remove("dark");
     }
+  };
+
+  const handleOverviewTabChange = (tab, filiereId = null) => {
+    setActiveTab(tab);
+    if (filiereId != null) setInitialFiliereId(filiereId);
   };
 
   const handleLogout = () => {
@@ -86,7 +92,7 @@ export default function ChefDashboard() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 px-4 py-4 md:px-8 md:py-6 overflow-x-hidden min-w-0">
+      <div className="flex-1 md:ml-64 px-4 pt-4 pb-4 md:px-8 md:pt-0 md:pb-6 overflow-x-hidden min-w-0">
         <ChefHeader
           title={title}
           subtitle={subtitle}
@@ -105,7 +111,10 @@ export default function ChefDashboard() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                <ChefOverview data={data} onTabChange={setActiveTab} />
+                <ChefOverview
+                  data={data}
+                  onTabChange={handleOverviewTabChange}
+                />
               </motion.div>
             )}
 
@@ -117,7 +126,10 @@ export default function ChefDashboard() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                <ChefFilieres />
+                <ChefFilieres
+                  initialFiliereId={initialFiliereId}
+                  onInitialFiliereConsumed={() => setInitialFiliereId(null)}
+                />
               </motion.div>
             )}
 

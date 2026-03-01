@@ -9,6 +9,7 @@ import StudentNotes from "../components/student/StudentNotes";
 import StudentEmploiTemps from "../components/student/StudentEmploiTemps";
 import StudentAIRevision from "../components/student/StudentAIRevision";
 import StudentProfil from "../components/student/StudentProfil";
+import StudentOnboarding from "../components/student/StudentOnboarding";
 import { authService } from "../services/authService";
 
 export default function StudentDashboard() {
@@ -87,7 +88,7 @@ export default function StudentDashboard() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 px-4 py-4 md:px-8 md:py-6 overflow-hidden h-screen flex flex-col min-w-0">
+      <div className="flex-1 md:ml-64 px-4 pt-4 pb-4 md:px-8 md:pt-0 md:pb-6 overflow-hidden h-screen flex flex-col min-w-0">
         <StudentHeader
           title={title}
           subtitle={subtitle}
@@ -106,7 +107,7 @@ export default function StudentDashboard() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                <StudentDashboardOverview />
+                <StudentDashboardOverview onNavigate={setActiveTab} />
               </motion.div>
             )}
 
@@ -172,6 +173,8 @@ export default function StudentDashboard() {
           </AnimatePresence>
         </main>
       </div>
+
+      <StudentOnboarding activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 }

@@ -144,6 +144,16 @@ class StatistiqueController extends Controller
                 ->select(DB::raw('SUM(notes.note * matieres.coefficient) / SUM(matieres.coefficient) as moyenne'))
                 ->value('moyenne');
 
+            $departements_stats = Departement::all()->map(function ($dept) {
+                $filiereIds = Filiere::where('departement_id', $dept->id)->pluck('id');
+                $total_etudiants = User::whereIn('filiere_id', $filiereIds)->where('is_active', true)->count();
+                return [
+                    'code' => $dept->code,
+                    'nom' => $dept->nom,
+                    'total_etudiants' => $total_etudiants,
+                ];
+            });
+
             $data = [
                 'role' => 'super_admin',
                 'resume' => [
@@ -153,7 +163,7 @@ class StatistiqueController extends Controller
                     'total_chefs' => \App\Models\ChefDepartement::count(),
                     'moyenne_generale' => round((float) $moyenneGenerale, 2),
                 ],
-
+                'departements_stats' => $departements_stats,
                 'derniers_imports' => ImportLog::with('admin:id,nom,prenom')->latest()->take(5)->get(),
             ];
             return response()->json($data);

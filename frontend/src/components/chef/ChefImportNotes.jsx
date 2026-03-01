@@ -7,14 +7,17 @@ import {
   AlertTriangle,
   FileSpreadsheet,
   History,
+  PenLine,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { laravelApiClient } from "../../api/client";
 import { cn } from "../../utils/cn";
 import ImportNotesModal from "./ImportNotesModal";
+import AddNoteModal from "./AddNoteModal";
 
 export default function ChefImportNotes() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -74,13 +77,22 @@ export default function ChefImportNotes() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="relative z-10 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold uppercase tracking-widest px-6 py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-600 hover:text-white transition-all shadow-lg active:scale-95 whitespace-nowrap group text-xs"
-          >
-            <UploadCloud size={18} />
-            Importer un CSV
-          </button>
+          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3">
+            <button
+              onClick={() => setIsAddNoteModalOpen(true)}
+              className="bg-emerald-600 text-white font-bold uppercase tracking-widest px-6 py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 whitespace-nowrap text-xs"
+            >
+              <PenLine size={18} />
+              Saisie individuelle
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold uppercase tracking-widest px-6 py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-600 hover:text-white transition-all shadow-lg active:scale-95 whitespace-nowrap group text-xs"
+            >
+              <UploadCloud size={18} />
+              Importer un CSV
+            </button>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -222,6 +234,12 @@ export default function ChefImportNotes() {
       <ImportNotesModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchHistory}
+      />
+
+      <AddNoteModal
+        isOpen={isAddNoteModalOpen}
+        onClose={() => setIsAddNoteModalOpen(false)}
         onSuccess={fetchHistory}
       />
     </>

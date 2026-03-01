@@ -66,7 +66,7 @@ export default function AdminDashboard() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 px-4 py-4 md:px-8 md:py-6 overflow-x-hidden min-w-0">
+      <div className="flex-1 md:ml-64 px-4 pt-4 pb-4 md:px-8 md:pt-0 md:pb-6 overflow-x-hidden min-w-0">
         <AdminHeader
           title={title}
           subtitle={subtitle}

@@ -4,11 +4,18 @@ import { cn } from "../../utils/cn";
 import { useState, useEffect } from "react";
 import { laravelApiClient } from "../../api/client";
 import AddDepartementModal from "./AddDepartementModal";
+import EditDepartementModal from "./EditDepartementModal";
+import ViewDepartementModal from "./ViewDepartementModal";
 
 export default function AdminDepartements() {
   const [departements, setDepartements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [chefParDept, setChefParDept] = useState({});
+  const [isEditDeptOpen, setIsEditDeptOpen] = useState(false);
+  const [deptToEdit, setDeptToEdit] = useState(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [deptToView, setDeptToView] = useState(null);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -27,8 +34,18 @@ export default function AdminDepartements() {
   const fetchDepartements = async () => {
     setLoading(true);
     try {
-      const response = await laravelApiClient.get("/admin/departements");
-      setDepartements(response.data.data);
+      const [deptsRes, chefsRes] = await Promise.all([
+        laravelApiClient.get("/admin/departements"),
+        laravelApiClient.get("/admin/chefs-departement"),
+      ]);
+      setDepartements(deptsRes.data.data);
+      const map = {};
+      (chefsRes.data.data || []).forEach((chef) => {
+        if (chef.is_active && chef.departement_id) {
+          map[chef.departement_id] = chef;
+        }
+      });
+      setChefParDept(map);
     } catch (error) {
       console.error("Erreur departements:", error);
     } finally {
@@ -81,7 +98,7 @@ export default function AdminDepartements() {
               <motion.div
                 key={dept.id}
                 variants={itemVariants}
-                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all flex flex-col justify-between group"
+                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex justify-between items-start mb-6">
@@ -96,24 +113,11 @@ export default function AdminDepartements() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
-                          const nouveauNom = window.prompt(
-                            "Nouveau nom du département :",
-                            dept.nom,
-                          );
-                          if (!nouveauNom) return;
-                          laravelApiClient
-                            .put(`/admin/departements/${dept.id}`, {
-                              nom: nouveauNom,
-                            })
-                            .then(() => fetchDepartements())
-                            .catch((err) =>
-                              alert(
-                                "Erreur lors de la mise à jour: " +
-                                  (err.response?.data?.message || err.message),
-                              ),
-                            );
+                          setDeptToEdit(dept);
+                          setIsEditDeptOpen(true);
                         }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-500 transition-colors"
+                        title="Modifier"
                       >
                         <Edit3 size={16} />
                       </button>
@@ -165,13 +169,19 @@ export default function AdminDepartements() {
                       {dept.filieres_count}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 dark:text-slate-400 font-medium tracking-tight">
-                      Chefs
+                  <div className="flex justify-between items-center text-sm gap-3">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium tracking-tight shrink-0">
+                      Chef
                     </span>
-                    <span className="font-bold text-slate-900 dark:text-white">
-                      {dept.chefs_count}
-                    </span>
+                    {chefParDept[dept.id] ? (
+                      <span className="font-bold text-slate-900 dark:text-white text-right truncate">
+                        {chefParDept[dept.id].prenom} {chefParDept[dept.id].nom}
+                      </span>
+                    ) : (
+                      <span className="font-bold text-slate-400 dark:text-slate-500 italic text-xs">
+                        Non assigné
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -179,7 +189,13 @@ export default function AdminDepartements() {
                   <span className="text-slate-400 dark:text-slate-500 font-bold uppercase text-[10px] tracking-widest">
                     Détails
                   </span>
-                  <button className="text-emerald-500 font-black flex items-center gap-1 hover:gap-2 transition-all">
+                  <button
+                    onClick={() => {
+                      setDeptToView(dept);
+                      setIsViewOpen(true);
+                    }}
+                    className="text-emerald-500 font-black flex items-center gap-1 hover:gap-2 transition-all"
+                  >
                     VOIR PLUS <ArrowRight size={14} />
                   </button>
                 </div>
@@ -223,6 +239,19 @@ export default function AdminDepartements() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchDepartements}
+      />
+
+      <EditDepartementModal
+        isOpen={isEditDeptOpen}
+        onClose={() => setIsEditDeptOpen(false)}
+        departement={deptToEdit}
+        onSuccess={fetchDepartements}
+      />
+
+      <ViewDepartementModal
+        isOpen={isViewOpen}
+        onClose={() => setIsViewOpen(false)}
+        departement={deptToView}
       />
     </>
   );

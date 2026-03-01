@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload,
   MoreVertical,
@@ -7,15 +7,24 @@ import {
   BookOpen,
   GraduationCap,
   X,
+  Pencil,
+  Trash2,
+  UserPlus,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { laravelApiClient } from "../../api/client";
+import { toast } from "react-hot-toast";
 import AddFiliereModal from "./AddFiliereModal";
+import EditFiliereModal from "./EditFiliereModal";
+import AddEtudiantModal from "./AddEtudiantModal";
 import ImportEtudiantsModal from "./ImportEtudiantsModal";
 import ImportEmploiModal from "./ImportEmploiModal";
 
-export default function ChefFilieres() {
+export default function ChefFilieres({
+  initialFiliereId = null,
+  onInitialFiliereConsumed,
+}) {
   const [filieres, setFilieres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -29,6 +38,16 @@ export default function ChefFilieres() {
     emploi: [],
     loading: false,
   });
+  // Dropdown menu
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
+  // Edit / Delete filière
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [filiereToEdit, setFiliereToEdit] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  // Ajouter étudiant
+  const [isAddEtudiantModalOpen, setIsAddEtudiantModalOpen] = useState(false);
+  const [filiereForEtudiant, setFiliereForEtudiant] = useState(null);
 
   useEffect(() => {
     if (selectedFiliere) {
@@ -80,6 +99,67 @@ export default function ChefFilieres() {
     }
   };
 
+  // Fermer le dropdown si on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleEditFiliere = (filiere) => {
+    setFiliereToEdit(filiere);
+    setIsEditModalOpen(true);
+    setOpenMenuId(null);
+  };
+
+  const handleDeleteFiliere = async (filiere) => {
+    if (
+      !confirm(
+        `Supprimer la filière "${filiere.nom}" ? Cette action est irréversible.`,
+      )
+    )
+      return;
+    setIsDeleting(true);
+    setOpenMenuId(null);
+    try {
+      await laravelApiClient.delete(`/departement/filieres/${filiere.id}`);
+      toast.success("Filière supprimée avec succès");
+      if (selectedFiliere?.id === filiere.id) setSelectedFiliere(null);
+      fetchFilieres();
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Erreur lors de la suppression";
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleAddEtudiant = (filiere) => {
+    setFiliereForEtudiant(filiere);
+    setIsAddEtudiantModalOpen(true);
+  };
+
+  // Auto-ouvre la filière ciblée depuis ChefOverview
+  useEffect(() => {
+    if (initialFiliereId != null && filieres.length > 0) {
+      const target = filieres.find((f) => f.id === initialFiliereId);
+      if (target) {
+        setSelectedFiliere(target);
+        // Scroll vers la filière après un court délai
+        setTimeout(() => {
+          const el = document.getElementById(`filiere-${target.id}`);
+          el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+      }
+      onInitialFiliereConsumed?.();
+    }
+  }, [initialFiliereId, filieres]);
+
   return (
     <>
       <motion.div
@@ -101,16 +181,25 @@ export default function ChefFilieres() {
               {filieres.length} Programmes d'études
             </p>
           </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="flex-1 md:flex-none border border-slate-900 dark:border-white text-slate-900 dark:text-white font-bold text-xs px-5 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 transition-all active:scale-95"
+              className="flex-1 md:flex-none border border-emerald-600 text-emerald-600 dark:border-emerald-500 dark:text-emerald-400 font-bold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white transition-all active:scale-95"
             >
               <Upload size={16} /> Import Étudiants
             </button>
             <button
+              onClick={() => {
+                setFiliereForEtudiant(null);
+                setIsAddEtudiantModalOpen(true);
+              }}
+              className="flex-1 md:flex-none bg-emerald-500 text-white font-bold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+            >
+              <UserPlus size={16} /> Ajouter Étudiant
+            </button>
+            <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex-1 md:flex-none bg-blue-600 text-white font-bold text-xs px-5 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-md active:scale-95"
+              className="flex-1 md:flex-none bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs px-4 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-700 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-slate-900 transition-all shadow-md active:scale-95"
             >
               <Plus size={16} /> Nouvelle Filière
             </button>
@@ -119,7 +208,7 @@ export default function ChefFilieres() {
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
           </div>
         ) : (
           <motion.div
@@ -131,27 +220,69 @@ export default function ChefFilieres() {
             {filieres.map((filiere) => (
               <motion.div
                 key={filiere.id}
+                id={`filiere-${filiere.id}`}
                 variants={itemVariants}
                 className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group"
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
                         {filiere.niveau?.charAt(0) || "F"}
                       </div>
                       <div>
                         <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
                           {filiere.nom}
                         </h3>
-                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">
+                        <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-0.5">
                           {filiere.code} • {filiere.annee_academique}
                         </p>
                       </div>
                     </div>
-                    <button className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                      <MoreVertical size={20} />
-                    </button>
+                    <div
+                      className="relative"
+                      ref={openMenuId === filiere.id ? menuRef : null}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(
+                            openMenuId === filiere.id ? null : filiere.id,
+                          );
+                        }}
+                        className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                      >
+                        <MoreVertical size={20} />
+                      </button>
+
+                      <AnimatePresence>
+                        {openMenuId === filiere.id && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: -4 }}
+                            transition={{ duration: 0.12 }}
+                            className="absolute right-0 top-8 z-50 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden min-w-40"
+                          >
+                            <button
+                              onClick={() => handleEditFiliere(filiere)}
+                              className="flex items-center gap-3 w-full px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400 transition-colors uppercase tracking-widest"
+                            >
+                              <Pencil size={14} />
+                              Modifier
+                            </button>
+                            <button
+                              onClick={() => handleDeleteFiliere(filiere)}
+                              disabled={isDeleting}
+                              className="flex items-center gap-3 w-full px-4 py-3 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-colors uppercase tracking-widest disabled:opacity-50"
+                            >
+                              <Trash2 size={14} />
+                              Supprimer
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 mt-6">
@@ -182,18 +313,23 @@ export default function ChefFilieres() {
                   </div>
 
                   <div className="mt-6 pt-6 border-t border-slate-50 dark:border-slate-800 flex justify-between items-center">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 dark:bg-slate-800 overflow-hidden"
-                        >
-                          <img
-                            src={`https://i.pravatar.cc/150?u=${filiere.id + i}`}
-                            alt="avatar"
-                          />
-                        </div>
-                      ))}
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {["A", "B", "C"].map((letter, i) => (
+                          <div
+                            key={i}
+                            className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-black text-[10px]"
+                          >
+                            {letter}
+                          </div>
+                        ))}
+                      </div>
+                      {filiere.users_count > 0 && (
+                        <span className="text-[10px] font-bold text-slate-400">
+                          +{filiere.users_count} étudiant
+                          {filiere.users_count > 1 ? "s" : ""}
+                        </span>
+                      )}
                     </div>
                     <button
                       onClick={() =>
@@ -221,7 +357,7 @@ export default function ChefFilieres() {
                           className={cn(
                             "text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all",
                             activeTab === "matieres"
-                              ? "border-blue-500 text-blue-500"
+                              ? "border-emerald-500 text-emerald-500"
                               : "border-transparent text-slate-400",
                           )}
                         >
@@ -232,7 +368,7 @@ export default function ChefFilieres() {
                           className={cn(
                             "text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all",
                             activeTab === "etudiants"
-                              ? "border-blue-500 text-blue-500"
+                              ? "border-emerald-500 text-emerald-500"
                               : "border-transparent text-slate-400",
                           )}
                         >
@@ -243,7 +379,7 @@ export default function ChefFilieres() {
                           className={cn(
                             "text-[10px] font-black uppercase tracking-widest pb-1 border-b-2 transition-all",
                             activeTab === "emploi"
-                              ? "border-blue-500 text-blue-500"
+                              ? "border-emerald-500 text-emerald-500"
                               : "border-transparent text-slate-400",
                           )}
                         >
@@ -251,10 +387,10 @@ export default function ChefFilieres() {
                         </button>
                       </div>
 
-                      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-4 min-h-[100px]">
+                      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-4 min-h-25">
                         {tabData.loading ? (
                           <div className="flex justify-center items-center h-full pt-4">
-                            <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                            <div className="w-6 h-6 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
                           </div>
                         ) : activeTab === "emploi" &&
                           tabData.emploi.length === 0 ? (
@@ -273,9 +409,17 @@ export default function ChefFilieres() {
                           <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                             {activeTab === "etudiants" &&
                               tabData.etudiants.length === 0 && (
-                                <p className="text-[10px] text-center font-bold text-slate-400 py-4">
-                                  Aucun étudiant inscrit.
-                                </p>
+                                <div className="text-center space-y-3 py-4">
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase italic">
+                                    Aucun étudiant inscrit.
+                                  </p>
+                                  <button
+                                    onClick={() => handleAddEtudiant(filiere)}
+                                    className="flex items-center justify-center gap-2 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg hover:bg-emerald-600 transition-all mx-auto"
+                                  >
+                                    <UserPlus size={14} /> Ajouter un étudiant
+                                  </button>
+                                </div>
                               )}
                             {activeTab === "matieres" &&
                               tabData.matieres.length === 0 && (
@@ -325,13 +469,25 @@ export default function ChefFilieres() {
                               ))}
 
                             {activeTab === "etudiants" &&
+                              tabData.etudiants.length > 0 && (
+                                <div className="flex justify-end mb-2">
+                                  <button
+                                    onClick={() => handleAddEtudiant(filiere)}
+                                    className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 transition-colors"
+                                  >
+                                    <UserPlus size={13} /> Ajouter
+                                  </button>
+                                </div>
+                              )}
+
+                            {activeTab === "etudiants" &&
                               tabData.etudiants.map((etud) => (
                                 <div
                                   key={etud.id}
                                   className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-sm"
                                 >
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 font-bold text-xs">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 font-bold text-xs">
                                       {etud.nom.charAt(0)}
                                       {etud.prenom.charAt(0)}
                                     </div>
@@ -382,6 +538,29 @@ export default function ChefFilieres() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={fetchFilieres}
+      />
+
+      <EditFiliereModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setFiliereToEdit(null);
+        }}
+        onSuccess={fetchFilieres}
+        filiere={filiereToEdit}
+      />
+
+      <AddEtudiantModal
+        isOpen={isAddEtudiantModalOpen}
+        onClose={() => {
+          setIsAddEtudiantModalOpen(false);
+          setFiliereForEtudiant(null);
+        }}
+        onSuccess={() => {
+          if (selectedFiliere) fetchTabData(selectedFiliere.id, "etudiants");
+          fetchFilieres();
+        }}
+        filiere={filiereForEtudiant}
       />
 
       <ImportEtudiantsModal

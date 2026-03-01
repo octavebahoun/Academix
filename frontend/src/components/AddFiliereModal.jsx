@@ -1,5 +1,3 @@
-// ...existing code...
-
 export default function AddFiliereModal({ open, onClose, onAdd }) {
   if (!open) return null;
   return (

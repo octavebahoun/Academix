@@ -6,15 +6,40 @@
       "sourceType": "github",
       "computedHash": "d0137ba04049bf8926bc80f6a5e2b82d94b5633b6445a85dbfb26ab4f1b104c6"
     },
+    "lucide-icons": {
+      "source": "aksuharun/skills",
+      "sourceType": "github",
+      "computedHash": "f9e81a2119173db069d84712943a45c3a43ea5baf87bedabe3c859fe2d40d06e"
+    },
+    "remotion": {
+      "source": "davila7/claude-code-templates",
+      "sourceType": "github",
+      "computedHash": "1935bd7d3380ada4f9cec68532276cbfa63ec658d55d296d991768885565de23"
+    },
     "remotion-video-production": {
       "source": "supercent-io/skills-template",
       "sourceType": "github",
       "computedHash": "57a768e22090235b93527de493523723769ecda0a4ea5ee24d3663011daef354"
     },
+    "svg-art": {
+      "source": "kv0906/cc-skills",
+      "sourceType": "github",
+      "computedHash": "356a500cf848e1229758271608f3956773cf89afb5bc367fc559b204f4d53640"
+    },
+    "svg-illustration": {
+      "source": "narumiruna/agent-skills",
+      "sourceType": "github",
+      "computedHash": "89368adfbd43c96c248b6cc4b7a231edadcd413c7273cd55d28996a95a7bc04d"
+    },
     "tailwind-best-practices": {
       "source": "asyrafhussin/agent-skills",
       "sourceType": "github",
       "computedHash": "159c653751154c515aafcc5a7e0aef35853f8d146f25e7f155c817074446b2cd"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
     }
   }
 }

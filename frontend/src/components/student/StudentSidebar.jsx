@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutGrid,
   GraduationCap,
@@ -10,8 +10,28 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { authService } from "../../services/authService";
 import logoSvg from "../../assets/logo.svg";
 import logoDarkSvg from "../../assets/logo-dark.svg";
+
+const navItems = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
+  { id: "sessions", label: "Sessions", icon: GraduationCap },
+  { id: "notes", label: "Notes", icon: FileText },
+  { id: "emploi-temps", label: "Emploi du temps", icon: Calendar },
+  { id: "ai-revision", label: "AI Revision", icon: BrainCircuit },
+  { id: "profil", label: "Profil", icon: User },
+];
+
+function getInitials(user) {
+  if (!user) return "E";
+  return (
+    `${(user.prenom || "").charAt(0)}${(user.nom || "").charAt(0)}`.toUpperCase() ||
+    "E"
+  );
+}
 
 export default function StudentSidebar({
   activeTab,
@@ -20,91 +40,148 @@ export default function StudentSidebar({
   isOpen,
   onClose,
 }) {
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
-    { id: "sessions", label: "Sessions", icon: GraduationCap },
-    { id: "notes", label: "Notes", icon: FileText },
-    { id: "emploi-temps", label: "Emploi du temps", icon: Calendar },
-    { id: "ai-revision", label: "AI Revision", icon: BrainCircuit },
-    { id: "profil", label: "Profil", icon: User },
-  ];
+  const user = authService.getCurrentUser();
+  const fullName = user
+    ? `${user.prenom || ""} ${user.nom || ""}`.trim()
+    : "Étudiant";
 
   return (
     <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 md:hidden"
-          onClick={onClose}
-        />
-      )}
+      {/* Mobile backdrop */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
       <aside
         className={cn(
-          "bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-screen fixed top-0 left-0 z-40 w-64 transition-transform duration-300 md:translate-x-0",
+          "fixed top-0 left-0 z-40 flex h-screen w-64 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-200 ease-out md:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="p-6 pb-2 flex justify-between items-center">
-          <div>
-            <img
-              src={logoSvg}
-              alt="AcademiX"
-              className="h-14 w-auto dark:hidden"
-            />
-            <img
-              src={logoDarkSvg}
-              alt="AcademiX"
-              className="h-14 w-auto hidden dark:block"
-            />
-          </div>
+        {/* Logo */}
+        <div className="flex items-center justify-between px-5 py-2.5">
+          <img
+            src={logoSvg}
+            alt="AcademiX"
+            className="h-14 w-auto dark:hidden"
+          />
+          <img
+            src={logoDarkSvg}
+            alt="AcademiX"
+            className="h-14 w-auto hidden dark:block"
+          />
           <button
             onClick={onClose}
-            className="md:hidden text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 p-1 rounded-md"
+            aria-label="Fermer le menu"
+            className="md:hidden rounded-md p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-200 dark:hover:bg-slate-800 transition-colors"
           >
-            <X size={24} />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id;
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold text-sm relative",
-                  isActive
-                    ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10"
-                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800",
-                )}
-              >
-                <Icon
-                  size={18}
-                  className={cn(isActive ? "text-emerald-500" : "")}
-                />
-                <span className="text-left leading-tight">{item.label}</span>
-                {isActive && (
-                  <motion.div
-                    layoutId="sidebar-active-indicator"
-                    className="absolute left-0 w-1 h-8 bg-emerald-500 rounded-r-full"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </nav>
+        <Separator />
 
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all font-semibold text-sm"
+        {/* Section label */}
+        <div className="px-5 pt-6 pb-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Espace Étudiant
+          </span>
+        </div>
+
+        {/* Navigation */}
+        <ScrollArea className="flex-1 px-3">
+          <nav
+            className="space-y-1 py-2"
+            id="tour-sidebar"
+            aria-label="Navigation principale"
           >
-            <LogOut size={18} />
-            Déconnexion
-          </button>
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  id={`tour-nav-${item.id}`}
+                  onClick={() => {
+                    onTabChange(item.id);
+                    onClose?.();
+                  }}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "group relative w-full flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors duration-150",
+                    isActive
+                      ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200",
+                  )}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="student-active-bar"
+                      className="absolute left-0 inset-y-1.5 w-0.5 rounded-r-full bg-emerald-500 dark:bg-emerald-400"
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 35,
+                      }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <Icon
+                    size={16}
+                    aria-hidden="true"
+                    className={cn(
+                      "shrink-0 transition-colors duration-150",
+                      isActive
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300",
+                    )}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </ScrollArea>
+
+        {/* User + Logout inline */}
+        <div className="mt-auto">
+          <Separator />
+          <div className="px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div
+                aria-hidden="true"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-xs font-semibold select-none"
+              >
+                {getInitials(user)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
+                  {fullName}
+                </p>
+                <p className="truncate text-xs text-slate-400 dark:text-slate-500">
+                  Étudiant
+                </p>
+              </div>
+              <button
+                onClick={onLogout}
+                aria-label="Déconnexion"
+                className="shrink-0 rounded-md p-2 text-slate-400 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-150"
+              >
+                <LogOut size={15} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
     </>

@@ -1,4 +1,16 @@
+import { motion } from "framer-motion";
 import { Menu, Moon, Sun } from "lucide-react";
+import { cn } from "../../utils/cn";
+import { Separator } from "@/components/ui/separator";
+import { authService } from "../../services/authService";
+
+function getInitials(user) {
+  if (!user) return "E";
+  return (
+    `${(user.prenom || "").charAt(0)}${(user.nom || "").charAt(0)}`.toUpperCase() ||
+    "E"
+  );
+}
 
 export default function StudentHeader({
   title,
@@ -8,43 +20,67 @@ export default function StudentHeader({
   rightAction,
   onMenuToggle,
 }) {
-  return (
-    <header className="flex flex-col md:flex-row justify-between mb-6 gap-4">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onMenuToggle}
-          className="md:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-          aria-label="Toggle menu"
-        >
-          <Menu size={24} />
-        </button>
-        <div>
-          <h1 className="text-3xl font-black font-display text-slate-900 dark:text-white tracking-tight capitalize">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">
-              {subtitle}
-            </p>
-          )}
-        </div>
-      </div>
+  const user = authService.getCurrentUser();
 
-      <div className="flex items-center self-end md:self-auto gap-4">
-        {rightAction}
-        {onThemeToggle && (
-          <button
-            onClick={onThemeToggle}
-            className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md transition-all"
-            aria-label="Toggle dark mode"
+  return (
+    <div className="-mx-4 md:-mx-8 px-4 md:px-8 border-b border-slate-200 dark:border-slate-800 mb-6 flex items-center md:mt-2 h-14 md:h-17">
+      <motion.header
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="w-full flex flex-row items-center justify-between gap-3"
+      >
+        {/* Left : menu mobile + titres */}
+        <div className="flex items-center gap-3">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={onMenuToggle}
+            aria-label="Ouvrir le menu"
+            className="md:hidden rounded-md p-2 -ml-1 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-        )}
-        <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-md">
-          SA
+            <Menu size={20} aria-hidden="true" />
+          </motion.button>
+          <div>
+            <h1 className="text-base md:text-xl font-bold font-display text-slate-900 dark:text-white tracking-tight leading-tight line-clamp-1">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="hidden md:block text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+
+        {/* Right : actions + theme + avatar */}
+        <div className="flex items-center gap-2 shrink-0">
+          {rightAction}
+          {onThemeToggle && (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={onThemeToggle}
+              aria-label={
+                theme === "dark"
+                  ? "Passer en mode clair"
+                  : "Passer en mode sombre"
+              }
+              className="h-9 w-9 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+            >
+              {theme === "dark" ? (
+                <Sun size={16} aria-hidden="true" />
+              ) : (
+                <Moon size={16} aria-hidden="true" />
+              )}
+            </motion.button>
+          )}
+          <div
+            aria-hidden="true"
+            className="h-9 w-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-semibold select-none"
+          >
+            {getInitials(user)}
+          </div>
+        </div>
+      </motion.header>
+    </div>
   );
 }

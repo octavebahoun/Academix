@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "cybersecurity-analyst": {
+      "source": "rysweet/amplihack",
+      "sourceType": "github",
+      "computedHash": "4f804565a002629ad80e311b460d710783af11bfddda5ddecee18c4b8f54cc0e"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import apiClient from './client';
 
+
 export const getSessionMessages = async (sessionId, options = {}) => {
   const { limit = 60, page, before } = options;
   const response = await apiClient.get(`/chat/${sessionId}/messages`, {
@@ -7,6 +8,8 @@ export const getSessionMessages = async (sessionId, options = {}) => {
   });
   return response.data;
 };
+
+
 
 export const getSessionParticipants = async (sessionId, role) => {
   const response = await apiClient.get(`/chat/${sessionId}/participants`, {
