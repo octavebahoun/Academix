@@ -34,25 +34,25 @@ class PythonAIService
                 $content = $response->json();
                 return [
                     'success' => true,
-                    'data'    => $content['data']
+                    'data' => $content['data']
                 ];
             }
 
             Log::error("PythonAIService error", [
                 'status' => $response->status(),
-                'body'   => $response->body()
+                'body' => $response->body()
             ]);
 
             return [
                 'success' => false,
-                'error'   => "Le service d'analyse IA a renvoyé une erreur ({$response->status()})."
+                'error' => "Le service d'analyse IA a renvoyé une erreur ({$response->status()})."
             ];
 
         } catch (\Exception $e) {
             Log::error("PythonAIService exception: " . $e->getMessage());
             return [
                 'success' => false,
-                'error'   => "Impossible de contacter le service d'intelligence artificielle."
+                'error' => "Impossible de contacter le service d'intelligence artificielle."
             ];
         }
     }

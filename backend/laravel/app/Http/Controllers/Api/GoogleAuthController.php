@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class GoogleAuthController extends Controller
 {
-    public function __construct(protected GoogleApiService $googleService) {}
+    public function __construct(protected GoogleApiService $googleService)
+    {
+    }
 
     /**
      * Redirige vers la page d'authentification Google.
@@ -27,14 +29,14 @@ class GoogleAuthController extends Controller
     public function handleGoogleCallback(Request $request)
     {
         $code = $request->query('code');
-        
+
         if (!$code) {
             return response()->json(['error' => "Code d'autorisation manquant"], 400);
         }
 
         try {
             $token = $this->googleService->fetchAccessTokenWithAuthCode($code);
-            
+
             $user = $request->user();
 
             if (!$user) {

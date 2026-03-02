@@ -119,8 +119,7 @@ export default function StudentAnalysis() {
       }
     } catch (err) {
       const msg =
-        err.response?.data?.message ||
-        "Erreur lors de la génération du bilan.";
+        err.response?.data?.message || "Erreur lors de la génération du bilan.";
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -140,7 +139,8 @@ export default function StudentAnalysis() {
             Bilan IA Personnalisé
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Analyse de vos performances académiques par intelligence artificielle
+            Analyse de vos performances académiques par intelligence
+            artificielle
           </p>
         </div>
 
@@ -174,7 +174,8 @@ export default function StudentAnalysis() {
             Aucun bilan disponible
           </p>
           <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">
-            Cliquez sur "Générer un bilan" pour obtenir votre première analyse IA.
+            Cliquez sur "Générer un bilan" pour obtenir votre première analyse
+            IA.
           </p>
         </div>
       )}
