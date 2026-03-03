@@ -14,7 +14,8 @@ class TacheObserver
 
     /**
      * Handle the Tache "created" event.
-     * syncTaskToGoogle() gère déjà setAccessTokenForUser() en interne.
+     * syncTaskToGoogle() → Google Tasks (panneau latéral)
+     * syncTaskToCalendar() → Événement Calendar (visible dans l'agenda)
      */
     public function created(Tache $tache): void
     {
@@ -23,6 +24,11 @@ class TacheObserver
                 $this->googleService->syncTaskToGoogle($tache);
             } catch (\Exception $e) {
                 Log::error("Erreur synchro Google Task (created): " . $e->getMessage());
+            }
+            try {
+                $this->googleService->syncTaskToCalendar($tache);
+            } catch (\Exception $e) {
+                Log::error("Erreur synchro Calendar Event pour tâche (created): " . $e->getMessage());
             }
         }
     }
@@ -38,6 +44,11 @@ class TacheObserver
             } catch (\Exception $e) {
                 Log::error("Erreur synchro Google Task (updated): " . $e->getMessage());
             }
+            try {
+                $this->googleService->syncTaskToCalendar($tache);
+            } catch (\Exception $e) {
+                Log::error("Erreur synchro Calendar Event pour tâche (updated): " . $e->getMessage());
+            }
         }
     }
 
@@ -46,11 +57,18 @@ class TacheObserver
      */
     public function deleted(Tache $tache): void
     {
-        if ($tache->user->google_access_token && $tache->google_task_id) {
+        if ($tache->user->google_access_token) {
+            if ($tache->google_task_id) {
+                try {
+                    $this->googleService->deleteTaskFromGoogle($tache);
+                } catch (\Exception $e) {
+                    Log::error("Erreur suppression Google Task (deleted): " . $e->getMessage());
+                }
+            }
             try {
-                $this->googleService->deleteTaskFromGoogle($tache);
+                $this->googleService->deleteTaskFromCalendar($tache);
             } catch (\Exception $e) {
-                Log::error("Erreur suppression Google Task (deleted): " . $e->getMessage());
+                Log::error("Erreur suppression Calendar Event pour tâche (deleted): " . $e->getMessage());
             }
         }
     }

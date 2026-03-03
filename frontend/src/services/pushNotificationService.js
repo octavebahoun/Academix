@@ -19,7 +19,15 @@ function urlBase64ToUint8Array(base64String) {
 async function getSWRegistration() {
     if (!('serviceWorker' in navigator)) return null;
     try {
-        return await navigator.serviceWorker.ready;
+        // Timeout de 5 s : navigator.serviceWorker.ready ne rejette jamais
+        // si aucun SW n'est actif → on évite de bloquer indéfiniment.
+        const registration = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Service Worker non disponible (timeout)')), 5000)
+            ),
+        ]);
+        return registration;
     } catch {
         return null;
     }
@@ -92,7 +100,7 @@ export const pushNotificationService = {
 
 
     async sendSubscriptionToServer(subscription) {
-        await laravelApiClient.post('/push/subscribe', subscription.toJSON());
+        await laravelApiClient.post('/student/push/subscribe', subscription.toJSON());
     },
 
     async unsubscribe() {
@@ -103,7 +111,7 @@ export const pushNotificationService = {
         if (!subscription) return true;
 
         try {
-            await laravelApiClient.delete('/push/subscribe', {
+            await laravelApiClient.delete('/student/push/subscribe', {
                 data: { endpoint: subscription.endpoint },
             });
         } catch {

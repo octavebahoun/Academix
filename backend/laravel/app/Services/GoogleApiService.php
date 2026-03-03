@@ -252,6 +252,100 @@ class GoogleApiService
         }
     }
 
+    /**
+     * Synchronise une tâche comme événement visible dans Google Calendar.
+     * Utilise un ID d'événement déterministe pour l'idempotence (pas de doublons).
+     */
+    public function syncTaskToCalendar(Tache $tache): void
+    {
+        $user = $tache->user;
+        if (!$this->setAccessTokenForUser($user))
+            return;
+
+        $calendarId = $this->ensureAcademiXCalendarExists($user);
+        $service = new Calendar($this->client);
+
+        // ID d'événement idempotent (caractères autorisés : a-v, 0-9)
+        $eventId = 'academitache' . str_pad($tache->id, 8, '0', STR_PAD_LEFT);
+
+        $statusLabel = match ($tache->statut ?? 'a_faire') {
+            'terminee' => '[Terminée]',
+            'en_cours' => '[En cours]',
+            default => '[A faire]',
+        };
+
+        $prioriteLabel = match ($tache->priorite ?? 'moyenne') {
+            'haute' => 'Haute',
+            'basse' => 'Basse',
+            default => 'Moyenne',
+        };
+
+        $description = trim(
+            ($tache->description ? $tache->description . "\n\n" : '')
+            . "Priorité : {$prioriteLabel}\n"
+            . "Statut : {$tache->statut}\n"
+            . "-- Synchronisé par AcademiX"
+        );
+
+        // Événement journée entière à la date limite
+        // Note : pour les all-day events, end.date est EXCLUSIF (+1 jour)
+        $dueDate = $tache->date_limite->format('Y-m-d');
+        $endDate = $tache->date_limite->copy()->addDay()->format('Y-m-d');
+
+        $eventData = [
+            'id' => $eventId,
+            'summary' => "{$statusLabel} {$tache->titre}",
+            'description' => $description,
+            'start' => ['date' => $dueDate],
+            'end' => ['date' => $endDate],
+            'reminders' => [
+                'useDefault' => false,
+                'overrides' => [
+                    ['method' => 'popup', 'minutes' => 60],
+                ],
+            ],
+            'transparency' => 'transparent',
+        ];
+
+        try {
+            // Essayer update d'abord (idempotent)
+            $service->events->update($calendarId, $eventId, new Event($eventData));
+            Log::info("[GoogleCalendar] Tâche #{$tache->id} mise à jour sur le calendrier.");
+        } catch (\Google\Service\Exception $e) {
+            if ($e->getCode() === 404) {
+                // N'existe pas encore → création
+                $service->events->insert($calendarId, new Event($eventData));
+                Log::info("[GoogleCalendar] Tâche #{$tache->id} créée sur le calendrier.");
+            } else {
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * Supprime l'événement calendrier associé à une tâche.
+     */
+    public function deleteTaskFromCalendar(Tache $tache): void
+    {
+        $user = $tache->user;
+        if (!$this->setAccessTokenForUser($user))
+            return;
+
+        $calendarId = $this->ensureAcademiXCalendarExists($user);
+        $service = new Calendar($this->client);
+
+        $eventId = 'academitache' . str_pad($tache->id, 8, '0', STR_PAD_LEFT);
+
+        try {
+            $service->events->delete($calendarId, $eventId);
+            Log::info("[GoogleCalendar] Événement tâche #{$tache->id} supprimé du calendrier.");
+        } catch (\Google\Service\Exception $e) {
+            if ($e->getCode() !== 404 && $e->getCode() !== 410) {
+                Log::warning("Impossible de supprimer l'événement calendrier de la tâche #{$tache->id}: " . $e->getMessage());
+            }
+        }
+    }
+
     public function deleteTaskFromGoogle(Tache $tache)
     {
         if (!$tache->google_task_id)

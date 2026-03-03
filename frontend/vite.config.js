@@ -58,6 +58,13 @@ export default defineConfig({
         // Fichiers à précacher automatiquement
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
       },
+
+      // Activer le SW en mode développement (nécessaire pour les push)
+      devOptions: {
+        enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html',
+      },
     }),
   ],
   resolve: {
