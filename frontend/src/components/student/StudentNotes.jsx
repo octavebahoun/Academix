@@ -92,7 +92,7 @@ function StatCard({
           accentFrom,
         )}
       />
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+      <p className="text-[10px] font-black text-slate-400 dark:text-white uppercase tracking-widest mb-3">
         {label}
       </p>
       <p
@@ -103,7 +103,9 @@ function StatCard({
       >
         {value ?? "—"}
         {unit && (
-          <span className="text-sm text-slate-400 font-bold ml-1">{unit}</span>
+          <span className="text-sm text-slate-400 dark:text-white font-bold ml-1">
+            {unit}
+          </span>
         )}
       </p>
       {barPct != null ? (
@@ -120,7 +122,7 @@ function StatCard({
         <p
           className={cn(
             "mt-3 text-[10px] font-black uppercase tracking-widest",
-            subColor || "text-slate-400",
+            subColor || "text-slate-400 dark:text-white",
           )}
         >
           {sub}

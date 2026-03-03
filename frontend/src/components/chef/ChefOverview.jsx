@@ -376,7 +376,7 @@ export default function ChefOverview({ data, onTabChange }) {
               <DecoSVG />
               <CardContent className="px-3 py-2.5 relative z-10">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white">
                     {stat.label}
                   </span>
                   <div
@@ -395,7 +395,7 @@ export default function ChefOverview({ data, onTabChange }) {
                 <p className="text-xl font-black font-display tracking-tight text-slate-900 dark:text-white tabular-nums leading-none mb-1">
                   {stat.value}
                 </p>
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                <span className="text-xs font-medium text-slate-400 dark:text-white">
                   {stat.sub}
                 </span>
               </CardContent>

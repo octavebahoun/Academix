@@ -147,14 +147,14 @@ function StatCard({ label, value, sub, Icon, iconBg, iconColor, accentFrom }) {
       />
       <div className="flex items-start justify-between gap-3 relative">
         <div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+          <p className="text-[10px] font-black text-slate-400 dark:text-white uppercase tracking-widest mb-2">
             {label}
           </p>
           <p className="text-3xl font-black italic tabular-nums text-slate-900 dark:text-white">
             {value ?? "—"}
           </p>
           {sub && (
-            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-white">
               {sub}
             </p>
           )}

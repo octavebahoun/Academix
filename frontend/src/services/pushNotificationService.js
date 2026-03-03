@@ -65,17 +65,29 @@ export const pushNotificationService = {
         const existing = await registration.pushManager.getSubscription();
         if (existing) {
             // On renvoie quand même au serveur pour être sûr qu'il a bien l'entrée
-            await this.sendSubscriptionToServer(existing);
+            try {
+                await this.sendSubscriptionToServer(existing);
+            } catch (err) {
+                console.warn('[Push] Impossible de synchroniser l\'abonnement existant :', err);
+            }
             return { success: true, alreadySubscribed: true };
         }
 
-        const subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        });
+        try {
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            });
 
-        await this.sendSubscriptionToServer(subscription);
-        return { success: true };
+            await this.sendSubscriptionToServer(subscription);
+            return { success: true };
+        } catch (err) {
+            console.error('[Push] Échec de l\'abonnement :', err);
+            if (Notification.permission === 'denied') {
+                return { success: false, error: 'Notifications bloquées par l\'utilisateur' };
+            }
+            return { success: false, error: err.message || 'Échec de l\'abonnement push' };
+        }
     },
 
 

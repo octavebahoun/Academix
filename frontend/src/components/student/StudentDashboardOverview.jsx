@@ -661,7 +661,7 @@ export default function StudentDashboardOverview({ onNavigate }) {
               <Decoration />
               <CardContent className="px-4 py-3.5 relative z-10">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 leading-tight">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:text-white leading-tight">
                     {label}
                   </span>
                   <div
@@ -677,7 +677,7 @@ export default function StudentDashboardOverview({ onNavigate }) {
                   {value}
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500">
+                  <span className="text-[9px] font-medium text-slate-400 dark:text-white">
                     {sub}
                   </span>
                   {badge && (

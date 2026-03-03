@@ -316,7 +316,7 @@ export default function AdminOverview() {
               <Decoration />
               <CardContent className="px-4 py-3.5 relative z-10">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-white">
                     {label}
                   </span>
                   <div
@@ -331,7 +331,7 @@ export default function AdminOverview() {
                 <p className="text-2xl font-black font-display tracking-tight text-slate-900 dark:text-white tabular-nums leading-none mb-1.5">
                   {value}
                 </p>
-                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+                <span className="text-xs font-medium text-slate-400 dark:text-white">
                   {sub}
                 </span>
               </CardContent>

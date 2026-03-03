@@ -1,6 +1,6 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
+import { CacheFirst, StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { RangeRequestsPlugin } from 'workbox-range-requests';
@@ -8,6 +8,17 @@ import { RangeRequestsPlugin } from 'workbox-range-requests';
 
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
+
+// ── Fallback offline pour la navigation (SPA) ──────────────────
+// NetworkFirst : essaie le réseau, sinon sert la version en cache.
+// Comme index.html est précaché, l'app se charge toujours hors-ligne.
+const navigationHandler = new NetworkFirst({
+    cacheName: 'navigations-v1',
+    plugins: [
+        new CacheableResponsePlugin({ statuses: [0, 200] }),
+    ],
+});
+registerRoute(new NavigationRoute(navigationHandler));
 
 
 registerRoute(

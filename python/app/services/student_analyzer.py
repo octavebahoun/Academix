@@ -47,7 +47,7 @@ class StudentAnalyzer:
                     # 1. Infos étudiant + filière
                     await cur.execute(
                         """
-                        SELECT u.id, u.nom, u.prenom, u.email, u.niveau,
+                        SELECT u.id, u.nom, u.prenom, u.email, u.annee_admission,
                                f.nom AS filiere_nom
                         FROM users u
                         LEFT JOIN filieres f ON f.id = u.filiere_id
@@ -157,7 +157,7 @@ class StudentAnalyzer:
         return {
             "etudiant_nom": f"{student.get('prenom', '')} {student.get('nom', '')}".strip(),
             "filiere": student.get("filiere_nom", ""),
-            "niveau": student.get("niveau", ""),
+            "niveau": student.get("annee_admission", ""),
             "moyenne_generale": moyenne_generale,
             "nb_notes_total": len(notes),
             "matieres": matieres_summary,
