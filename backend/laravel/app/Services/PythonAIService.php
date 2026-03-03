@@ -23,10 +23,12 @@ class PythonAIService
     public function analyzeStudent(int $studentId): array
     {
         try {
-            // Note: On utilise le port 8001 pour le service Python selon .env
+            // Transmet le Bearer token de l'utilisateur connecté au service Python
+            $token = request()->bearerToken();
+
             $response = Http::timeout(45)
                 ->withHeaders([
-                    'X-Internal-Key' => config('services.python_ai.internal_key', env('PYTHON_AI_INTERNAL_KEY')),
+                    'Authorization' => "Bearer {$token}",
                 ])
                 ->get("{$this->baseUrl}/api/v1/analysis/{$studentId}");
 
