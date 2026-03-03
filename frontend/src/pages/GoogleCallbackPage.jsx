@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { studentService } from "../services/studentService";
@@ -10,10 +10,15 @@ export default function GoogleCallbackPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading | success | error
   const [errorMsg, setErrorMsg] = useState("");
+  const processedRef = useRef(false); // Empêche le double traitement (StrictMode / rechargement)
 
   useEffect(() => {
+    if (processedRef.current) return;
+    processedRef.current = true;
+
     const code = searchParams.get("code");
     const error = searchParams.get("error");
+    const state = searchParams.get("state");
 
     // Vérifier que l'utilisateur est bien connecté
     const user = authService.getCurrentUser();
@@ -46,7 +51,7 @@ export default function GoogleCallbackPage() {
 
     const processCallback = async () => {
       try {
-        await studentService.handleGoogleCallback(code);
+        await studentService.handleGoogleCallback(code, state);
         setStatus("success");
         toast.success("Google Calendar connecté avec succès !");
         setTimeout(

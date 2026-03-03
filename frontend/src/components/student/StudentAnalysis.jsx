@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
@@ -16,7 +16,7 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
-import { laravelApiClient } from "../../api/client";
+import { studentService } from "../../services/studentService";
 import toast from "react-hot-toast";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -85,44 +85,58 @@ export default function StudentAnalysis() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState([]);
+  const mountedRef = useRef(true);
 
   // Chargement de la dernière analyse au montage
   useEffect(() => {
     fetchHistory();
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const fetchHistory = async () => {
     setLoadingHistory(true);
     try {
-      const res = await laravelApiClient.get("/student/analysis/history");
-      const items = res.data?.data?.data ?? [];
+      const result = await studentService.getAnalysisHistory();
+      if (!mountedRef.current) return;
+      const items = result?.data?.data ?? [];
       setHistory(items);
       if (items.length > 0) setAnalysis(items[0]);
     } catch {
       // Pas d'analyse existante, c'est normal
     } finally {
-      setLoadingHistory(false);
+      if (mountedRef.current) setLoadingHistory(false);
     }
   };
 
   const triggerAnalysis = async () => {
     setLoading(true);
     try {
-      const res = await laravelApiClient.get("/student/analysis");
-      if (res.data?.success) {
-        const newAnalysis = res.data.data;
+      const result = await studentService.triggerAnalysis();
+      if (!mountedRef.current) return;
+      if (result?.success) {
+        const newAnalysis = result.data;
         setAnalysis(newAnalysis);
         setHistory((prev) => [newAnalysis, ...prev]);
         toast.success("Bilan IA généré avec succès !");
       } else {
-        toast.error(res.data?.message || "Impossible de générer le bilan.");
+        toast.error(result?.message || "Impossible de générer le bilan.");
       }
     } catch (err) {
-      const msg =
-        err.response?.data?.message || "Erreur lors de la génération du bilan.";
-      toast.error(msg);
+      if (!mountedRef.current) return;
+      // Si anti-spam 429, afficher l'analyse existante
+      if (err.response?.status === 429 && err.response?.data?.data) {
+        setAnalysis(err.response.data.data);
+        toast("Une analyse récente existe déjà.", { icon: "⏳" });
+      } else {
+        const msg =
+          err.response?.data?.message ||
+          "Erreur lors de la génération du bilan.";
+        toast.error(msg);
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   };
 

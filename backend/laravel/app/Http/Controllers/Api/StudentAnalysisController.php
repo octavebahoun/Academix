@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\StudentAnalysis;
+use App\Notifications\StudentAnalysisNotification;
 use App\Services\PythonAIService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,63 +17,57 @@ class StudentAnalysisController extends Controller
     }
 
     /**
-     * Lancer une nouvelle analyse IA complète pour un étudiant.
-     *
-     * @param int|null $id
-     * @return JsonResponse
+     * Lancer une nouvelle analyse IA complète pour l'étudiant connecté.
      */
-    public function analyze(Request $request, ?int $id = null): JsonResponse
+    public function analyze(Request $request): JsonResponse
     {
-        // Si aucun ID n'est fourni, on analyse l'utilisateur connecté
-        $targetId = $id ?? $request->user()?->id;
+        $student = $request->user();
 
-        if (!$targetId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Utilisateur non identifié.'
-            ], 401);
-        }
-
-        // 1. On vérifie l'existence de l'utilisateur
-        $student = User::find($targetId);
-        if (!$student) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Étudiant non trouvé.'
-            ], 404);
-        }
-
-        // 2. Anti-spam : 1 analyse maximum toutes les 24h
-        $lastAnalysis = StudentAnalysis::where('user_id', $targetId)
-            ->where('created_at', '>=', now()->subHours(24))
+        // 1. Anti-spam : 1 analyse maximum toutes les 24h
+        $lastAnalysis = StudentAnalysis::forUser($student->id)
+            ->recent(24)
             ->latest()
             ->first();
 
         if ($lastAnalysis) {
             return response()->json([
                 'success' => false,
-                'message' => "Une analyse a déjà été effectuée il y a moins de 24h pour cet étudiant.",
+                'message' => "Une analyse a déjà été effectuée il y a moins de 24h.",
                 'data' => $lastAnalysis
             ], 429);
         }
 
-        // 3. Appel du service Python
-        $result = $this->aiService->analyzeStudent($targetId);
+        // 2. Appel du service Python
+        $result = $this->aiService->analyzeStudent($student->id);
 
         if (!$result['success']) {
             return response()->json([
                 'success' => false,
                 'message' => "L'IA n'a pas pu traiter la demande : " . ($result['error'] ?? 'Erreur inconnue')
-            ], 500);
+            ], 502);
         }
 
-        $analysisData = $result['data']['analysis']; // JSON généré par l'IA
-        $contextData = $result['data']['context'];  // Données de contexte calculées par Python
+        // 3. Validation de la structure retournée par Python
+        $data = $result['data'] ?? [];
+        $analysisData = $data['analysis'] ?? null;
+        $contextData = $data['context'] ?? null;
+
+        if (
+            !$analysisData || !$contextData
+            || !isset($analysisData['message_principal'])
+            || !isset($contextData['moyenne_generale'])
+        ) {
+            Log::error('PythonAIService: structure de réponse invalide', ['data' => $data]);
+            return response()->json([
+                'success' => false,
+                'message' => "Le service IA a retourné une réponse inattendue. Veuillez réessayer.",
+            ], 502);
+        }
 
         // 4. Enregistrement en base de données
         try {
             $analysis = StudentAnalysis::create([
-                'user_id' => $targetId,
+                'user_id' => $student->id,
                 'moyenne_generale' => $contextData['moyenne_generale'],
                 'niveau_alerte' => $analysisData['niveau_alerte'] ?? 'info',
                 'message_principal' => $analysisData['message_principal'],
@@ -82,6 +76,9 @@ class StudentAnalysisController extends Controller
                 'point_positif' => $analysisData['point_positif'] ?? null,
                 'contexte_raw' => $contextData,
             ]);
+
+            // 5. Dispatcher la notification (mail + database + push VAPID)
+            $student->notify(new StudentAnalysisNotification($analysis));
 
             return response()->json([
                 'success' => true,
@@ -92,23 +89,17 @@ class StudentAnalysisController extends Controller
             Log::error("Erreur sauvegarde analyse IA: " . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la sauvegarde de l\'analyse.',
-                'error' => $e->getMessage()
+                'message' => 'Erreur interne lors de la sauvegarde de l\'analyse.',
             ], 500);
         }
     }
 
     /**
-     * Récupérer l'historique des analyses d'un étudiant.
-     *
-     * @param int|null $id
-     * @return JsonResponse
+     * Récupérer l'historique des analyses de l'étudiant connecté.
      */
-    public function history(Request $request, ?int $id = null): JsonResponse
+    public function history(Request $request): JsonResponse
     {
-        $targetId = $id ?? $request->user()?->id;
-
-        $analyses = StudentAnalysis::where('user_id', $targetId)
+        $analyses = StudentAnalysis::forUser($request->user()->id)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -120,24 +111,18 @@ class StudentAnalysisController extends Controller
 
     /**
      * Marquer une analyse comme ayant été envoyée par mail/notif.
-     * Si l'ID est celui d'un utilisateur, on prend sa dernière analyse.
-     * Sinon on cherche par ID d'analyse.
-     *
-     * @param int $id
-     * @return JsonResponse
      */
-    public function markAsSent(int $id): JsonResponse
+    public function markAsSent(Request $request, int $id): JsonResponse
     {
-        // On cherche d'abord si c'est un ID d'analyse
-        $analysis = StudentAnalysis::find($id);
+        $analysis = StudentAnalysis::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
         if (!$analysis) {
-            // Sinon on cherche la dernière analyse de l'utilisateur avec cet ID
-            $analysis = StudentAnalysis::where('user_id', $id)->latest()->first();
-        }
-
-        if (!$analysis) {
-            return response()->json(['success' => false, 'message' => 'Analyse non trouvée.'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Analyse non trouvée ou accès non autorisé.'
+            ], 404);
         }
 
         $analysis->update(['sent_at' => now()]);

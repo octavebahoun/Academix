@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Jobs\SendWebPushNotificationJob;
 use App\Models\StudentAnalysis;
-use App\Services\WebPushService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -18,12 +18,23 @@ class StudentAnalysisNotification extends Notification implements ShouldQueue
     {
     }
 
+    /**
+     * Canaux : mail + database seulement.
+     * Le push VAPID est dispatché séparément via afterCommit() pour
+     * ne pas dépendre d'un canal Laravel inexistant.
+     */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database', 'webpush'];
+        // Dispatcher le push VAPID de manière asynchrone
+        $this->dispatchWebPush($notifiable);
+
+        return ['mail', 'database'];
     }
 
-    public function toWebPush(object $notifiable, mixed $notification): void
+    /**
+     * Dispatch le push VAPID via un Job dédié (asynchrone, 3 tentatives).
+     */
+    private function dispatchWebPush(object $notifiable): void
     {
         $emoji = match ($this->analysis->niveau_alerte) {
             'danger' => '⚠️',
@@ -31,11 +42,11 @@ class StudentAnalysisNotification extends Notification implements ShouldQueue
             default => '📊',
         };
 
-        app(WebPushService::class)->sendToUser($notifiable->id, [
+        SendWebPushNotificationJob::dispatch($notifiable->id, [
             'title' => "{$emoji} Ton bilan académique",
             'body' => $this->analysis->message_principal,
             'url' => '/dashboard',
-            'tag' => 'analysis-' . $this->analysis->id, // évite les doublons
+            'tag' => 'analysis-' . $this->analysis->id,
         ]);
     }
 

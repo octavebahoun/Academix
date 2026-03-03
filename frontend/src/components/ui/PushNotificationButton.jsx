@@ -13,6 +13,21 @@ export function PushNotificationButton({ className = "" }) {
     unsubscribe,
   } = usePushNotifications();
 
+  /** Confirmation avant désabonnement */
+  const handleClick = () => {
+    if (isSubscribed) {
+      if (
+        window.confirm(
+          "Désactiver les notifications push ? Tu ne recevras plus d'alertes.",
+        )
+      ) {
+        unsubscribe();
+      }
+    } else {
+      subscribe();
+    }
+  };
+
   if (!isSupported) return null;
 
   if (permission === "denied" && !isSubscribed) return null;
@@ -21,7 +36,7 @@ export function PushNotificationButton({ className = "" }) {
     <div className={`flex flex-col gap-1 ${className}`}>
       {/* Bouton principal */}
       <button
-        onClick={isSubscribed ? unsubscribe : subscribe}
+        onClick={handleClick}
         disabled={isLoading}
         title={
           isSubscribed

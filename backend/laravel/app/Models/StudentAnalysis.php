@@ -20,12 +20,26 @@ class StudentAnalysis extends Model
     ];
 
     protected $casts = [
-        'conseils'              => 'array',
+        'conseils' => 'array',
         'matieres_prioritaires' => 'array',
-        'contexte_raw'          => 'array',
-        'sent_at'               => 'datetime',
-        'moyenne_generale'      => 'float',
+        'contexte_raw' => 'array',
+        'sent_at' => 'datetime',
+        'moyenne_generale' => 'float',
     ];
+
+    // ─── Scopes ──────────────────────────────────────────────────────────────
+
+    public function scopeForUser($query, int $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeRecent($query, int $hours = 24)
+    {
+        return $query->where('created_at', '>=', now()->subHours($hours));
+    }
+
+    // ─── Relations ───────────────────────────────────────────────────────────
 
     public function student(): BelongsTo
     {

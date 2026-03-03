@@ -6,74 +6,125 @@ use App\Models\PushSubscription;
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 use Illuminate\Support\Facades\Log;
+
 class WebPushService
 {
-    private WebPush $webPush;
+    private ?WebPush $webPush = null;
+
+    /**
+     * Indique si le service est opérationnel (clés VAPID présentes).
+     */
+    private bool $enabled = false;
 
     public function __construct()
     {
-        $auth = [
-            'VAPID' => [
-                'subject' => config('app.vapid_subject', 'mailto:contact@academix.app'),
-                'publicKey' => config('app.vapid_public_key'),
-                'privateKey' => config('app.vapid_private_key'),
-            ],
-        ];
+        $publicKey = config('services.vapid.public_key');
+        $privateKey = config('services.vapid.private_key');
+        $subject = config('services.vapid.subject', 'mailto:contact@academix.app');
 
-        $this->webPush = new WebPush($auth);
+        // ── Guard : si les clés VAPID ne sont pas configurées, on désactive le service
+        if (empty($publicKey) || empty($privateKey)) {
+            Log::warning('[Push] Clés VAPID non configurées — service désactivé. Ajoutez VAPID_PUBLIC_KEY et VAPID_PRIVATE_KEY dans .env');
+            return;
+        }
 
-        // En développement, on accepte les erreurs SSL
-        if (app()->environment('local')) {
+        try {
+            $auth = [
+                'VAPID' => [
+                    'subject' => $subject,
+                    'publicKey' => $publicKey,
+                    'privateKey' => $privateKey,
+                ],
+            ];
+
+            $this->webPush = new WebPush($auth);
+
+            // TTL (durée de vie du message sur le push service)
+            $ttl = app()->environment('local') ? 86400 : 14400; // 24h en dev, 4h en prod
+            $curlOpts = app()->environment('local')
+                ? [CURLOPT_SSL_VERIFYPEER => false]
+                : [];
+
             $this->webPush->setDefaultOptions([
-                'TTL' => 86400, // 24h de durée de vie du message
-                'curl' => [CURLOPT_SSL_VERIFYPEER => false],
+                'TTL' => $ttl,
+                'curl' => $curlOpts,
             ]);
+
+            $this->enabled = true;
+        } catch (\Throwable $e) {
+            Log::error('[Push] Impossible d\'initialiser WebPush : ' . $e->getMessage());
         }
     }
 
 
+    /**
+     * Vérifie si le service est opérationnel.
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+
+    /**
+     * Envoie un push à toutes les subscriptions d'un utilisateur.
+     * Utilise le batching (queueNotification + flush) pour envoyer en parallèle.
+     */
     public function sendToUser(int $userId, array $payload): void
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $subscriptions = PushSubscription::where('user_id', $userId)->get();
 
-        foreach ($subscriptions as $sub) {
-            $this->sendToSubscription($sub, $payload);
+        if ($subscriptions->isEmpty()) {
+            return;
         }
-    }
 
+        $jsonPayload = json_encode(array_merge([
+            'title' => 'AcademiX',
+            'icon' => '/icons/icon-192x192.png',
+            'badge' => '/icons/icon-72x72.png',
+            'url' => '/dashboard',
+        ], $payload));
 
-    public function sendToSubscription(PushSubscription $subscription, array $payload): void
-    {
+        // ── Batching : queue toutes les notifications puis flush en une seule passe
+        foreach ($subscriptions as $sub) {
+            try {
+                $webPushSub = Subscription::create([
+                    'endpoint' => $sub->endpoint,
+                    'publicKey' => $sub->public_key,
+                    'authToken' => $sub->auth_token,
+                    'contentEncoding' => 'aesgcm',
+                ]);
+
+                $this->webPush->queueNotification($webPushSub, $jsonPayload);
+            } catch (\Throwable $e) {
+                Log::warning("[Push] Impossible de créer la subscription pour user #{$sub->user_id}: {$e->getMessage()}");
+            }
+        }
+
+        // ── Flush : envoie toutes les notifications en parallèle
         try {
-            $webPushSub = Subscription::create([
-                'endpoint' => $subscription->endpoint,
-                'publicKey' => $subscription->public_key,
-                'authToken' => $subscription->auth_token,
-                'contentEncoding' => 'aesgcm',
-            ]);
+            foreach ($this->webPush->flush() as $report) {
+                if (!$report->isSuccess()) {
+                    $statusCode = $report->getResponse()?->getStatusCode();
+                    $endpoint = $report->getEndpoint();
 
-            $jsonPayload = json_encode(array_merge([
-                'title' => 'AcademiX',
-                'icon' => '/icons/icon-192x192.png',
-                'badge' => '/icons/icon-72x72.png',
-                'url' => '/dashboard',
-            ], $payload));
-
-            $report = $this->webPush->sendOneNotification($webPushSub, $jsonPayload);
-
-            // Traiter le résultat
-            if (!$report->isSuccess()) {
-                $reason = $report->getReason();
-                // 410 Gone = navigateur a révoqué l'abonnement → on le supprime
-                if (in_array($report->getResponse()?->getStatusCode(), [404, 410])) {
-                    Log::info("[Push] Abonnement expiré (user #{$subscription->user_id}), suppression.");
-                    $subscription->delete();
-                } else {
-                    Log::warning("[Push] Échec envoi (user #{$subscription->user_id}): {$reason}");
+                    // 404/410 = abonnement expiré → on le supprime de la base
+                    if (in_array($statusCode, [404, 410])) {
+                        PushSubscription::where('user_id', $userId)
+                            ->where('endpoint', $endpoint)
+                            ->delete();
+                        Log::info("[Push] Abonnement expiré (user #{$userId}), suppression.");
+                    } else {
+                        Log::warning("[Push] Échec envoi (user #{$userId}): {$report->getReason()}");
+                    }
                 }
             }
         } catch (\Throwable $e) {
-            Log::error('[Push] Exception lors de l\'envoi: ' . $e->getMessage());
+            Log::error('[Push] Exception lors du flush: ' . $e->getMessage());
         }
     }
 }

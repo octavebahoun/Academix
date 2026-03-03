@@ -40,6 +40,14 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
+        'timezone' => env('GOOGLE_CALENDAR_TIMEZONE', 'Africa/Porto-Novo'),
+    ],
+
+    // VAPID — Web Push Notifications
+    'vapid' => [
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+        'subject' => env('VAPID_SUBJECT', 'mailto:contact@academix.app'),
     ],
 
 ];

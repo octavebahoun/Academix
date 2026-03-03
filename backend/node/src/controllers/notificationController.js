@@ -83,8 +83,12 @@ exports.getUnreadCount = async (req, res) => {
  */
 exports.createNotification = async (req, res) => {
   try {
-    const { user_id, type, titre, message, action_url, data, expires_at } = req.body;
-    const targetUserId = user_id || req.user.id;
+    const { type, titre, message, action_url, data, expires_at } = req.body;
+    // Sécurité : toujours utiliser l'ID de l'utilisateur authentifié
+    // (un admin peut cibler un autre user via user_id uniquement)
+    const targetUserId = (req.user.role === 'admin' && req.body.user_id)
+      ? req.body.user_id
+      : req.user.id;
 
     if (!type || !titre || !message) {
       return res.status(400).json({

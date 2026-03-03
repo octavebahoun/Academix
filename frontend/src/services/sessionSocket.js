@@ -38,9 +38,9 @@ class SessionSocketService {
     return this.socket;
   }
 
-  registerUser(userId) {
+  registerUser() {
     if (this.socket) {
-      this.socket.emit('register-user', { userId });
+      this.socket.emit('register-user');
     }
   }
 

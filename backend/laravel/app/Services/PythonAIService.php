@@ -16,46 +16,56 @@ class PythonAIService
 
     /**
      * Lance l'analyse IA pour un étudiant en appelant le service Python FastAPI.
-     *
-     * @param int $studentId
-     * @return array
+     * Retry : 2 tentatives max, pas de retry sur erreur client (4xx).
      */
     public function analyzeStudent(int $studentId): array
     {
-        try {
-            // Transmet le Bearer token de l'utilisateur connecté au service Python
-            $token = request()->bearerToken();
+        $maxAttempts = 2;
+        $lastError = null;
 
-            $response = Http::timeout(45)
-                ->withHeaders([
-                    'Authorization' => "Bearer {$token}",
-                ])
-                ->get("{$this->baseUrl}/api/v1/analysis/{$studentId}");
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $token = request()->bearerToken();
 
-            if ($response->successful()) {
-                $content = $response->json();
-                return [
-                    'success' => true,
-                    'data' => $content['data']
-                ];
+                $response = Http::timeout(45)
+                    ->withHeaders([
+                        'Authorization' => "Bearer {$token}",
+                    ])
+                    ->get("{$this->baseUrl}/api/v1/analysis/{$studentId}");
+
+                if ($response->successful()) {
+                    $content = $response->json();
+                    return [
+                        'success' => true,
+                        'data' => $content['data'] ?? $content,
+                    ];
+                }
+
+                $lastError = "Le service d'analyse IA a renvoyé une erreur ({$response->status()}).";
+                Log::warning("PythonAIService tentative {$attempt}/{$maxAttempts}", [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                // Ne pas retenter sur les erreurs client (4xx)
+                if ($response->status() >= 400 && $response->status() < 500) {
+                    break;
+                }
+
+            } catch (\Exception $e) {
+                $lastError = "Impossible de contacter le service d'intelligence artificielle.";
+                Log::warning("PythonAIService exception tentative {$attempt}/{$maxAttempts}: " . $e->getMessage());
             }
 
-            Log::error("PythonAIService error", [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
-
-            return [
-                'success' => false,
-                'error' => "Le service d'analyse IA a renvoyé une erreur ({$response->status()})."
-            ];
-
-        } catch (\Exception $e) {
-            Log::error("PythonAIService exception: " . $e->getMessage());
-            return [
-                'success' => false,
-                'error' => "Impossible de contacter le service d'intelligence artificielle."
-            ];
+            if ($attempt < $maxAttempts) {
+                usleep(500_000); // 500ms avant retry
+            }
         }
+
+        Log::error("PythonAIService: toutes les tentatives ont échoué", ['attempts' => $maxAttempts]);
+        return [
+            'success' => false,
+            'error' => $lastError,
+        ];
     }
 }

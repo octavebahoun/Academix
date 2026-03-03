@@ -88,7 +88,7 @@ export const studentService = {
 
     // Analyse IA
     triggerAnalysis: async () => {
-        const response = await laravelApiClient.get('/student/analysis');
+        const response = await laravelApiClient.post('/student/analysis');
         return response.data;
     },
 
@@ -108,9 +108,9 @@ export const studentService = {
         return response.data;
     },
 
-    // Envoie le code OAuth reçu depuis Google au backend (appelé depuis GoogleCallbackPage)
-    handleGoogleCallback: async (code) => {
-        const response = await laravelApiClient.post('/auth/google/callback', { code });
+    // Envoie le code OAuth et le state reçus depuis Google au backend (appelé depuis GoogleCallbackPage)
+    handleGoogleCallback: async (code, state) => {
+        const response = await laravelApiClient.post('/auth/google/callback', { code, state });
         return response.data;
     },
 

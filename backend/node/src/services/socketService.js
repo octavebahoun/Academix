@@ -267,10 +267,15 @@ module.exports = (io) => {
   io.on('connection', (socket) => {
     logger.info(`Socket connected: ${socket.id}`);
 
-    socket.on('register-user', async (data) => {
-      const userId = data?.userId;
-      if (!userId) return;
+    socket.on('register-user', async () => {
+      // Utilise l'ID vérifié par le middleware d'auth (jamais data client)
+      const userId = socket.user?.id;
+      if (!userId) {
+        logger.warn(`[register-user] socket ${socket.id} sans user.id authentifié`);
+        return;
+      }
       socket.join(`user_${userId}`);
+      logger.info(`[register-user] User #${userId} rejoint la room user_${userId}`);
     });
 
     socket.on('join-session', async (data) => {

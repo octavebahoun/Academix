@@ -36,7 +36,6 @@ app.include_router(image_router, prefix="/api/v1/image", tags=["Image Generation
 app.include_router(podcast_router, prefix="/api/v1/podcast", tags=["Podcast Service"])
 app.include_router(history_router, prefix="/api/v1/history", tags=["History"])
 app.include_router(analysis_router, prefix="/api/v1/analysis", tags=["Student Analysis"])
-app.include_router(analysis_router, prefix="/api/v1/analysis", tags=["Student Analysis"])
 
 @app.get("/")
 def root():

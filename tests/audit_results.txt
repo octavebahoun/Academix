@@ -1,0 +1,382 @@
+================================================================================
+  AUDIT COMPLET — SUITE DE TESTS ACADEMIX
+  Date: 03/03/2026 19:36:57
+================================================================================
+
+┌─────────────────────────────────────────────────────────┐
+│                    RÉSUMÉ GLOBAL                        │
+├─────────────────────────────────────────────────────────┤
+│  Total des tests       :   239                          │
+│  ✅ Réussis            :    56                          │
+│  ❌ Échoués            :    41                          │
+│  ⚠️  Ignorés (skip)    :   142                          │
+│  💥 Erreurs            :     0                          │
+│  ⏱️  Durée totale       :    23.86s                      │
+│  📊 Taux de réussite   :   23.4%                         │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│               RÉSULTATS PAR BACKEND                     │
+├───────────┬─────────┬─────────┬─────────┬──────────────┤
+│ Backend   │ Réussis │ Échoués │ Ignorés │ Taux         │
+├───────────┼─────────┼─────────┼─────────┼──────────────┤
+│ Laravel   │       7 │      41 │      81 │    5.4%      │
+│ Node.js   │      34 │       0 │      23 │   59.6%      │
+│ Python    │      15 │       0 │      38 │   28.3%      │
+└───────────┴─────────┴─────────┴─────────┴──────────────┘
+
+================================================================================
+  INVENTAIRE COMPLET DES ROUTES TESTÉES
+================================================================================
+
+
+  📌 Laravel API (/api/v1) (85 routes)
+  ──────────────────────────────────────────────────
+    ✓ POST   /auth/admin/register
+    ✓ POST   /auth/admin/login
+    ✓ POST   /auth/admin/logout
+    ✓ POST   /auth/chef/login
+    ✓ POST   /auth/chef/logout
+    ✓ POST   /auth/student/register
+    ✓ POST   /auth/student/login
+    ✓ POST   /auth/student/activate
+    ✓ POST   /auth/student/logout
+    ✓ GET    /auth/me
+    ✓ GET    /auth/google/redirect
+    ✓ POST   /auth/google/callback
+    ✓ GET    /admin/departements
+    ✓ POST   /admin/departements
+    ✓ GET    /admin/departements/{id}
+    ✓ PUT    /admin/departements/{id}
+    ✓ DELETE /admin/departements/{id}
+    ✓ GET    /admin/departements/{id}/stats
+    ✓ GET    /admin/chefs-departement
+    ✓ POST   /admin/chefs-departement
+    ✓ GET    /admin/chefs-departement/{id}
+    ✓ PUT    /admin/chefs-departement/{id}
+    ✓ DELETE /admin/chefs-departement/{id}
+    ✓ POST   /admin/chefs-departement/{id}/toggle
+    ✓ GET    /admin/stats/global
+    ✓ GET    /admin/stats/dashboard
+    ✓ GET    /admin/matieres
+    ✓ POST   /admin/matieres
+    ✓ GET    /admin/matieres/{id}
+    ✓ PUT    /admin/matieres/{id}
+    ✓ DELETE /admin/matieres/{id}
+    ✓ GET    /admin/emploi-temps/filieres/{id}
+    ✓ POST   /admin/emploi-temps
+    ✓ GET    /admin/emploi-temps/{id}
+    ✓ GET    /admin/notes
+    ✓ POST   /admin/notes
+    ✓ GET    /admin/notes/{id}
+    ✓ GET    /departement/filieres
+    ✓ POST   /departement/filieres
+    ✓ GET    /departement/filieres/{id}
+    ✓ PUT    /departement/filieres/{id}
+    ✓ DELETE /departement/filieres/{id}
+    ✓ POST   /departement/filieres/{id}/matieres
+    ✓ DELETE /departement/filieres/{id}/matieres/{mid}
+    ✓ GET    /departement/filieres/{id}/etudiants
+    ✓ GET    /departement/filieres/{id}/matieres
+    ✓ GET    /departement/filieres/{id}/stats
+    ✓ GET    /departement/filieres/{id}/emploi-temps
+    ✓ GET    /departement/matieres
+    ✓ POST   /departement/matieres
+    ✓ GET    /departement/matieres/{id}
+    ✓ GET    /departement/etudiants
+    ✓ POST   /departement/import/etudiants
+    ✓ POST   /departement/import/notes
+    ✓ POST   /departement/import/emploi-temps
+    ✓ GET    /departement/import/template/etudiants
+    ✓ GET    /departement/import/template/notes
+    ✓ GET    /departement/import/template/emploi-temps
+    ✓ GET    /departement/import/history
+    ✓ GET    /departement/import/history/{id}/download
+    ✓ GET    /departement/notes
+    ✓ POST   /departement/notes
+    ✓ POST   /departement/emploi-temps
+    ✓ GET    /departement/dashboard
+    ✓ GET    /student/profil
+    ✓ PUT    /student/profil
+    ✓ GET    /student/moyennes
+    ✓ GET    /student/notes
+    ✓ GET    /student/emploi-temps
+    ✓ GET    /student/taches
+    ✓ POST   /student/taches
+    ✓ GET    /student/taches/{id}
+    ✓ PUT    /student/taches/{id}
+    ✓ DELETE /student/taches/{id}
+    ✓ PATCH  /student/taches/{id}/complete
+    ✓ GET    /student/alertes
+    ✓ PATCH  /student/alertes/{id}/read
+    ✓ GET    /student/analysis
+    ✓ GET    /student/analysis/history
+    ✓ POST   /student/analysis/mark-sent/{id}
+    ✓ POST   /student/push/subscribe
+    ✓ DELETE /student/push/subscribe
+    ✓ GET    /student/google/status
+    ✓ DELETE /student/google/disconnect
+    ✓ POST   /student/google/sync
+
+  📌 Node.js API (26 routes)
+  ──────────────────────────────────────────────────
+    ✓ GET    /
+    ✓ GET    /health
+    ✓ GET    /api/test
+    ✓ POST   /api/test/echo
+    ✓ GET    /api/test/hello/:name
+    ✓ GET    /api/messages/conversations
+    ✓ GET    /api/messages/unread-count
+    ✓ GET    /api/messages/:userId
+    ✓ POST   /api/messages
+    ✓ PATCH  /api/messages/:messageId/read
+    ✓ GET    /api/sessions
+    ✓ POST   /api/sessions
+    ✓ POST   /api/sessions/:id/join
+    ✓ POST   /api/sessions/:id/rate
+    ✓ POST   /api/chat/upload
+    ✓ GET    /api/chat/:sessionId/messages
+    ✓ GET    /api/chat/:sessionId/participants
+    ✓ GET    /api/chat/:sessionId/mentions
+    ✓ GET    /api/chat/:sessionId/whiteboard-state
+    ✓ GET    /api/notifications
+    ✓ GET    /api/notifications/unread-count
+    ✓ POST   /api/notifications
+    ✓ PATCH  /api/notifications/read-all
+    ✓ PATCH  /api/notifications/:id/read
+    ✓ DELETE /api/notifications/:id
+    ✓ POST   /api/webhook/alerte
+
+  📌 Python FastAPI (/api/v1) (20 routes)
+  ──────────────────────────────────────────────────
+    ✓ GET    /
+    ✓ POST   /chat
+    ✓ POST   /upload
+    ✓ POST   /summary/generate
+    ✓ GET    /summary/{summary_id}
+    ✓ GET    /summary/download/{summary_id}
+    ✓ POST   /quiz/generate
+    ✓ POST   /quiz/correct
+    ✓ GET    /quiz/{quiz_id}
+    ✓ POST   /exercises/generate
+    ✓ GET    /exercises/{exercise_id}
+    ✓ GET    /exercises/download/{exercise_id}
+    ✓ POST   /image/generate
+    ✓ GET    /image/download/{filename}
+    ✓ POST   /podcast/generate
+    ✓ GET    /podcast/download/{podcast_id}
+    ✓ GET    /history
+    ✓ DELETE /history/{history_id}
+    ✓ DELETE /history
+    ✓ GET    /analysis/{student_id}
+
+  ══════════════════════════════════════════════════
+  TOTAL : 131 routes testées
+  ══════════════════════════════════════════════════
+
+
+================================================================================
+  ❌ DÉTAIL DES ÉCHECS
+================================================================================
+
+  1. test_01_laravel_auth.TestAdminLogin::test_admin_login_missing_email
+     Message: AssertionError: Devrait rejeter sans email: 200
+assert 200 in [422, 400]
+ +  where 200 = <Response [200]>.status_code
+
+  2. test_01_laravel_auth.TestAdminLogin::test_admin_login_missing_password
+     Message: AssertionError: Devrait rejeter sans password: 200
+assert 200 in [422, 400]
+ +  where 200 = <Response [200]>.status_code
+
+  3. test_01_laravel_auth.TestAdminLogin::test_admin_login_empty_body
+     Message: AssertionError: Devrait rejeter body vide: 200
+assert 200 in [422, 400]
+ +  where 200 = <Response [200]>.status_code
+
+  4. test_01_laravel_auth.TestAdminRegister::test_admin_register_without_token
+     Message: AssertionError: Devrait être non autorisé: 500
+assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  5. test_01_laravel_auth.TestAdminLogout::test_admin_logout_without_token
+     Message: AssertionError: Devrait être non autorisé: 500
+assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  6. test_01_laravel_auth.TestChefLogin::test_chef_login_missing_fields
+     Message: AssertionError: Devrait rejeter: 200
+assert 200 in [422, 400]
+ +  where 200 = <Response [200]>.status_code
+
+  7. test_01_laravel_auth.TestChefLogout::test_chef_logout_without_token
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  8. test_01_laravel_auth.TestStudentLogin::test_student_login_missing_email
+     Message: assert 200 in [422, 400]
+ +  where 200 = <Response [200]>.status_code
+
+  9. test_01_laravel_auth.TestStudentLogin::test_student_login_empty_body
+     Message: assert 200 in [422, 400]
+ +  where 200 = <Response [200]>.status_code
+
+  10. test_01_laravel_auth.TestStudentLogin::test_student_login_invalid_credentials
+     Message: assert 200 in [401, 422, 403]
+ +  where 200 = <Response [200]>.status_code
+
+  11. test_01_laravel_auth.TestStudentActivate::test_student_activate_missing_data
+     Message: assert 200 in [422, 400, 404]
+ +  where 200 = <Response [200]>.status_code
+
+  12. test_01_laravel_auth.TestStudentActivate::test_student_activate_invalid_code
+     Message: assert 200 in [422, 400, 404, 401]
+ +  where 200 = <Response [200]>.status_code
+
+  13. test_01_laravel_auth.TestStudentRegister::test_student_register_without_token
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  14. test_01_laravel_auth.TestStudentLogout::test_student_logout_without_token
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  15. test_01_laravel_auth.TestAuthMe::test_me_without_token
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  16. test_01_laravel_auth.TestGoogleAuth::test_google_redirect_without_token
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  17. test_01_laravel_auth.TestGoogleAuth::test_google_callback_without_token
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  18. test_02_laravel_admin.TestAdminDepartements::test_list_departements_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  19. test_02_laravel_admin.TestAdminDepartements::test_create_departement_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  20. test_02_laravel_admin.TestAdminChefsDepartement::test_list_chefs_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  21. test_02_laravel_admin.TestAdminStatistiques::test_stats_global_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  22. test_02_laravel_admin.TestAdminStatistiques::test_stats_dashboard_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  23. test_02_laravel_admin.TestAdminMatieres::test_list_matieres_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  24. test_02_laravel_admin.TestAdminEmploiTemps::test_emploi_temps_filieres_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  25. test_02_laravel_admin.TestAdminNotes::test_list_notes_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  26. test_03_laravel_departement.TestDepartementFilieres::test_list_filieres_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  27. test_03_laravel_departement.TestDepartementEtudiants::test_list_etudiants_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  28. test_03_laravel_departement.TestDepartementImports::test_import_etudiants_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  29. test_03_laravel_departement.TestDepartementImports::test_import_notes_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  30. test_03_laravel_departement.TestDepartementImports::test_import_emploi_temps_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  31. test_03_laravel_departement.TestDepartementDashboard::test_dashboard_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  32. test_04_laravel_student.TestStudentProfil::test_profil_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  33. test_04_laravel_student.TestStudentProfil::test_update_profil_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  34. test_04_laravel_student.TestStudentNotes::test_moyennes_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  35. test_04_laravel_student.TestStudentNotes::test_notes_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  36. test_04_laravel_student.TestStudentEmploiTemps::test_emploi_temps_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  37. test_04_laravel_student.TestStudentTaches::test_list_taches_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  38. test_04_laravel_student.TestStudentAlertes::test_list_alertes_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  39. test_04_laravel_student.TestStudentAnalysis::test_analysis_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  40. test_04_laravel_student.TestStudentPush::test_push_subscribe_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+  41. test_04_laravel_student.TestStudentGoogle::test_google_status_no_auth
+     Message: assert 500 in [401, 403]
+ +  where 500 = <Response [500]>.status_code
+
+
+================================================================================
+  📋 RECOMMANDATIONS D'AUDIT
+================================================================================
+
+  ❌ Taux de réussite faible (<70%). Revue urgente recommandée.
+  ⚠️  Plus de 30% des tests sont ignorés. Vérifiez que les serveurs sont démarrés et les tokens d'authentification valides.
+  🔧 Backend Laravel : 41 test(s) échoué(s). À corriger.
+  
+  📌 CHECKLIST SÉCURITÉ :
+    □ Toutes les routes protégées renvoient 401 sans token
+    □ Les tokens invalides sont rejetés
+    □ Les données manquantes renvoient 422
+    □ Les IDs inexistants renvoient 404
+    □ Le webhook vérifie le secret partagé
+  
+  📌 CHECKLIST FONCTIONNELLE :
+    □ Tous les CRUD fonctionnent (Create, Read, Update, Delete)
+    □ Les filtres et la pagination fonctionnent
+    □ Les uploads de fichiers sont validés (extension, taille)
+    □ Les services IA répondent correctement
+    □ L'historique IA est correctement sauvegardé
+  
+  📌 CHECKLIST PERFORMANCE :
+    □ Durée totale des tests : 23.86s
+    □ Temps moyen par test : 0.100s
+
+════════════════════════════════════════════════════════════════════════════════
+  Rapport généré le 03/03/2026 à 19:36:57
+  Fichier HTML : /home/octave/Bureau/last/tests/report.html
+════════════════════════════════════════════════════════════════════════════════

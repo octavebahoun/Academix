@@ -13,36 +13,39 @@ class GoogleAuthController extends Controller
     {
     }
 
-    /**
-     * Redirige vers la page d'authentification Google.
-     */
-    public function redirectToGoogle()
+
+    public function redirectToGoogle(Request $request)
     {
+        $user = $request->user();
+        $state = $this->generateOAuthState($user);
+
         return response()->json([
-            'auth_url' => $this->googleService->getAuthUrl()
+            'auth_url' => $this->googleService->getAuthUrl($state)
         ]);
     }
 
-    /**
-     * Gère le retour de l'authentification Google (Callback).
-     * Reçoit le code via POST depuis la page callback du frontend SPA.
-     */
     public function handleGoogleCallback(Request $request)
     {
-        $code = $request->input('code'); // Reçu en POST body depuis le frontend
+        $code = $request->input('code');
+        $state = $request->input('state');
 
         if (!$code) {
             return response()->json(['error' => "Code d'autorisation manquant"], 400);
         }
 
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Utilisateur non authentifié. Veuillez vous connecter avant de lier votre compte Google.'], 401);
+        }
+
+        // Vérification CSRF du state OAuth
+        if (!$state || !$this->verifyOAuthState($state, $user)) {
+            return response()->json(['error' => 'État OAuth invalide ou expiré. Veuillez réessayer.'], 400);
+        }
+
         try {
             $token = $this->googleService->fetchAccessTokenWithAuthCode($code);
-
-            $user = $request->user();
-
-            if (!$user) {
-                return response()->json(['error' => 'Utilisateur non authentifié. Veuillez vous connecter avant de lier votre compte Google.'], 401);
-            }
 
             // Mise à jour de l'utilisateur avec les jetons Google
             $updateData = [
@@ -51,6 +54,12 @@ class GoogleAuthController extends Controller
 
             if (isset($token['refresh_token'])) {
                 $updateData['google_refresh_token'] = $token['refresh_token'];
+            }
+
+            // Récupérer l'ID Google depuis l'id_token
+            $googleUserId = $this->googleService->fetchGoogleUserId($token);
+            if ($googleUserId) {
+                $updateData['google_id'] = $googleUserId;
             }
 
             $user->update($updateData);
@@ -87,11 +96,22 @@ class GoogleAuthController extends Controller
     }
 
     /**
-     * Déconnecte le compte Google de l'étudiant (supprime les jetons).
+     * Déconnecte le compte Google de l'étudiant (révoque et supprime les jetons).
      */
     public function googleDisconnect(Request $request)
     {
-        $request->user()->update([
+        $user = $request->user();
+
+        // Révoquer le token côté Google avant de le supprimer
+        if ($user->google_access_token) {
+            try {
+                $this->googleService->revokeToken($user);
+            } catch (\Exception $e) {
+                Log::warning("Impossible de révoquer le token Google pour user #{$user->id}: " . $e->getMessage());
+            }
+        }
+
+        $user->update([
             'google_access_token' => null,
             'google_refresh_token' => null,
             'google_id' => null,
@@ -120,5 +140,47 @@ class GoogleAuthController extends Controller
             Log::error("Erreur synchro manuelle Google: " . $e->getMessage());
             return response()->json(['error' => 'Erreur lors de la synchronisation : ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Génère un state OAuth signé avec HMAC pour la protection CSRF.
+     */
+    private function generateOAuthState($user): string
+    {
+        $payload = base64_encode(json_encode([
+            'user_id' => $user->id,
+            'ts' => time(),
+        ]));
+        $signature = hash_hmac('sha256', $payload, config('app.key'));
+        return $payload . '.' . $signature;
+    }
+
+    /**
+     * Vérifie que le state OAuth est valide (signature + expiration + utilisateur).
+     */
+    private function verifyOAuthState(string $fullState, $user): bool
+    {
+        $parts = explode('.', $fullState, 2);
+        if (count($parts) !== 2)
+            return false;
+
+        [$payload, $signature] = $parts;
+        $expectedSignature = hash_hmac('sha256', $payload, config('app.key'));
+
+        if (!hash_equals($expectedSignature, $signature))
+            return false;
+
+        $data = json_decode(base64_decode($payload), true);
+        if (!$data)
+            return false;
+
+        if (($data['user_id'] ?? null) !== $user->id)
+            return false;
+
+        // Le state expire après 10 minutes
+        if (time() - ($data['ts'] ?? 0) > 600)
+            return false;
+
+        return true;
     }
 }

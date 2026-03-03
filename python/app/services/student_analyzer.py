@@ -1,11 +1,14 @@
 import json
 import os
+import re
 from typing import Optional
 import aiomysql
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from app.core.config import settings
+from app.api.dependencies import get_db_pool
+from app.models.schemas import AnalysisResult
 
 
 class StudentAnalyzer:
@@ -22,79 +25,66 @@ class StudentAnalyzer:
 
     # ─── Accès base de données ────────────────────────────────────────────────
 
-    async def _get_db_pool(self):
-        return await aiomysql.create_pool(
-            host=settings.DB_HOST,
-            port=settings.DB_PORT,
-            user=settings.DB_USER,
-            password=settings.DB_PASSWORD,
-            db=settings.DB_NAME,
-            autocommit=True,
-            minsize=1,
-            maxsize=5,
-        )
-
     async def _fetch_student_data(self, student_id: int) -> dict:
         """
         Récupère toutes les données académiques de l'étudiant depuis MySQL.
-        Retourne : infos étudiant, notes par matière, tâches.
+        Utilise le pool singleton de dependencies.py.
         """
-        pool = await self._get_db_pool()
-        try:
-            async with pool.acquire() as conn:
-                async with conn.cursor(aiomysql.DictCursor) as cur:
+        pool = await get_db_pool()
+        if not pool:
+            raise ValueError("Connexion à la base de données impossible")
 
-                    # 1. Infos étudiant + filière
-                    await cur.execute(
-                        """
-                        SELECT u.id, u.nom, u.prenom, u.email, u.annee_admission,
-                               f.nom AS filiere_nom
-                        FROM users u
-                        LEFT JOIN filieres f ON f.id = u.filiere_id
-                        WHERE u.id = %s
-                        """,
-                        (student_id,),
-                    )
-                    student = await cur.fetchone()
-                    if not student:
-                        return {}
+        async with pool.acquire() as conn:
+            async with conn.cursor(aiomysql.DictCursor) as cur:
 
-                    # 2. Notes avec matière (seulement les 30 dernières)
-                    await cur.execute(
-                        """
-                        SELECT n.note, n.note_max, n.coefficient, n.type_evaluation,
-                               n.date_evaluation, m.nom AS matiere_nom
-                        FROM notes n
-                        LEFT JOIN matieres m ON m.id = n.matiere_id
-                        WHERE n.user_id = %s
-                        ORDER BY n.date_evaluation DESC
-                        LIMIT 30
-                        """,
-                        (student_id,),
-                    )
-                    notes = await cur.fetchall()
+                # 1. Infos étudiant + filière
+                await cur.execute(
+                    """
+                    SELECT u.id, u.nom, u.prenom, u.email, u.annee_admission,
+                           f.nom AS filiere_nom
+                    FROM users u
+                    LEFT JOIN filieres f ON f.id = u.filiere_id
+                    WHERE u.id = %s
+                    """,
+                    (student_id,),
+                )
+                student = await cur.fetchone()
+                if not student:
+                    return {}
 
-                    # 3. Tâches (statut + priorité)
-                    await cur.execute(
-                        """
-                        SELECT titre, priorite, statut, date_limite
-                        FROM taches
-                        WHERE user_id = %s
-                        ORDER BY date_limite ASC
-                        LIMIT 20
-                        """,
-                        (student_id,),
-                    )
-                    taches = await cur.fetchall()
+                # 2. Notes avec matière (seulement les 30 dernières)
+                await cur.execute(
+                    """
+                    SELECT n.note, n.note_max, n.coefficient, n.type_evaluation,
+                           n.date_evaluation, m.nom AS matiere_nom
+                    FROM notes n
+                    LEFT JOIN matieres m ON m.id = n.matiere_id
+                    WHERE n.user_id = %s
+                    ORDER BY n.date_evaluation DESC
+                    LIMIT 30
+                    """,
+                    (student_id,),
+                )
+                notes = await cur.fetchall()
 
-            return {
-                "student": dict(student),
-                "notes": [dict(n) for n in notes],
-                "taches": [dict(t) for t in taches],
-            }
-        finally:
-            pool.close()
-            await pool.wait_closed()
+                # 3. Tâches (statut + priorité)
+                await cur.execute(
+                    """
+                    SELECT titre, priorite, statut, date_limite
+                    FROM taches
+                    WHERE user_id = %s
+                    ORDER BY date_limite ASC
+                    LIMIT 20
+                    """,
+                    (student_id,),
+                )
+                taches = await cur.fetchall()
+
+        return {
+            "student": dict(student),
+            "notes": [dict(n) for n in notes],
+            "taches": [dict(t) for t in taches],
+        }
 
     # ─── Calcul du contexte ───────────────────────────────────────────────────
 
@@ -171,21 +161,53 @@ class StudentAnalyzer:
     # ─── Appel LLM ────────────────────────────────────────────────────────────
 
     def _build_prompt(self) -> str:
-        return """Tu es un conseiller pédagogique bienveillant et expert pour une plateforme d'e-learning africaine appelée AcademiX.
+        return """Tu es un conseiller pédagogique expert et HONNÊTE pour une plateforme d'e-learning africaine appelée AcademiX.
 
-Ton rôle est d'analyser les performances académiques d'un étudiant et de produire un bilan personnalisé, motivant et actionnable.
+Ton rôle est d'analyser les performances académiques d'un étudiant et de produire un bilan personnalisé et actionnable.
 
 CONTEXTE ÉTUDIANT :
 {context_json}
 
-INSTRUCTIONS :
-- Identifie le niveau d'alerte global : "info" (tout va bien), "warning" (attention requise), "danger" (situation critique)
-- Rédige un message principal chaleureux et personnalisé (2-3 phrases, vouvoiement ou tutoiement selon le contexte)
-- Propose 3 à 5 conseils concrets et actionnables (pas de généralités)
-- Identifie les 1 à 3 matières les plus urgentes à travailler (vides si aucune faiblesse)
-- Souligne un point positif réel basé sur les données
+═══════════════════════════════════════════════════════════════
+RÈGLES STRICTES ET NON NÉGOCIABLES POUR LE NIVEAU D'ALERTE :
+═══════════════════════════════════════════════════════════════
 
-RÉPONDS UNIQUEMENT en JSON valide avec exactement cette structure, sans texte avant ou après :
+Applique ces seuils SANS EXCEPTION en te basant sur les champs "moyenne_generale" et "matieres_faibles" du contexte :
+
+■ "danger" → moyenne_generale < 8  OU  plus de la moitié des matières ont une moyenne < 10
+■ "warning" → moyenne_generale >= 8 ET < 12  OU  au moins 1 matière a une moyenne < 8
+■ "info" → moyenne_generale >= 12  ET  aucune matière en dessous de 8
+
+EXEMPLES CONCRETS :
+- Moyenne 10.36 avec 1+ matières faibles → "warning" (JAMAIS "info")
+- Moyenne 7.5 → "danger" (JAMAIS "warning" ou "info")
+- Moyenne 14.2 sans matière critique → "info"
+- Moyenne 13.0 mais une matière à 6/20 → "warning"
+
+═══════════════════════════════════════════════════════════════
+RÈGLES POUR LE MESSAGE PRINCIPAL :
+═══════════════════════════════════════════════════════════════
+
+■ Si "danger" : Sois DIRECT sur la situation critique. Nomme les matières en difficulté. Encourage l'étudiant à se relever avec des actions concrètes, mais NE MINIMISE PAS les problèmes. Pas de "félicitations".
+■ Si "warning" : Sois HONNÊTE. Reconnais les efforts mais pointe clairement les faiblesses. NE DIS PAS "excellentes performances" si la moyenne est sous 12/20.
+■ Si "info" : Félicitations méritées et encouragements à maintenir le cap.
+
+INTERDICTIONS ABSOLUES :
+- NE DIS JAMAIS "excellentes performances" ou "félicitations" si moyenne < 12/20
+- NE LAISSE JAMAIS "matieres_prioritaires" vide s'il existe des matières dans "matieres_faibles"
+- N'IGNORE JAMAIS les matières en difficulté dans ton analyse
+
+═══════════════════════════════════════════════════════════════
+INSTRUCTIONS DE RÉDACTION :
+═══════════════════════════════════════════════════════════════
+
+- Tutoie l'étudiant
+- 2-3 phrases pour le message principal
+- 3 à 5 conseils CONCRETS et actionnables (pas de généralités comme "travaille plus")
+- Liste les matières urgentes (celles dans "matieres_faibles" en priorité)
+- Souligne UN point positif réel (meilleure matière, progression, taux de complétion tâches…)
+
+RÉPONDS UNIQUEMENT en JSON valide, sans texte avant ou après :
 {{
   "niveau_alerte": "info|warning|danger",
   "message_principal": "...",
@@ -195,15 +217,15 @@ RÉPONDS UNIQUEMENT en JSON valide avec exactement cette structure, sans texte a
 }}"""
 
     async def generate_analysis(self, context: dict) -> dict:
-        """Appelle le LLM Groq et retourne le JSON d'analyse."""
+        """Appelle le LLM Groq et retourne le JSON d'analyse validé."""
         llm = ChatGroq(
             model=settings.LLM_MODEL,
-            temperature=0.4,
+            temperature=0.3,
             max_tokens=1024,
         )
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "Tu es un conseiller pédagogique expert. Tu réponds TOUJOURS en JSON valide uniquement."),
+            ("system", "Tu es un conseiller pédagogique expert. Tu réponds TOUJOURS en JSON valide uniquement, sans texte autour."),
             ("human", self._build_prompt()),
         ])
 
@@ -211,15 +233,32 @@ RÉPONDS UNIQUEMENT en JSON valide avec exactement cette structure, sans texte a
         context_str = json.dumps(context, ensure_ascii=False, default=str)
         raw_output = await chain.ainvoke({"context_json": context_str})
 
-        # Nettoyage : extraire le JSON même si le LLM ajoute des backticks
+        # Nettoyage robuste : extraire le JSON même si le LLM entoure de texte
         raw_output = raw_output.strip()
-        if raw_output.startswith("```"):
-            raw_output = raw_output.split("```")[1]
-            if raw_output.startswith("json"):
-                raw_output = raw_output[4:]
+        if "```" in raw_output:
+            parts = raw_output.split("```")
+            for part in parts:
+                cleaned = part.strip()
+                if cleaned.startswith("json"):
+                    cleaned = cleaned[4:].strip()
+                if cleaned.startswith("{"):
+                    raw_output = cleaned
+                    break
 
-        analysis = json.loads(raw_output.strip())
-        return analysis
+        # Fallback : extraire le premier objet JSON via regex
+        if not raw_output.strip().startswith("{"):
+            match = re.search(r'\{[\s\S]*\}', raw_output)
+            if match:
+                raw_output = match.group(0)
+
+        try:
+            analysis = json.loads(raw_output.strip())
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Le LLM a retourné un JSON invalide : {e}")
+
+        # Validation contre le schéma Pydantic (corrige les valeurs invalides)
+        validated = AnalysisResult(**analysis)
+        return validated.model_dump()
 
     # ─── Point d'entrée principal ─────────────────────────────────────────────
 

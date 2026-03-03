@@ -155,13 +155,15 @@ Route::prefix('v1')->group(function () {
         Route::patch('alertes/{id}/read', [AlerteController::class, 'markAsRead']);
 
         // IA Analysis Routes
-        Route::get('analysis', [StudentAnalysisController::class, 'analyze']);
+        Route::post('analysis', [StudentAnalysisController::class, 'analyze']);
         Route::get('analysis/history', [StudentAnalysisController::class, 'history']);
         Route::post('analysis/mark-sent/{id}', [StudentAnalysisController::class, 'markAsSent']);
 
-        // Push Notifications Routes
-        Route::post('push/subscribe', [PushSubscriptionController::class, 'store']);
-        Route::delete('push/subscribe', [PushSubscriptionController::class, 'destroy']);
+        // Push Notifications Routes (rate-limited: 6 requêtes/minute)
+        Route::middleware('throttle:6,1')->group(function () {
+            Route::post('push/subscribe', [PushSubscriptionController::class, 'store']);
+            Route::delete('push/subscribe', [PushSubscriptionController::class, 'destroy']);
+        });
 
         // Profil update
         Route::put('profil', [StudentController::class, 'updateProfil']);

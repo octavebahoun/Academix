@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\User;
 use App\Services\GoogleApiService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -12,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
 
-class SyncGoogleCalendarForFiliereJob implements ShouldQueue
+class SyncGoogleCalendarForFiliereJob implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,9 +27,22 @@ class SyncGoogleCalendarForFiliereJob implements ShouldQueue
      */
     public int $backoff = 60;
 
+    /**
+     * Durée pendant laquelle le job reste unique (secondes).
+     */
+    public int $uniqueFor = 30;
+
     public function __construct(
         protected int $filiereId
     ) {
+    }
+
+    /**
+     * ID unique pour éviter les doublons de jobs pour la même filière.
+     */
+    public function uniqueId(): string
+    {
+        return 'sync-filiere-' . $this->filiereId;
     }
 
     public function handle(GoogleApiService $googleService): void
@@ -44,6 +58,7 @@ class SyncGoogleCalendarForFiliereJob implements ShouldQueue
 
         Log::info("[GoogleSync] Début de la sync pour {$users->count()} utilisateur(s) (filière {$this->filiereId}).");
 
+        /** @var User $user */
         foreach ($users as $user) {
             try {
                 $googleService->syncEmploiTemps($user);

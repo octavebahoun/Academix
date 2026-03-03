@@ -249,7 +249,7 @@ const ChatPage = ({ session, onLeave }) => {
 
     const token = localStorage.getItem("token") || "demo-token";
     sessionSocketService.connect(token);
-    sessionSocketService.registerUser(CURRENT_USER.id);
+    sessionSocketService.registerUser();
     sessionSocketService.joinSession(
       sessionId,
       CURRENT_USER,

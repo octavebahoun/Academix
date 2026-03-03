@@ -26,13 +26,17 @@ class GoogleApiService
 
         $this->client->addScope(Calendar::CALENDAR);
         $this->client->addScope(Tasks::TASKS);
+        $this->client->addScope('openid');
 
         $this->client->setAccessType('offline');
         $this->client->setPrompt('consent');
     }
 
-    public function getAuthUrl(): string
+    public function getAuthUrl(?string $state = null): string
     {
+        if ($state) {
+            $this->client->setState($state);
+        }
         return $this->client->createAuthUrl();
     }
 
@@ -77,32 +81,45 @@ class GoogleApiService
 
     /**
      * Crée ou récupère le calendrier dédié "AcademiX".
+     * Vérifie que le calendrier existe toujours côté Google, le recrée si supprimé.
      */
     public function ensureAcademiXCalendarExists(User $user): string
     {
-        if (!$this->setAccessTokenForUser($user))
-            return 'primary';
-
-        if ($user->google_calendar_id)
-            return $user->google_calendar_id;
+        if (!$this->setAccessTokenForUser($user)) {
+            throw new \RuntimeException("Token Google invalide pour l'utilisateur #{$user->id}.");
+        }
 
         $service = new Calendar($this->client);
+        $timezone = config('services.google.timezone', 'Africa/Porto-Novo');
+
+        // Vérifier que le calendrier existant est toujours accessible
+        if ($user->google_calendar_id) {
+            try {
+                $service->calendars->get($user->google_calendar_id);
+                return $user->google_calendar_id;
+            } catch (\Google\Service\Exception $e) {
+                if ($e->getCode() === 404 || $e->getCode() === 410) {
+                    Log::warning("[GoogleCalendar] Calendrier {$user->google_calendar_id} introuvable pour user #{$user->id}, recréation...");
+                    $user->update(['google_calendar_id' => null]);
+                } else {
+                    throw $e;
+                }
+            }
+        }
+
+        // Créer un nouveau calendrier dédié
         $calendar = new Calendar\Calendar();
         $calendar->setSummary('AcademiX - Emploi du Temps');
-        $calendar->setTimeZone('Africa/Porto-Novo');
+        $calendar->setTimeZone($timezone);
 
-        try {
-            $createdCalendar = $service->calendars->insert($calendar);
-            $user->update(['google_calendar_id' => $createdCalendar->getId()]);
-            return $createdCalendar->getId();
-        } catch (\Exception $e) {
-            return 'primary';
-        }
+        $createdCalendar = $service->calendars->insert($calendar);
+        $user->update(['google_calendar_id' => $createdCalendar->getId()]);
+        return $createdCalendar->getId();
     }
 
     /**
      * Synchronise l'emploi du temps de l'étudiant vers Google Calendar.
-     * Utilise iCalUID pour l'idempotence (pas de doublons) et pagination pour le nettoyage.
+     * Utilise des IDs d'événements déterministes pour l'idempotence (upsert, pas de doublons).
      */
     public function syncEmploiTemps(User $user)
     {
@@ -113,8 +130,100 @@ class GoogleApiService
 
         $calendarId = $this->ensureAcademiXCalendarExists($user);
         $service = new Calendar($this->client);
+        $timezone = config('services.google.timezone', 'Africa/Porto-Novo');
 
-        // Nettoyage avec pagination complète
+        $edt = EmploiTempsFiliere::with('matiere')
+            ->where('filiere_id', $user->filiere_id)
+            ->get();
+
+        $dayMap = [
+            'Lundi' => 'MO',
+            'Mardi' => 'TU',
+            'Mercredi' => 'WE',
+            'Jeudi' => 'TH',
+            'Vendredi' => 'FR',
+            'Samedi' => 'SA',
+            'Dimanche' => 'SU',
+        ];
+
+        // Calcul dynamique de la fin d'année universitaire
+        $now = Carbon::now();
+        $endYear = $now->month >= 9 ? $now->year + 1 : $now->year;
+        $untilDate = Carbon::create($endYear, 6, 30, 23, 59, 59, 'UTC')->format('Ymd\THis\Z');
+        $startDate = Carbon::now()->startOfWeek();
+
+        // Upsert de chaque cours avec un ID déterministe
+        $expectedEventIds = [];
+        foreach ($edt as $cours) {
+            $eventId = $this->generateEdtEventId($cours->id);
+            $expectedEventIds[] = $eventId;
+
+            if (!isset($dayMap[$cours->jour])) {
+                Log::warning("[GoogleSync] Jour inconnu '{$cours->jour}' pour le cours #{$cours->id}, ignoré.");
+                continue;
+            }
+
+            $eventData = [
+                'id' => $eventId,
+                'summary' => "{$cours->matiere->nom} ({$cours->type_cours})",
+                'location' => $cours->salle ?? 'A définir',
+                'description' => "Enseignant: {$cours->enseignant}\n-- Synchronisé par AcademiX",
+                'start' => [
+                    'dateTime' => $this->getDateTimeForDay($startDate, $cours->jour, $cours->heure_debut),
+                    'timeZone' => $timezone,
+                ],
+                'end' => [
+                    'dateTime' => $this->getDateTimeForDay($startDate, $cours->jour, $cours->heure_fin),
+                    'timeZone' => $timezone,
+                ],
+                'recurrence' => ["RRULE:FREQ=WEEKLY;BYDAY={$dayMap[$cours->jour]};UNTIL={$untilDate}"],
+                'reminders' => [
+                    'useDefault' => false,
+                    'overrides' => [['method' => 'popup', 'minutes' => 30]],
+                ],
+            ];
+
+            try {
+                // Upsert : essayer update d'abord, créer si 404
+                $service->events->update($calendarId, $eventId, new Event($eventData));
+            } catch (\Google\Service\Exception $e) {
+                if ($e->getCode() === 404) {
+                    try {
+                        $service->events->insert($calendarId, new Event($eventData));
+                    } catch (\Exception $insertEx) {
+                        Log::error("[GoogleSync] Erreur insertion cours #{$cours->id} pour user #{$user->id}: " . $insertEx->getMessage());
+                    }
+                } else {
+                    Log::error("[GoogleSync] Erreur upsert cours #{$cours->id} pour user #{$user->id}: " . $e->getMessage());
+                }
+            }
+        }
+
+        // Nettoyage : supprimer les événements AcademiX EDT orphelins
+        $this->cleanupOrphanEdtEvents($service, $calendarId, $expectedEventIds);
+    }
+
+    private function getDateTimeForDay(Carbon $currentWeekStart, string $jour, $heure)
+    {
+        $dayMap = ['Lundi' => 0, 'Mardi' => 1, 'Mercredi' => 2, 'Jeudi' => 3, 'Vendredi' => 4, 'Samedi' => 5, 'Dimanche' => 6];
+        $time = Carbon::parse($heure);
+        return $currentWeekStart->copy()->addDays($dayMap[$jour] ?? 0)->setTime($time->hour, $time->minute)->toRfc3339String();
+    }
+
+    /**
+     * Génère un ID d'événement Google Calendar déterministe pour un cours EDT.
+     * Caractères autorisés : a-v, 0-9 (base32hex).
+     */
+    private function generateEdtEventId(int $coursId): string
+    {
+        return 'academikcours' . str_pad($coursId, 8, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Supprime les événements AcademiX EDT qui ne correspondent plus à un cours actuel.
+     */
+    private function cleanupOrphanEdtEvents(Calendar $service, string $calendarId, array $expectedEventIds): void
+    {
         try {
             $pageToken = null;
             do {
@@ -125,13 +234,13 @@ class GoogleApiService
                 $events = $service->events->listEvents($calendarId, $params);
 
                 foreach ($events->getItems() as $event) {
-                    $summary = $event->getSummary() ?? '';
-                    if (str_contains($summary, '(CM)') || str_contains($summary, '(TD)') || str_contains($summary, '(TP)')) {
+                    $eventId = $event->getId();
+                    if (str_starts_with($eventId, 'academikcours') && !in_array($eventId, $expectedEventIds)) {
                         try {
-                            $service->events->delete($calendarId, $event->getId());
+                            $service->events->delete($calendarId, $eventId);
+                            Log::debug("[GoogleSync] Événement orphelin {$eventId} supprimé.");
                         } catch (\Exception $e) {
-                            // 404/410 = déjà supprimé, on ignore
-                            Log::debug("Impossible de supprimer l'événement {$event->getId()}: " . $e->getMessage());
+                            Log::debug("[GoogleSync] Impossible de supprimer l'événement orphelin {$eventId}: " . $e->getMessage());
                         }
                     }
                 }
@@ -139,95 +248,41 @@ class GoogleApiService
                 $pageToken = $events->getNextPageToken();
             } while ($pageToken);
         } catch (\Exception $e) {
-            Log::warning("Erreur lors du nettoyage de l'agenda AcademiX pour l'utilisateur {$user->id}: " . $e->getMessage());
+            Log::warning("[GoogleSync] Erreur lors du nettoyage des événements orphelins: " . $e->getMessage());
         }
-
-        $edt = EmploiTempsFiliere::with('matiere')
-            ->where('filiere_id', $user->filiere_id)
-            ->get();
-
-        if ($edt->isEmpty()) {
-            Log::info("Aucun cours trouvé pour la filière " . $user->filiere_id);
-            return;
-        }
-
-        $dayMap = [
-            'Lundi' => 'MO',
-            'Mardi' => 'TU',
-            'Mercredi' => 'WE',
-            'Jeudi' => 'TH',
-            'Vendredi' => 'FR',
-            'Samedi' => 'SA'
-        ];
-
-        // Calcul dynamique de la fin d'année universitaire :
-        // Si on est entre septembre et décembre → fin = 30 juin de l'année suivante
-        // Sinon (janvier - août) → fin = 30 juin de l'année en cours
-        $now = Carbon::now();
-        $endYear = $now->month >= 9 ? $now->year + 1 : $now->year;
-        $untilDate = Carbon::create($endYear, 6, 30, 23, 59, 59, 'UTC')->format('Ymd\THis\Z');
-
-        // On part du début de la semaine actuelle
-        $startDate = Carbon::now()->startOfWeek();
-
-        foreach ($edt as $cours) {
-            try {
-                $event = new Event([
-                    'summary' => "{$cours->matiere->nom} ({$cours->type_cours})",
-                    'location' => $cours->salle ?? 'A définir',
-                    'description' => "Enseignant: {$cours->enseignant}",
-                    'start' => [
-                        'dateTime' => $this->getDateTimeForDay($startDate, $cours->jour, $cours->heure_debut),
-                        'timeZone' => 'Africa/Porto-Novo',
-                    ],
-                    'end' => [
-                        'dateTime' => $this->getDateTimeForDay($startDate, $cours->jour, $cours->heure_fin),
-                        'timeZone' => 'Africa/Porto-Novo',
-                    ],
-                    'recurrence' => ["RRULE:FREQ=WEEKLY;BYDAY={$dayMap[$cours->jour]};UNTIL={$untilDate}"],
-                    'reminders' => [
-                        'useDefault' => false,
-                        'overrides' => [
-                            ['method' => 'popup', 'minutes' => 30],
-                        ],
-                    ],
-                ]);
-
-                $service->events->insert($calendarId, $event);
-            } catch (\Exception $e) {
-                Log::error("Erreur lors de l'insertion d'un cours Google Calendar pour l'utilisateur {$user->id}: " . $e->getMessage());
-            }
-        }
-    }
-
-    private function getDateTimeForDay(Carbon $currentWeekStart, string $jour, $heure)
-    {
-        $dayMap = ['Lundi' => 0, 'Mardi' => 1, 'Mercredi' => 2, 'Jeudi' => 3, 'Vendredi' => 4, 'Samedi' => 5];
-        $time = Carbon::parse($heure);
-        return $currentWeekStart->copy()->addDays($dayMap[$jour])->setTime($time->hour, $time->minute)->toRfc3339String();
     }
 
     // --- GOOGLE TASKS (Gestion des tâches) ---
 
     public function ensureAcademiXTaskListExists(User $user): string
     {
-        if (!$this->setAccessTokenForUser($user))
-            return '@default';
-
-        if ($user->google_task_list_id)
-            return $user->google_task_list_id;
+        if (!$this->setAccessTokenForUser($user)) {
+            throw new \RuntimeException("Token Google invalide pour l'utilisateur #{$user->id}.");
+        }
 
         $service = new Tasks($this->client);
+
+        // Vérifier que la task list existante est toujours accessible
+        if ($user->google_task_list_id) {
+            try {
+                $service->tasklists->get($user->google_task_list_id);
+                return $user->google_task_list_id;
+            } catch (\Google\Service\Exception $e) {
+                if ($e->getCode() === 404 || $e->getCode() === 410) {
+                    Log::warning("[GoogleTasks] Task list {$user->google_task_list_id} introuvable pour user #{$user->id}, recréation...");
+                    $user->update(['google_task_list_id' => null]);
+                } else {
+                    throw $e;
+                }
+            }
+        }
+
         $taskList = new Tasks\TaskList();
         $taskList->setTitle('AcademiX Tasks');
 
-        try {
-            $createdList = $service->tasklists->insert($taskList);
-            $user->update(['google_task_list_id' => $createdList->getId()]);
-            return $createdList->getId();
-        } catch (\Exception $e) {
-            return '@default';
-        }
+        $createdList = $service->tasklists->insert($taskList);
+        $user->update(['google_task_list_id' => $createdList->getId()]);
+        return $createdList->getId();
     }
 
     public function syncTaskToGoogle(Tache $tache)
@@ -362,6 +417,76 @@ class GoogleApiService
             $service->tasks->delete($taskListId, $tache->google_task_id);
         } catch (\Exception $e) {
             Log::warning("Impossible de supprimer la tâche Google: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Supprime une tâche Google Tasks par son ID (utilisé par le job async).
+     */
+    public function deleteGoogleTaskById(User $user, string $googleTaskId): void
+    {
+        if (!$this->setAccessTokenForUser($user))
+            return;
+
+        $taskListId = $this->ensureAcademiXTaskListExists($user);
+        $service = new Tasks($this->client);
+
+        try {
+            $service->tasks->delete($taskListId, $googleTaskId);
+        } catch (\Exception $e) {
+            Log::warning("[GoogleTasks] Impossible de supprimer la tâche {$googleTaskId}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Supprime un événement Calendar par son ID (utilisé par le job async).
+     */
+    public function deleteCalendarEventById(User $user, string $eventId): void
+    {
+        if (!$this->setAccessTokenForUser($user))
+            return;
+
+        $calendarId = $this->ensureAcademiXCalendarExists($user);
+        $service = new Calendar($this->client);
+
+        try {
+            $service->events->delete($calendarId, $eventId);
+        } catch (\Google\Service\Exception $e) {
+            if ($e->getCode() !== 404 && $e->getCode() !== 410) {
+                Log::warning("[GoogleCalendar] Impossible de supprimer l'événement {$eventId}: " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Révoque le token Google OAuth de l'utilisateur.
+     */
+    public function revokeToken(User $user): void
+    {
+        if (!$user->google_access_token)
+            return;
+
+        $token = json_decode($user->google_access_token, true);
+        if (is_array($token) && !isset($token['error'])) {
+            $this->client->setAccessToken($token);
+            $this->client->revokeToken();
+        }
+    }
+
+    /**
+     * Récupère l'ID Google de l'utilisateur depuis le id_token OAuth.
+     */
+    public function fetchGoogleUserId(array $token): ?string
+    {
+        if (!isset($token['id_token']))
+            return null;
+
+        try {
+            $payload = $this->client->verifyIdToken($token['id_token']);
+            return $payload['sub'] ?? null;
+        } catch (\Exception $e) {
+            Log::warning("[GoogleAuth] Impossible de décoder l'id_token: " . $e->getMessage());
+            return null;
         }
     }
 }

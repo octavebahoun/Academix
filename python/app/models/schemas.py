@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from enum import Enum
 
@@ -164,6 +164,14 @@ class AnalysisResult(BaseModel):
     conseils: List[str]
     matieres_prioritaires: List[str]
     point_positif: Optional[str] = None
+
+    @field_validator('niveau_alerte')
+    @classmethod
+    def validate_niveau_alerte(cls, v):
+        allowed = {'info', 'warning', 'danger'}
+        if v not in allowed:
+            return 'warning'  # fallback sûr
+        return v
 
 
 class StudentAnalysisData(BaseModel):

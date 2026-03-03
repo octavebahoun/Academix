@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
+use App\Jobs\SendWebPushNotificationJob;
 use App\Models\Alerte;
-use App\Services\WebPushService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -12,6 +12,7 @@ class AlerteObserver
 
     public function created(Alerte $alerte): void
     {
+        // ── 1. Webhook Socket.io → Node.js (temps réel in-app)
         $nodeUrl = config('services.node.url');
         $secret = config('services.node.webhook_secret');
 
@@ -40,22 +41,18 @@ class AlerteObserver
             }
         }
 
-        try {
-            $emoji = match ($alerte->niveau_severite) {
-                'eleve' => '🔴',
-                'moyen' => '🟡',
-                default => '🟢',
-            };
+        // ── 2. Push VAPID natif (notification OS) — dispatché en ASYNC via Job
+        $emoji = match ($alerte->niveau_severite) {
+            'eleve' => '🔴',
+            'moyen' => '🟡',
+            default => '🟢',
+        };
 
-            app(WebPushService::class)->sendToUser($alerte->user_id, [
-                'title' => "{$emoji} {$alerte->titre}",
-                'body' => $alerte->message,
-                'url' => '/dashboard',
-                'tag' => 'alerte-' . $alerte->id,
-            ]);
-        } catch (\Throwable $e) {
-            // Ne jamais laisser le push faire échouer la création d'alerte
-            Log::warning("AlerteObserver : échec Web Push — {$e->getMessage()}");
-        }
+        SendWebPushNotificationJob::dispatch($alerte->user_id, [
+            'title' => "{$emoji} {$alerte->titre}",
+            'body' => $alerte->message,
+            'url' => '/dashboard',
+            'tag' => 'alerte-' . $alerte->id,
+        ]);
     }
 }
