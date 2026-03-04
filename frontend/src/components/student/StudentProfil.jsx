@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   Mail,
   MapPin,
@@ -15,6 +16,7 @@ import {
   Link2,
   Link2Off,
   RefreshCw,
+  Shield,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
 import { studentService } from "../../services/studentService";
@@ -344,6 +346,23 @@ export default function StudentProfil() {
                 <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
                   Campus Principal
                 </p>
+              </div>
+            </div>
+            <div className="flex gap-4 group/privacy">
+              <Shield
+                size={18}
+                className="text-slate-400 mt-1 transition-colors group-hover/privacy:text-emerald-500"
+              />
+              <div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                  Confidentialité
+                </h4>
+                <Link
+                  to="/privacy"
+                  className="text-sm font-bold text-slate-900 dark:text-white hover:text-emerald-500 transition-colors leading-tight block"
+                >
+                  Politique de confidentialité
+                </Link>
               </div>
             </div>
           </div>

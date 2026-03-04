@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Github,
   Twitter,
@@ -40,8 +40,17 @@ const socialLinks = [
 ];
 
 export default function Footer() {
+  const navigate = useNavigate();
+
   const scrollTo = (href) => {
     if (href.startsWith("#")) {
+      if (
+        window.location.pathname !== "/landing" &&
+        window.location.pathname !== "/"
+      ) {
+        navigate("/landing" + href);
+        return;
+      }
       const el = document.querySelector(href);
       el?.scrollIntoView({ behavior: "smooth" });
     }
@@ -94,13 +103,23 @@ export default function Footer() {
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <button
-                      onClick={() => scrollTo(link.href)}
-                      className="text-sm text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1 group"
-                    >
-                      {link.label}
-                      <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
+                    {link.href.startsWith("/") ? (
+                      <Link
+                        to={link.href}
+                        className="text-sm text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1 group"
+                      >
+                        {link.label}
+                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => scrollTo(link.href)}
+                        className="text-sm text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1 group"
+                      >
+                        {link.label}
+                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

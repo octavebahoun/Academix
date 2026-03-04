@@ -214,7 +214,7 @@ class MassiveSeeder extends Seeder
         $this->command->info('║  🏛️  Chef ECO  : chef.eco@academix.com               ║');
         $this->command->info('║                                                      ║');
         $this->command->info('║  🎓 Étudiants : ETU-INFO-001@academix.com            ║');
-        $this->command->info('║                 ETU-GC-001@academix.com  etc.        ║');
+        $this->command->info('║                 ETU-GC-001@academix.com              ║');
         $this->command->info('╚══════════════════════════════════════════════════════╝');
     }
 

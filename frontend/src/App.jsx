@@ -15,6 +15,7 @@ import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 import ChatPage from "./pages/ChatPage";
 import SessionsFeedPage from "./pages/SessionsFeedPage";
 import LandingPage from "./pages/LandingPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { authService } from "./services/authService";
 import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
@@ -126,6 +127,7 @@ function AppContent() {
         {/* Landing page publique — redirige vers le dashboard si déjà connecté */}
         <Route path="/" element={<RootRedirect />} />
         <Route path="/landing" element={<LandingPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
 
         {/* Redirection après login selon le rôle */}
         <Route path="/home" element={<HomeRedirect />} />

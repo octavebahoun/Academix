@@ -24,8 +24,19 @@ export default function LandingNavbar() {
 
   const scrollTo = (href) => {
     setMobileOpen(false);
+    if (
+      window.location.pathname !== "/landing" &&
+      window.location.pathname !== "/"
+    ) {
+      navigate("/landing" + href);
+      return;
+    }
     const el = document.querySelector(href);
-    el?.scrollIntoView({ behavior: "smooth" });
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/landing" + href);
+    }
   };
 
   return (
