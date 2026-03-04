@@ -133,7 +133,10 @@ export const studentService = {
     },
 
     updateProfil: async (data) => {
-        const response = await laravelApiClient.put('/student/profil', data);
+        // Utiliser POST pour l'upload de photo, même si c'est conceptuellement un update
+        const response = await laravelApiClient.post('/student/profil-update', data, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
         return response.data;
     },
 };

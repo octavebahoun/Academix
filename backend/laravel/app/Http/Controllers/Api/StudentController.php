@@ -17,17 +17,17 @@ class StudentController extends Controller
         $admin = $request->user();
 
         $etudiants = User::with('filiere')
-            ->when($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement(), function($query) use ($admin) {
+            ->when($admin && method_exists($admin, 'isChefDepartement') && $admin->isChefDepartement(), function ($query) use ($admin) {
 
-                $query->whereHas('filiere', function($q) use ($admin) {
+                $query->whereHas('filiere', function ($q) use ($admin) {
                     $q->where('departement_id', $admin->departement_id);
                 });
             })
-            ->when($request->search, function($query, $search) {
-                $query->where(function($q) use ($search) {
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('nom', 'like', "%{$search}%")
-                      ->orWhere('prenom', 'like', "%{$search}%")
-                      ->orWhere('matricule', 'like', "%{$search}%");
+                        ->orWhere('prenom', 'like', "%{$search}%")
+                        ->orWhere('matricule', 'like', "%{$search}%");
                 });
             })
             ->orderBy('nom')
@@ -44,25 +44,39 @@ class StudentController extends Controller
 
     public function updateProfil(Request $request)
     {
+        $user = $request->user();
+
         $validated = $request->validate([
-            'telephone'           => 'nullable|string|max:20',
-            'photo'               => 'nullable|string|url',
-            'objectif_moyenne'    => 'sometimes|numeric|min:0|max:20',
+            'telephone' => 'nullable|string|max:20',
+            'photo' => 'nullable|image|max:2048', // Accepte un fichier image
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'objectif_moyenne' => 'sometimes|numeric|min:0|max:20',
             'style_apprentissage' => 'sometimes|in:visuel,auditif,kinesthesique',
         ]);
 
-        $request->user()->update($validated);
-        return response()->json($request->user()->fresh()->load('filiere'));
+        if ($request->hasFile('photo')) {
+            // Supprimer l'ancienne photo si elle existe
+            if ($user->photo && str_contains($user->photo, 'storage/avatars')) {
+                $oldPath = str_replace(asset('storage/'), '', $user->photo);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('photo')->store('avatars', 'public');
+            $validated['photo'] = asset('storage/' . $path);
+        }
+
+        $user->update($validated);
+        return response()->json($user->fresh()->load('filiere'));
     }
 
     public function notes(Request $request)
     {
         $notes = Note::with('matiere:id,nom,code,coefficient')
             ->where('user_id', $request->user()->id)
-            ->when($request->semestre, function($query, $semestre) {
+            ->when($request->semestre, function ($query, $semestre) {
                 $query->where('semestre', $semestre);
             })
-            ->when($request->annee_academique, function($query, $annee) {
+            ->when($request->annee_academique, function ($query, $annee) {
                 $query->where('annee_academique', $annee);
             })
             ->orderBy('date_evaluation')
@@ -105,7 +119,7 @@ class StudentController extends Controller
                 'matiere_id' => $matiere->matiere_id,
                 'nom' => $matiere->matiere_nom,
                 'coefficient' => $matiere->coefficient,
-                'moyenne' => round((float)$matiere->moyenne_ponderee, 2)
+                'moyenne' => round((float) $matiere->moyenne_ponderee, 2)
             ];
 
             $semestres[$sem]['total_ponderee'] += ($matiere->moyenne_ponderee * $matiere->coefficient);
@@ -124,7 +138,7 @@ class StudentController extends Controller
         }
 
         $moyenneGenerale = $totalGeneralCoeff > 0 ? round($totalGeneralPonderee / $totalGeneralCoeff, 2) : 0;
-        $objectif = (float)$user->objectif_moyenne ?? 0;
+        $objectif = (float) $user->objectif_moyenne ?? 0;
 
         return response()->json([
             'semestres' => $semestresFormatted,
@@ -139,10 +153,10 @@ class StudentController extends Controller
         $user = $request->user();
         $edt = EmploiTempsFiliere::with('matiere:id,nom,code')
             ->where('filiere_id', $user->filiere_id)
-            ->when($request->semestre, function($query, $semestre) {
+            ->when($request->semestre, function ($query, $semestre) {
                 $query->where('semestre', $semestre);
             })
-            ->when($request->jour, function($query, $jour) {
+            ->when($request->jour, function ($query, $jour) {
                 $query->where('jour', $jour);
             })
             ->orderByRaw("FIELD(jour, 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi')")
@@ -155,9 +169,11 @@ class StudentController extends Controller
     public function matieres(Request $request)
     {
         $user = $request->user();
-        $filiere = Filiere::with(['matieres' => function($query) {
+        $filiere = Filiere::with([
+            'matieres' => function ($query) {
                 $query->withPivot('semestre');
-            }])
+            }
+        ])
             ->find($user->filiere_id);
 
         return response()->json($filiere->matieres);

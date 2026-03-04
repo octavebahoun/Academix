@@ -130,6 +130,10 @@ export default function StudentAnalysis() {
         setAnalysis(newAnalysis);
         setHistory((prev) => [newAnalysis, ...prev]);
         toast.success("Bilan IA généré avec succès !");
+      } else if (result?.already_exists) {
+        // L'analyse existe déjà mais < 24h (retour 200 success:false)
+        setAnalysis(result.data);
+        toast("Un bilan récent est déjà disponible.", { icon: "📊" });
       } else {
         toast.error(result?.message || "Impossible de générer le bilan.");
       }

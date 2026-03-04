@@ -14,7 +14,6 @@ use App\Models\User;
 use App\Models\Note;
 use App\Models\Tache;
 use App\Models\Alerte;
-use App\Models\EmploiTempsFiliere;
 use App\Models\StatistiqueDepartement;
 use App\Models\StatistiqueFiliere;
 
@@ -196,7 +195,6 @@ class MassiveSeeder extends Seeder
         $this->seedFilieres();
         $this->seedFiliereMatieres();
         $this->seedEtudiants();
-        $this->seedEmploiTemps();
         $this->seedNotes();
         $this->seedTaches();
         $this->seedAlertes();
@@ -431,66 +429,6 @@ class MassiveSeeder extends Seeder
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // ─── 8. EMPLOI DU TEMPS ──────────────────────────────────────────────────
-    // ══════════════════════════════════════════════════════════════════════════
-
-    private function seedEmploiTemps(): void
-    {
-        $jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-        $heures = [
-            ['08:00', '10:00'],
-            ['10:15', '12:15'],
-            ['14:00', '16:00'],
-            ['16:15', '18:15'],
-        ];
-        $salles = ['Amphi A', 'Amphi B', 'Salle 101', 'Salle 102', 'Salle 103', 'Salle 201', 'Labo 1', 'Labo 2', 'Labo 3'];
-        $types = ['CM', 'TD', 'TP'];
-        $count = 0;
-
-        $filieres = Filiere::with('departement')->get();
-
-        foreach ($filieres as $fil) {
-            $dept = $fil->departement;
-            $matsCatalogue = $this->matieresCatalogue[$dept->code] ?? [];
-
-            foreach (['S1', 'S2'] as $sem) {
-                $slotIdx = 0;
-                foreach ($matsCatalogue as $idx => $mc) {
-                    $expectedSem = $idx < ceil(count($matsCatalogue) / 2) ? 'S1' : 'S2';
-                    if ($expectedSem !== $sem)
-                        continue;
-
-                    $matId = Matiere::where('code', $mc['code'])->value('id');
-                    if (!$matId)
-                        continue;
-
-                    // 2 créneaux par matière (1 CM + 1 TD/TP)
-                    for ($k = 0; $k < 2; $k++) {
-                        $jourIdx = $slotIdx % count($jours);
-                        $heureIdx = intdiv($slotIdx, count($jours)) % count($heures);
-
-                        EmploiTempsFiliere::create([
-                            'filiere_id' => $fil->id,
-                            'matiere_id' => $matId,
-                            'jour' => $jours[$jourIdx],
-                            'heure_debut' => $heures[$heureIdx][0],
-                            'heure_fin' => $heures[$heureIdx][1],
-                            'salle' => $salles[array_rand($salles)],
-                            'type_cours' => $k === 0 ? 'CM' : $types[array_rand(['TD', 'TP'])],
-                            'enseignant' => $mc['prof'] ?? 'Enseignant',
-                            'semestre' => $sem,
-                        ]);
-                        $slotIdx++;
-                        $count++;
-                    }
-                }
-            }
-        }
-
-        $this->command->info("  ✓ {$count} créneaux d'emploi du temps créés");
-    }
-
-    // ══════════════════════════════════════════════════════════════════════════
     // ─── 9. NOTES (profils variés : excellent / bon / moyen / faible / très faible)
     // ══════════════════════════════════════════════════════════════════════════
 
@@ -590,12 +528,10 @@ class MassiveSeeder extends Seeder
     private function seedTaches(): void
     {
         $tachesModeles = [
-            ['titre' => 'Réviser le chapitre sur %s', 'prio' => 'haute', 'statut' => 'a_faire'],
             ['titre' => 'Terminer le TP de %s', 'prio' => 'haute', 'statut' => 'en_cours'],
             ['titre' => 'Préparer l\'exposé sur %s', 'prio' => 'moyenne', 'statut' => 'a_faire'],
             ['titre' => 'Rendre le devoir de %s', 'prio' => 'haute', 'statut' => 'terminee'],
             ['titre' => 'Lire les notes de cours de %s', 'prio' => 'basse', 'statut' => 'a_faire'],
-            ['titre' => 'Faire les exercices de %s', 'prio' => 'moyenne', 'statut' => 'en_cours'],
             ['titre' => 'Préparer l\'examen de %s', 'prio' => 'haute', 'statut' => 'a_faire'],
         ];
 
@@ -656,7 +592,7 @@ class MassiveSeeder extends Seeder
                     'niveau_severite' => 'eleve',
                     'titre' => 'Moyenne générale critique',
                     'message' => "Votre moyenne générale est de " . round($avg, 2) . "/20. Il est urgent de consulter vos enseignants et de redoubler d'efforts.",
-                    'actions_suggerees' => ['Consulter le tuteur pédagogique', 'Revoir les matières faibles en priorité', 'Participer aux séances de tutorat'],
+                    'actions_suggerees' => ['Consulter un tuteur pédagogique', 'Revoir les matières faibles en priorité', 'Participer aux séances de tutorat'],
                     'est_lue' => false,
                 ]);
                 $count++;

@@ -165,8 +165,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('push/subscribe', [PushSubscriptionController::class, 'destroy']);
         });
 
-        // Profil update
-        Route::put('profil', [StudentController::class, 'updateProfil']);
+        // Profil update (POST nécessaire pour gérer les fichiers/avatars plus facilement)
+        Route::post('profil-update', [StudentController::class, 'updateProfil']);
 
         // Google Calendar Routes
         Route::get('google/status', [GoogleAuthController::class, 'googleStatus']);

@@ -46,6 +46,13 @@ class User extends Authenticatable
         'last_login' => 'datetime',
     ];
 
+    protected $appends = ['avatar_url'];
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->photo;
+    }
+
     public function filiere(): BelongsTo
     {
         return $this->belongsTo(Filiere::class);

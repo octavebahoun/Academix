@@ -10,6 +10,7 @@ import {
 import { aiService } from "../../services/aiService";
 import { useAIHistory } from "../../hooks/useAIHistory";
 import AIHistorySidebar from "./AIHistorySidebar";
+import toast from "react-hot-toast";
 
 export default function ImageTool() {
   const [prompt, setPrompt] = useState("");
@@ -25,8 +26,9 @@ export default function ImageTool() {
   } = useAIHistory("image");
 
   const handleGenerate = async () => {
+    toast.error("La génération d'images est en cours de développement.");
+    return;
     if (!prompt.trim()) return;
-    setLoading(true);
     try {
       const res = await aiService.generateImage(prompt);
       setImage(res);
@@ -67,27 +69,25 @@ export default function ImageTool() {
           <div className="relative z-10 flex flex-col gap-6">
             <label className="text-sm font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest pl-2">
               <Sparkles size={16} className="text-amber-500" /> Quel concept
-              souhaitez-vous visualiser ?
+              souhaitez-vous visualiser ?{" "}
+              <span className="text-orange-500 font-black italic">
+                (Bientôt disponible)
+              </span>
             </label>
             <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="text"
-                placeholder="Ex: Un schéma 3D d'une cellule procaryote avec légendes..."
-                className="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-6 py-5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-medium"
+                disabled
+                placeholder="Fonctionnalité en cours de développement..."
+                className="flex-1 bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl px-6 py-5 text-slate-400 dark:text-slate-600 focus:outline-none cursor-not-allowed font-medium"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
               />
               <button
                 onClick={handleGenerate}
-                disabled={loading || !prompt.trim()}
-                className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                className="bg-slate-500 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg cursor-not-allowed opacity-70"
               >
-                {loading ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <Send size={20} />
-                )}
+                <Send size={20} />
                 Générer
               </button>
             </div>

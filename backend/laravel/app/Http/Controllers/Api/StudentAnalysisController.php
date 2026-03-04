@@ -32,9 +32,10 @@ class StudentAnalysisController extends Controller
         if ($lastAnalysis) {
             return response()->json([
                 'success' => false,
+                'already_exists' => true,
                 'message' => "Une analyse a déjà été effectuée il y a moins de 24h.",
                 'data' => $lastAnalysis
-            ], 429);
+            ], 200);
         }
 
         // 2. Appel du service Python

@@ -80,6 +80,7 @@ const TOOLS = [
     accent: "border-amber-500",
     tag: "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
     label: "Visuel",
+    isFuture: true,
   },
   {
     id: "prof",
@@ -365,6 +366,11 @@ export default function StudentAIRevision({ isOnline = true }) {
                     >
                       {tool.label}
                     </span>
+                    {tool.isFuture && (
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400">
+                        Bientôt Disponible
+                      </span>
+                    )}
                   </div>
 
                   <div>

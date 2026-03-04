@@ -146,35 +146,32 @@ export default function StudentProfil() {
     e.preventDefault();
     setSaving(true);
     try {
-      // Convertir le fichier en base64 pour affichage local
-      let localAvatarUrl = profil?.avatar_url || null;
+      const formData = new FormData();
+      formData.append("email", editForm.email);
+      // Campus n'existe pas en DB pour le moment, mais on l'envoie si on veut l'étendre plus tard
+      // formData.append("campus", editForm.campus);
+
       if (editForm.avatar) {
-        localAvatarUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => resolve(ev.target.result);
-          reader.readAsDataURL(editForm.avatar);
-        });
+        formData.append("photo", editForm.avatar);
       }
 
-      // Appel API en best-effort
-      try {
-        await studentService.updateProfil({});
-      } catch {
-        // silencieux — on met à jour le state quand même
-      }
+      // Appel API réel
+      const updatedUser = await studentService.updateProfil(formData);
 
-      // Mise à jour locale du state
+      // Mise à jour locale du state avec les données du serveur
       setProfil((prev) => ({
         ...prev,
-        email: editForm.email,
-        campus: editForm.campus,
-        avatar_url: localAvatarUrl,
+        ...updatedUser,
+        // On s'assure que avatar_url est mis à jour (le backend renvoie le User frais)
       }));
 
       toast.success("Profil mis à jour !");
       setShowEditModal(false);
-    } catch {
-      toast.error("Erreur lors de la mise à jour.");
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error(
+        error.response?.data?.message || "Erreur lors de la mise à jour.",
+      );
     } finally {
       setSaving(false);
     }
@@ -637,23 +634,13 @@ export default function StudentProfil() {
                         </span>
                       )}
                     </div>
-                    <motion.button
+                    <button
                       type="button"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() =>
-                        toast.error(
-                          "Le changement de photo est temporairement indisponible.",
-                        )
-                      }
-                      className="absolute bottom-0 right-0 w-8 h-8 bg-slate-500 text-white rounded-full flex items-center justify-center shadow-md transition cursor-not-allowed group"
-                      title="En maintenance"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-md transition active:scale-95"
                     >
                       <Camera size={14} />
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] font-black px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                        EN MAINTENANCE
-                      </span>
-                    </motion.button>
+                    </button>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -662,11 +649,8 @@ export default function StudentProfil() {
                       onChange={handleAvatarChange}
                     />
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    Photo de profil{" "}
-                    <span className="text-orange-500 font-black italic">
-                      (Bientôt disponible)
-                    </span>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Photo de profil
                   </p>
                 </div>
 
