@@ -637,13 +637,23 @@ export default function StudentProfil() {
                         </span>
                       )}
                     </div>
-                    <button
+                    <motion.button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-md transition active:scale-95"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() =>
+                        toast.error(
+                          "Le changement de photo est temporairement indisponible.",
+                        )
+                      }
+                      className="absolute bottom-0 right-0 w-8 h-8 bg-slate-500 text-white rounded-full flex items-center justify-center shadow-md transition cursor-not-allowed group"
+                      title="En maintenance"
                     >
                       <Camera size={14} />
-                    </button>
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[8px] font-black px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        EN MAINTENANCE
+                      </span>
+                    </motion.button>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -652,8 +662,11 @@ export default function StudentProfil() {
                       onChange={handleAvatarChange}
                     />
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Photo de profil
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    Photo de profil{" "}
+                    <span className="text-orange-500 font-black italic">
+                      (Bientôt disponible)
+                    </span>
                   </p>
                 </div>
 

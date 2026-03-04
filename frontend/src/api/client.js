@@ -67,12 +67,35 @@ const setupInterceptors = (client) => {
     client.interceptors.response.use(
         (response) => response,
         (error) => {
+            // Gestion de l'expiration du token (401)
             if (error.response?.status === 401) {
                 if (!window.location.pathname.includes('/login')) {
                     localStorage.removeItem('token');
                     window.location.href = '/login';
                 }
             }
+
+            // Formater le message d'erreur pour l'utilisateur
+            if (error.response?.data) {
+                const originalMessage = error.response.data.message || error.response.data.error || "";
+
+                // Détection des erreurs de base de données ou de services externes (Google Calendar, etc.)
+                const isDatabaseError = /sql|database|db_|connection|query|mysql|pdo/i.test(originalMessage);
+                const isExternalServiceError = /google|calendar|oauth|provider|api_key/i.test(originalMessage);
+                const isServerError = error.response.status >= 500;
+
+                if (isDatabaseError || isExternalServiceError || isServerError) {
+                    const friendlyMessage = isExternalServiceError
+                        ? "Désolé, une erreur est survenue lors de la communication avec un service externe (Google Calendar). Nos équipes travaillent à la résolution."
+                        : "Une erreur technique est survenue sur nos serveurs. Veuillez réessayer dans quelques instants.";
+
+                    // On remplace le message pour que les composants affichent le message formaté
+                    if (error.response.data.message) error.response.data.message = friendlyMessage;
+                    if (error.response.data.error) error.response.data.error = friendlyMessage;
+                    if (!error.response.data.message && !error.response.data.error) error.response.data.message = friendlyMessage;
+                }
+            }
+
             return Promise.reject(error);
         }
     );

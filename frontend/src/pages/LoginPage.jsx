@@ -206,12 +206,12 @@ const LoginPage = () => {
             {/* Role tabs */}
             <motion.div
               variants={itemVariants}
-              className="flex w-full items-center justify-center lg:justify-start"
+              className="flex w-full justify-center"
             >
               <Tabs
                 defaultValue={role}
                 onValueChange={setRole}
-                className="w-full max-w-xs"
+                className="w-full"
               >
                 <TabsList className="grid grid-cols-3 h-12 bg-slate-100/80 dark:bg-slate-800/50 p-1 rounded-2xl gap-1">
                   <TabsTrigger
@@ -228,9 +228,9 @@ const LoginPage = () => {
                   </TabsTrigger>
                   <TabsTrigger
                     value="student"
-                    className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700"
+                    className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 font-bold"
                   >
-                    Élève
+                    Étudiant
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
