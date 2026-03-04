@@ -14,6 +14,7 @@ import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
 import ChatPage from "./pages/ChatPage";
 import SessionsFeedPage from "./pages/SessionsFeedPage";
+import LandingPage from "./pages/LandingPage";
 import { authService } from "./services/authService";
 import { useState, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
@@ -24,9 +25,9 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
   const user = authService.getCurrentUser();
   const role = authService.getRole();
 
-  if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/landing" />;
   if (allowedRoles.length > 0 && !allowedRoles.includes(role))
-    return <Navigate to="/" />;
+    return <Navigate to="/landing" />;
 
   return children;
 };
@@ -38,6 +39,8 @@ function AppContent() {
   );
 
   const hideGlobalNavbar =
+    location.pathname === "/" ||
+    location.pathname.startsWith("/landing") ||
     location.pathname.startsWith("/chef") ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/etudiant") ||
@@ -62,6 +65,7 @@ function AppContent() {
       {!hideGlobalNavbar && <Navbar />}
       <Routes>
         {/* Routes publiques */}
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         {/* Callback OAuth Google — accessible sans auth (token lu depuis localStorage) */}
         <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
@@ -119,20 +123,34 @@ function AppContent() {
           }
         />
 
-        {/* Redirection par défaut selon le rôle */}
-        <Route path="/" element={<HomeLoader />} />
+        {/* Landing page publique — redirige vers le dashboard si déjà connecté */}
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/landing" element={<LandingPage />} />
+
+        {/* Redirection après login selon le rôle */}
+        <Route path="/home" element={<HomeRedirect />} />
       </Routes>
     </>
   );
 }
 
-const HomeLoader = () => {
+// Redirige vers le dashboard si connecté, sinon vers la landing page
+const RootRedirect = () => {
+  const user = authService.getCurrentUser();
   const role = authService.getRole();
-  if (!role) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/landing" replace />;
+  if (role === "super_admin") return <Navigate to="/admin" replace />;
+  if (role === "chef_departement") return <Navigate to="/chef" replace />;
+  if (role === "student") return <Navigate to="/etudiant" replace />;
+  return <Navigate to="/landing" replace />;
+};
+
+const HomeRedirect = () => {
+  const role = authService.getRole();
   if (role === "super_admin") return <Navigate to="/admin" />;
   if (role === "chef_departement") return <Navigate to="/chef" />;
   if (role === "student") return <Navigate to="/etudiant" />;
-  return <Navigate to="/login" />;
+  return <Navigate to="/landing" />;
 };
 
 export default function App() {

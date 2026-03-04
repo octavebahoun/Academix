@@ -66,7 +66,7 @@ export const authService = {
             console.error('Logout error on server', e);
         }
         localStorage.clear();
-        window.location.href = '/login';
+        window.location.href = '/landing';
     },
 
     getCurrentUser: () => {

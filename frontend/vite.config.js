@@ -57,6 +57,8 @@ export default defineConfig({
       injectManifest: {
         // Fichiers à précacher automatiquement
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // Augmenter la limite pour les gros chunks (3 MiB)
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
 
       // Activer le SW en mode développement (nécessaire pour les push)
@@ -70,6 +72,20 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Séparer les gros vendors en chunks dédiés
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-remotion': ['remotion', '@remotion/player'],
+          'vendor-framer': ['framer-motion'],
+          'vendor-lottie': ['lottie-react'],
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-slot', '@radix-ui/react-tooltip'],
+        },
+      },
     },
   },
   server: {
