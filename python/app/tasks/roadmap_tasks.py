@@ -346,17 +346,9 @@ def _transcribe_video(video_id: str) -> Optional[str]:
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["fr", "en"])
             return " ".join([segment.get("text", "") for segment in transcript]).strip()
         except _TRANSCRIPT_EXCEPTIONS:
-            pass
-
-    temp_dir = tempfile.mkdtemp(prefix="roadmap_")
-    audio_path = None
-    try:
-        audio_path = _download_audio(video_id, temp_dir)
-        if not audio_path:
+            logger.info("Pas de transcription trouvée pour la vidéo %s, on l'ignore.", video_id)
             return None
-        return _transcribe_with_whisper(audio_path)
-    finally:
-        shutil.rmtree(temp_dir, ignore_errors=True)
+    return None
 
 
 def _create_evaluation_payload(candidate: Dict[str, Any]) -> Dict[str, Any]:
@@ -511,20 +503,34 @@ async def _run_pipeline(job_uuid: str, celery_id: str, attempt: int) -> None:
     )
     await roadmap_service.update_roadmap(roadmap_id, status=RoadmapJobStatus.transcribing)
 
-    transcribed = []
-    for candidate in candidates:
-        transcript = await asyncio.to_thread(_transcribe_video, candidate.get("video_id"))
-        if transcript:
-            candidate["transcript"] = transcript
-            transcribed.append(candidate)
+    async def process_transcript(candidate):
+        try:
+            transcript = await asyncio.to_thread(_transcribe_video, candidate.get("video_id"))
+            if transcript:
+                candidate["transcript"] = transcript
+                return candidate
+        except Exception as exc:
+            logger.warning("Erreur transcription %s: %s", candidate.get("video_id"), exc)
+        return None
 
-    evaluations = []
-    for candidate in transcribed:
-        eval_result = await asyncio.to_thread(_evaluate_candidate, candidate)
-        if eval_result and eval_result.get("score", 0) >= 60:
-            candidate.update(eval_result)
-            candidate["summary"] = candidate.get("summary") or eval_result.get("summary")
-            evaluations.append(candidate)
+    transcript_tasks = [process_transcript(cand) for cand in candidates]
+    transcribed_results = await asyncio.gather(*transcript_tasks)
+    transcribed = [c for c in transcribed_results if c is not None]
+
+    async def process_evaluation(candidate):
+        try:
+            eval_result = await asyncio.to_thread(_evaluate_candidate, candidate)
+            if eval_result and eval_result.get("score", 0) >= 60:
+                candidate.update(eval_result)
+                candidate["summary"] = candidate.get("summary") or eval_result.get("summary")
+                return candidate
+        except Exception as exc:
+            logger.warning("Erreur évaluation %s: %s", candidate.get("title"), exc)
+        return None
+
+    evaluation_tasks = [process_evaluation(cand) for cand in transcribed]
+    eval_results = await asyncio.gather(*evaluation_tasks)
+    evaluations = [c for c in eval_results if c is not None]
 
     if not evaluations:
         raise ValueError("Aucun contenu vidéo validé pour la roadmap")

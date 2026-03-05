@@ -13,5 +13,8 @@ nixPkgs = [
 
 [phases.build]
 cmds = [
-  "if [ -d python ] && [ -f python/main.py ]; then cd python; fi && python -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt"
+  "if [ -d python ]; then cd python && pip install --upgrade pip && pip install -r requirements.txt; fi"
 ]
+
+[start]
+cmd = "cd python && python main.py"
