@@ -98,9 +98,9 @@ export default function SummaryTool() {
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Zone principale 70% */}
-      <div className="flex-[7] min-w-0 space-y-6">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Zone principale */}
+      <div className="flex-1 lg:flex-[7] min-w-0 space-y-6 order-1 lg:order-1">
         <AnimatePresence mode="wait">
           {!result ? (
             <motion.div
@@ -118,7 +118,7 @@ export default function SummaryTool() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
                 <div
-                  className={`p-12 border-2 border-dashed rounded-[2rem] transition-all flex flex-col items-center gap-4 ${file ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
+                  className={`p-8 lg:p-12 border-2 border-dashed rounded-3xl lg:rounded-[2rem] transition-all flex flex-col items-center gap-4 ${file ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
                 >
                   <div
                     className={`w-16 h-16 rounded-full flex items-center justify-center ${file ? "bg-indigo-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}
@@ -141,7 +141,7 @@ export default function SummaryTool() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
                     Niveau de détail
@@ -197,10 +197,10 @@ export default function SummaryTool() {
               key="result"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-slate-50 dark:bg-slate-950 rounded-[2rem] p-8 border border-slate-200 dark:border-slate-800"
+              className="bg-slate-50 dark:bg-slate-950 rounded-3xl lg:rounded-[2rem] p-5 lg:p-8 border border-slate-200 dark:border-slate-800"
             >
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                <h3 className="text-lg lg:text-xl font-black text-slate-900 dark:text-white uppercase italic tracking-tight">
                   {result.title || "Fiche de révision"}
                 </h3>
                 <button className="flex items-center gap-2 text-indigo-500 font-bold text-xs uppercase tracking-widest hover:text-indigo-600 transition-colors">
@@ -226,8 +226,8 @@ export default function SummaryTool() {
         </AnimatePresence>
       </div>
 
-      {/* Sidebar 30% */}
-      <div className="flex-[3] min-w-[200px]">
+      {/* Sidebar */}
+      <div className="flex-1 lg:flex-[3] min-w-0 lg:min-w-[200px] order-2 lg:order-2">
         <AIHistorySidebar
           items={items}
           loading={histLoading}

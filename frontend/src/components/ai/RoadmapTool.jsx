@@ -93,7 +93,9 @@ export default function RoadmapTool() {
 
       if (res.status === "failed") {
         cleanupPolling();
-        setError(res.error_message || "Echec lors de la generation de la roadmap.");
+        setError(
+          res.error_message || "Echec lors de la generation de la roadmap.",
+        );
         setLoading(false);
         return;
       }
@@ -106,7 +108,9 @@ export default function RoadmapTool() {
     } catch (e) {
       cleanupPolling();
       setLoading(false);
-      setError(e?.response?.data?.message || "Impossible de suivre le statut du job.");
+      setError(
+        e?.response?.data?.message || "Impossible de suivre le statut du job.",
+      );
     }
   };
 
@@ -131,7 +135,10 @@ export default function RoadmapTool() {
       pollRef.current = setInterval(() => pollStatus(res.job_id), 2000);
     } catch (e) {
       setLoading(false);
-      setError(e?.response?.data?.message || "Erreur lors du declenchement de la generation.");
+      setError(
+        e?.response?.data?.message ||
+          "Erreur lors du declenchement de la generation.",
+      );
     }
   };
 
@@ -146,19 +153,22 @@ export default function RoadmapTool() {
 
   const handleDownloadPdf = async () => {
     try {
-      const roadmapUuid = roadmap?.roadmap_uuid || status?.roadmap_uuid || job?.roadmap_uuid;
+      const roadmapUuid =
+        roadmap?.roadmap_uuid || status?.roadmap_uuid || job?.roadmap_uuid;
       if (!roadmapUuid) return;
       const blob = await aiService.downloadRoadmapPdf(roadmapUuid);
       downloadBlob(blob, `roadmap_${roadmapUuid}.pdf`);
     } catch (e) {
-      setError(e?.response?.data?.message || "Erreur lors du telechargement du PDF.");
+      setError(
+        e?.response?.data?.message || "Erreur lors du telechargement du PDF.",
+      );
     }
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div className="lg:col-span-4 space-y-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-6">
+      <div className="lg:col-span-4 space-y-4 w-full">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl lg:rounded-[2rem] p-4 lg:p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center shadow-md">
               <Map size={22} />
@@ -180,13 +190,17 @@ export default function RoadmapTool() {
               </label>
               <select
                 value={form.mode}
-                onChange={(e) => setForm((p) => ({ ...p, mode: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, mode: e.target.value }))
+                }
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20"
                 disabled={loading}
               >
                 <option value="Revision guidee">Revision guidee</option>
                 <option value="Preparation examen">Preparation examen</option>
-                <option value="Apprentissage accelere">Apprentissage accelere</option>
+                <option value="Apprentissage accelere">
+                  Apprentissage accelere
+                </option>
               </select>
             </div>
 
@@ -196,7 +210,9 @@ export default function RoadmapTool() {
               </label>
               <input
                 value={form.matiere}
-                onChange={(e) => setForm((p) => ({ ...p, matiere: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, matiere: e.target.value }))
+                }
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20"
                 placeholder="Ex: Maths, Algorithmes..."
                 disabled={loading}
@@ -209,7 +225,9 @@ export default function RoadmapTool() {
               </label>
               <input
                 value={form.notion}
-                onChange={(e) => setForm((p) => ({ ...p, notion: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, notion: e.target.value }))
+                }
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20"
                 placeholder="Ex: Integrales, POO..."
                 disabled={loading}
@@ -222,7 +240,9 @@ export default function RoadmapTool() {
               </label>
               <select
                 value={form.niveau}
-                onChange={(e) => setForm((p) => ({ ...p, niveau: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, niveau: e.target.value }))
+                }
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500/20"
                 disabled={loading}
               >
@@ -236,7 +256,9 @@ export default function RoadmapTool() {
           <div className="mt-5 grid grid-cols-2 gap-3">
             <button
               onClick={handleGenerate}
-              disabled={loading || !form.mode || (!form.matiere && !form.notion)}
+              disabled={
+                loading || !form.mode || (!form.matiere && !form.notion)
+              }
               className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:scale-100 shadow-xl flex items-center justify-center gap-2"
             >
               {loading ? (
@@ -295,7 +317,10 @@ export default function RoadmapTool() {
 
           {error && (
             <div className="mt-4 flex items-start gap-3 rounded-2xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 p-4">
-              <AlertTriangle size={18} className="text-rose-600 dark:text-rose-400 mt-0.5" />
+              <AlertTriangle
+                size={18}
+                className="text-rose-600 dark:text-rose-400 mt-0.5"
+              />
               <p className="text-sm font-semibold text-rose-700 dark:text-rose-200">
                 {error}
               </p>
@@ -305,7 +330,11 @@ export default function RoadmapTool() {
 
         <button
           onClick={handleDownloadPdf}
-          disabled={!roadmap?.roadmap_uuid && !status?.roadmap_uuid && !job?.roadmap_uuid}
+          disabled={
+            !roadmap?.roadmap_uuid &&
+            !status?.roadmap_uuid &&
+            !job?.roadmap_uuid
+          }
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[10px] uppercase tracking-[0.2em] py-4 rounded-2xl transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <Download size={16} /> Telecharger PDF
@@ -320,10 +349,11 @@ export default function RoadmapTool() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-8"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl lg:rounded-[2rem] p-6 lg:p-8"
             >
               <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                Lance une generation pour afficher une roadmap (semaines, videos et ressources).
+                Lance une generation pour afficher une roadmap (semaines, videos
+                et ressources).
               </p>
             </motion.div>
           ) : (
@@ -332,7 +362,7 @@ export default function RoadmapTool() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-8"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl lg:rounded-[2rem] p-5 lg:p-8"
             >
               <div className="flex items-start justify-between gap-4 mb-8">
                 <div>
@@ -363,7 +393,8 @@ export default function RoadmapTool() {
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          {section.period_label || `Semaine ${section.position}`}
+                          {section.period_label ||
+                            `Semaine ${section.position}`}
                         </p>
                         <h4 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
                           {section.title}
@@ -435,4 +466,3 @@ export default function RoadmapTool() {
     </div>
   );
 }
-

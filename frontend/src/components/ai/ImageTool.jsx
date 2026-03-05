@@ -61,10 +61,10 @@ export default function ImageTool() {
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Zone principale 70% */}
-      <div className="flex-[7] min-w-0 space-y-8">
-        <div className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-xl relative overflow-hidden">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Zone principale */}
+      <div className="flex-1 lg:flex-[7] min-w-0 space-y-8 order-1 lg:order-1">
+        <div className="bg-white dark:bg-slate-900 p-6 lg:p-10 rounded-3xl lg:rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full -mr-20 -mt-20"></div>
           <div className="relative z-10 flex flex-col gap-6">
             <label className="text-sm font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest pl-2">
@@ -98,7 +98,7 @@ export default function ImageTool() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-900 rounded-[3rem] p-10 border border-slate-800 overflow-hidden shadow-2xl text-center"
+            className="bg-slate-900 rounded-3xl lg:rounded-[3rem] p-6 lg:p-10 border border-slate-800 overflow-hidden shadow-2xl text-center"
           >
             <h3 className="text-xl font-black text-white mb-4 uppercase italic tracking-tight underline decoration-amber-500 underline-offset-8">
               Résultat de la génération
@@ -145,8 +145,8 @@ export default function ImageTool() {
         )}
       </div>
 
-      {/* Sidebar 30% */}
-      <div className="flex-[3] min-w-[200px]">
+      {/* Sidebar */}
+      <div className="flex-1 lg:flex-[3] min-w-0 lg:min-w-[200px] order-2 lg:order-2">
         <AIHistorySidebar
           items={items}
           loading={histLoading}

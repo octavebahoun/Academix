@@ -86,9 +86,9 @@ export default function ExerciseTool() {
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Zone principale 70% */}
-      <div className="flex-[7] min-w-0">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Zone principale */}
+      <div className="flex-1 lg:flex-[7] min-w-0 order-1 lg:order-1">
         <div className="max-w-4xl space-y-8">
           {!exercises ? (
             <div className="max-w-2xl space-y-8">
@@ -100,7 +100,7 @@ export default function ExerciseTool() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
                 <div
-                  className={`p-16 border-2 border-dashed rounded-[3rem] transition-all flex flex-col items-center gap-6 ${file ? "border-purple-500 bg-purple-50/50 dark:bg-purple-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
+                  className={`p-8 lg:p-16 border-2 border-dashed rounded-3xl lg:rounded-[3rem] transition-all flex flex-col items-center gap-4 lg:gap-6 ${file ? "border-purple-500 bg-purple-50/50 dark:bg-purple-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
                 >
                   <div
                     className={`w-20 h-20 rounded-full flex items-center justify-center ${file ? "bg-purple-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}
@@ -158,7 +158,7 @@ export default function ExerciseTool() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.1 }}
-                      className="bg-white dark:bg-slate-950 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm"
+                      className="bg-white dark:bg-slate-950 p-6 lg:p-8 rounded-3xl lg:rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm"
                     >
                       <div className="flex items-start gap-4 mb-6">
                         <span className="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0">
@@ -223,8 +223,8 @@ export default function ExerciseTool() {
         </div>
       </div>
 
-      {/* Sidebar 30% */}
-      <div className="flex-[3] min-w-[200px]">
+      {/* Sidebar */}
+      <div className="flex-1 lg:flex-[3] min-w-0 lg:min-w-[200px] order-2 lg:order-2">
         <AIHistorySidebar
           items={items}
           loading={histLoading}

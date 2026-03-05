@@ -126,9 +126,9 @@ export default function ProfAITool() {
   };
 
   return (
-    <div className="flex gap-6 h-[700px]">
-      {/* Zone principale 70% — chat */}
-      <div className="flex-[7] min-w-0 flex flex-col bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div className="flex flex-col lg:flex-row gap-6 lg:h-[700px]">
+      {/* Zone principale — chat */}
+      <div className="flex-1 lg:flex-[7] min-w-0 h-[500px] lg:h-full flex flex-col bg-white dark:bg-slate-900 rounded-3xl lg:rounded-[3rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden order-1 lg:order-1">
         {/* Header */}
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -162,7 +162,7 @@ export default function ProfAITool() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6 scrollbar-hide">
           <AnimatePresence initial={false}>
             {messages.map((msg, i) => (
               <motion.div
@@ -221,7 +221,7 @@ export default function ProfAITool() {
         </div>
 
         {/* Input */}
-        <div className="p-8 bg-slate-50/50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
+        <div className="p-4 lg:p-8 bg-slate-50/50 dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800">
           <div className="relative flex items-center gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 pl-6 shadow-inner focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
             <input
               type="text"
@@ -242,8 +242,8 @@ export default function ProfAITool() {
         </div>
       </div>
 
-      {/* Sidebar 30% — conversations passées */}
-      <div className="flex-[3] min-w-[200px]">
+      {/* Sidebar */}
+      <div className="flex-1 lg:flex-[3] min-w-0 lg:min-w-[200px] h-[300px] lg:h-full order-2 lg:order-2">
         <AIHistorySidebar
           items={items}
           loading={histLoading}

@@ -46,10 +46,10 @@ from app.services import roadmap_service
 logger = get_task_logger(__name__)
 
 MAX_YOUTUBE_RESULTS = 12
-MIN_DURATION_SECONDS = 180
-MAX_DURATION_SECONDS = 1800
-MIN_VIEWS = 1000
-MAX_VIDEO_AGE_DAYS = 365 * 5
+MIN_DURATION_SECONDS = 60  # Accept shorter videos (1 min)
+MAX_DURATION_SECONDS = 2400 # Up to 40 mins
+MIN_VIEWS = 0 # No view count floor, reliability is checked later via transcripts
+MAX_VIDEO_AGE_DAYS = 365 * 10 # 10 years
 
 
 def _safe_json_load(raw: str) -> Optional[Any]:
@@ -264,13 +264,23 @@ def _search_youtube_concept(concept: Dict[str, Any]) -> List[Dict[str, Any]]:
         "type": "video",
         "maxResults": MAX_YOUTUBE_RESULTS,
         "order": "relevance",
-        "relevanceLanguage": "fr",
         "key": settings.YOUTUBE_API_KEY,
     }
+    
+    # Try with French first
+    search_params["relevanceLanguage"] = "fr"
     search_resp = requests.get("https://www.googleapis.com/youtube/v3/search", params=search_params, timeout=30)
+    
+    # Fallback to general search if no results or failure
+    if search_resp.status_code != 200 or not search_resp.json().get("items"):
+        if "relevanceLanguage" in search_params:
+            del search_params["relevanceLanguage"]
+            search_resp = requests.get("https://www.googleapis.com/youtube/v3/search", params=search_params, timeout=30)
+
     if search_resp.status_code != 200:
-        logger.warning("YouTube search échoué (%s)", search_resp.status_code)
+        logger.warning("YouTube search échoué (%s): %s", search_resp.status_code, search_resp.text)
         return []
+        
     items = search_resp.json().get("items", [])
     video_ids = [item.get("id", {}).get("videoId") for item in items if item.get("id", {}).get("videoId")]
     if not video_ids:
@@ -578,7 +588,9 @@ async def _run_pipeline(job_uuid: str, celery_id: str, attempt: int) -> None:
     evaluations = [c for c in eval_results if c is not None]
 
     if not evaluations:
-        raise ValueError("Aucun contenu vidéo validé pour la roadmap")
+        if not candidates:
+            raise ValueError("Aucune vidéo trouvée sur YouTube pour ces concepts. Essayez des termes plus larges.")
+        raise ValueError("Des vidéos ont été trouvées mais aucune n'a été validée par l'IA (contenu non pertinent ou pas de sous-titres).")
 
     await roadmap_service.update_job(
         job_uuid,

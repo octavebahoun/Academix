@@ -52,7 +52,7 @@ export default function QuizTool() {
           },
           created_at: new Date().toISOString(),
         },
-        res  // ← résultat complet persisté dans IndexedDB
+        res, // ← résultat complet persisté dans IndexedDB
       );
     } catch {
       alert("Erreur lors de la génération du quiz");
@@ -79,7 +79,9 @@ export default function QuizTool() {
         setQuiz(cached);
         setCurrentStep("playing");
       } else {
-        alert("Impossible de charger ce quiz (pas de version hors-ligne disponible)");
+        alert(
+          "Impossible de charger ce quiz (pas de version hors-ligne disponible)",
+        );
       }
     } finally {
       setLoading(false);
@@ -110,9 +112,9 @@ export default function QuizTool() {
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Zone principale 70% */}
-      <div className="flex-[7] min-w-0">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Zone principale */}
+      <div className="flex-1 lg:flex-[7] min-w-0 order-1 lg:order-1">
         <div className="max-w-3xl">
           <AnimatePresence mode="wait">
             {currentStep === "upload" && (
@@ -131,7 +133,7 @@ export default function QuizTool() {
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
                   <div
-                    className={`p-16 border-2 border-dashed rounded-[3rem] transition-all flex flex-col items-center gap-6 ${file ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
+                    className={`p-8 lg:p-16 border-2 border-dashed rounded-3xl lg:rounded-[3rem] transition-all flex flex-col items-center gap-4 lg:gap-6 ${file ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
                   >
                     <div
                       className={`w-20 h-20 rounded-full flex items-center justify-center ${file ? "bg-emerald-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}
@@ -179,7 +181,7 @@ export default function QuizTool() {
                   {quiz.questions.map((q, i) => (
                     <div
                       key={i}
-                      className="bg-white dark:bg-slate-950 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm"
+                      className="bg-white dark:bg-slate-950 p-5 lg:p-8 rounded-3xl lg:rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm"
                     >
                       <div className="flex gap-4 mb-6">
                         <span className="flex-shrink-0 w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-xs font-black text-slate-500">
@@ -229,7 +231,7 @@ export default function QuizTool() {
                 key="result"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white dark:bg-slate-900 rounded-[3rem] p-12 text-center shadow-2xl border border-slate-100 dark:border-slate-800"
+                className="bg-white dark:bg-slate-900 rounded-3xl lg:rounded-[3rem] p-6 lg:p-12 text-center shadow-2xl border border-slate-100 dark:border-slate-800"
               >
                 <div
                   className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 ${score === quiz.questions.length ? "bg-emerald-500" : "bg-amber-500"} text-white shadow-xl`}
@@ -255,7 +257,7 @@ export default function QuizTool() {
                     return (
                       <div
                         key={i}
-                        className={`p-6 rounded-[2rem] border-2 shadow-sm ${isCorrect ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-500/10" : "border-rose-500/50 bg-rose-50/50 dark:bg-rose-500/10"}`}
+                        className={`p-4 lg:p-6 rounded-2xl lg:rounded-[2rem] border-2 shadow-sm ${isCorrect ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-500/10" : "border-rose-500/50 bg-rose-50/50 dark:bg-rose-500/10"}`}
                       >
                         <p className="font-bold text-slate-800 dark:text-slate-200 mb-4">
                           {i + 1}. {q.question}
@@ -306,8 +308,8 @@ export default function QuizTool() {
         </div>
       </div>
 
-      {/* Sidebar 30% */}
-      <div className="flex-[3] min-w-[200px]">
+      {/* Sidebar */}
+      <div className="flex-1 lg:flex-[3] min-w-0 lg:min-w-[200px] order-2 lg:order-2">
         <AIHistorySidebar
           items={items}
           loading={histLoading}

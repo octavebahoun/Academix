@@ -174,10 +174,10 @@ export default function PodcastTool() {
   };
 
   return (
-    <div className="flex gap-6">
-      {/* Zone principale 70% */}
-      <div className="flex-[7] min-w-0">
-        <div className="max-w-4xl space-y-12">
+    <div className="flex flex-col lg:flex-row gap-6">
+      {/* Zone principale */}
+      <div className="flex-1 lg:flex-[7] min-w-0 order-1 lg:order-1">
+        <div className="max-w-4xl mx-auto space-y-8 lg:space-y-12">
           {!isGenerated ? (
             <div className="max-w-2xl mx-auto space-y-8">
               <div className="text-center mb-10">
@@ -204,7 +204,7 @@ export default function PodcastTool() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                 />
                 <div
-                  className={`p-16 border-2 border-dashed rounded-[3rem] transition-all flex flex-col items-center gap-6 ${file ? "border-rose-500 bg-rose-50/50 dark:bg-rose-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
+                  className={`p-8 lg:p-16 border-2 border-dashed rounded-3xl lg:rounded-[3rem] transition-all flex flex-col items-center gap-4 lg:gap-6 ${file ? "border-rose-500 bg-rose-50/50 dark:bg-rose-500/10" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"}`}
                 >
                   <div
                     className={`w-20 h-20 rounded-full flex items-center justify-center ${file ? "bg-rose-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}
@@ -250,7 +250,7 @@ export default function PodcastTool() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-slate-900 rounded-[4rem] p-12 shadow-2xl border border-slate-800 overflow-hidden relative"
+                className="bg-slate-900 rounded-3xl lg:rounded-[4rem] p-6 lg:p-12 shadow-2xl border border-slate-800 overflow-hidden relative"
               >
                 {/* Audio Waves Decor */}
                 <div className="absolute bottom-0 left-0 w-full h-32 opacity-10 flex items-end gap-1 px-4">
@@ -280,10 +280,10 @@ export default function PodcastTool() {
                     </div>
                   </div>
 
-                  <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-2">
+                  <h2 className="text-xl lg:text-3xl font-black text-white uppercase italic tracking-tighter mb-2">
                     Podcast : {file?.name.split(".")[0]}
                   </h2>
-                  <p className="text-rose-400 font-bold text-xs uppercase tracking-widest mb-12">
+                  <p className="text-rose-400 font-bold text-[10px] lg:text-xs uppercase tracking-widest mb-8 lg:mb-12">
                     Généré par AcademiX AI • {formatTime(duration)}
                   </p>
 
@@ -329,13 +329,13 @@ export default function PodcastTool() {
                       </button>
                       <button
                         onClick={togglePlay}
-                        className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-2xl hover:scale-110 active:scale-95 transition-all"
+                        className="w-20 h-20 lg:w-24 lg:h-24 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-2xl hover:scale-110 active:scale-95 transition-all"
                       >
                         {isPlaying ? (
-                          <Pause size={40} fill="currentColor" />
+                          <Pause size={32} fill="currentColor" />
                         ) : (
                           <Play
-                            size={40}
+                            size={32}
                             fill="currentColor"
                             className="ml-2"
                           />
@@ -454,8 +454,8 @@ export default function PodcastTool() {
         </div>
       </div>
 
-      {/* Sidebar 30% */}
-      <div className="flex-[3] min-w-[200px]">
+      {/* Sidebar */}
+      <div className="flex-1 lg:flex-[3] min-w-0 lg:min-w-[200px] order-2 lg:order-2">
         <AIHistorySidebar
           items={items}
           loading={histLoading}
