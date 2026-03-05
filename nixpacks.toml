@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = [
+  "python312",
+  "ffmpeg",
+  "cairo",
+  "pango",
+  "gdk-pixbuf",
+  "glib",
+  "libffi",
+  "harfbuzz",
+  "fontconfig"
+]
+
+[phases.build]
+cmds = [
+  "if [ -d python ] && [ -f python/main.py ]; then cd python; fi && python -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt"
+]
