@@ -56,12 +56,8 @@ export default function PodcastTool() {
     setLoading(true);
     try {
       const response = await aiService.generatePodcast({ file });
-      const endpoint = response.url.replace(/^\/api\/v1/, "");
-      const audioResponse = await pythonApiClient.get(endpoint, {
-        responseType: "blob",
-      });
-      const blobUrl = window.URL.createObjectURL(audioResponse.data);
-      setAudioUrl(blobUrl);
+      const newAudioUrl = `/api/python/podcast/download/${response.podcast_id}`;
+      setAudioUrl(newAudioUrl);
       setPodcastData(response);
       setIsGenerated(true);
       setSelectedHistoryId(response.podcast_id);
@@ -97,30 +93,22 @@ export default function PodcastTool() {
     setIsGenerated(false);
     setLoading(true);
     try {
-      const endpoint = entry.meta?.audio_url?.replace(/^\/api\/v1/, "");
-      if (endpoint) {
-        const audioResponse = await pythonApiClient.get(endpoint, {
-          responseType: "blob",
-        });
-        const blobUrl = window.URL.createObjectURL(audioResponse.data);
-        setAudioUrl(blobUrl);
-        setPodcastData({ url: entry.meta.audio_url, script: null });
+      const id =
+        entry.result_id ||
+        (entry.meta?.audio_url && entry.meta.audio_url.split("/").pop());
+      if (id) {
+        const newAudioUrl = `/api/python/podcast/download/${id}`;
+
+        // On récupère le script s'il est dispo en local
+        const cached = await offlineStorage.get("podcast", entry.result_id);
+
+        setAudioUrl(newAudioUrl);
+        setPodcastData({ url: newAudioUrl, script: cached?.script || null });
         setIsGenerated(true);
       }
-    } catch {
-      // Fallback offline : l'audio est peut-être dans le Cache API (Workbox).
-      // On reconstruit une URL directe depuis les métadonnées stockées en IndexedDB.
-      const cached = await offlineStorage.get("podcast", entry.result_id);
-      if (cached?.url) {
-        // La requête vers cette URL passera par le Service Worker → cache Workbox
-        setAudioUrl(cached.url);
-        setPodcastData({ url: cached.url, script: cached.script || null });
-        setIsGenerated(true);
-      } else {
-        alert(
-          "Impossible de charger ce podcast (pas de version hors-ligne disponible)",
-        );
-      }
+    } catch (e) {
+      console.error(e);
+      alert("Impossible de charger l'historique de ce podcast.");
     } finally {
       setLoading(false);
     }

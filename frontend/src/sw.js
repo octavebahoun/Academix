@@ -66,6 +66,21 @@ registerRoute(
     })
 );
 
+// ── API Node — Sessions ───────────────────────────────────────
+registerRoute(
+    ({ url }) => url.pathname.match(/^\/api\/node\/sessions/),
+    new StaleWhileRevalidate({
+        cacheName: 'node-sessions-v1',
+        plugins: [
+            new CacheableResponsePlugin({ statuses: [0, 200] }),
+            new ExpirationPlugin({
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+                maxEntries: 100,
+            }),
+        ],
+    })
+);
+
 // Invalidation manuelle du cache étudiant (depuis l'app ou un push)
 self.addEventListener('message', async (event) => {
     if (event.data?.type === 'INVALIDATE_STUDENT_CACHE') {
@@ -107,15 +122,15 @@ registerRoute(
 );
 
 
-// ── API Laravel — podcasts audio ──────────────────────────────
-// Couvre : /api/laravel/podcast/download/<id>
+// ── API Podcasts Audio (Laravel ou Python) ────────────────────
+// Couvre : /api/laravel/podcast/download/<id> ou /api/python/podcast/download/<id>
 //          /api/laravel/podcast/stream/<id>
 // + fichiers audio par extension (mp3, wav, ogg…)
 // + request.destination === 'audio' (balise <audio> native)
 // RangeRequestsPlugin gère les requêtes partielles (HTTP 206) pour le seeking.
 registerRoute(
     ({ request, url }) =>
-        url.pathname.match(/^\/api\/laravel\/podcast\/(download|stream)\/[\w-]+/) ||
+        url.pathname.match(/^\/api\/(laravel|python)\/podcast\/(download|stream)\/[\w-]+/) ||
         request.destination === 'audio' ||
         /\.(?:mp3|wav|ogg|m4a|aac)(\?.*)?$/i.test(url.pathname),
     new CacheFirst({
