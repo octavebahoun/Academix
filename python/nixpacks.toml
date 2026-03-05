@@ -1,6 +1,8 @@
+providers = ["python"]
+
 [phases.setup]
 nixPkgs = [
-  "python312",
+  "python311",
   "ffmpeg",
   "cairo",
   "pango",
@@ -12,9 +14,5 @@ nixPkgs = [
 ]
 
 [phases.build]
-cmds = [
-  "pip install --upgrade pip && pip install -r requirements.txt"
-]
-
-[start]
-cmd = "python main.py"
+# Le provider python s'occupe déjà de "pip install -r requirements.txt"
+# On n'a rien besoin d'ajouter ici, Railway le fera auto-magiquement !

@@ -136,15 +136,10 @@ def _build_analysis_messages(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
         },
         {
             "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        f"Mode: {mode}\nMatière: {matiere}\nNotion: {notion}\nNiveau: {niveau}\n"
-                        "Fournissez un JSON contenant une liste de concepts ordonnés, leurs requêtes YouTube et les liens docs pertinents."
-                    ),
-                }
-            ],
+            "content": (
+                f"Mode: {mode}\nMatière: {matiere}\nNotion: {notion}\nNiveau: {niveau}\n"
+                "Fournissez un JSON contenant une liste de concepts ordonnés, leurs requêtes YouTube et les liens docs pertinents."
+            ),
         },
     ]
 
@@ -369,15 +364,10 @@ def _evaluate_candidate(candidate: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         },
         {
             "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        f"Évaluez la pertinence de la vidéo '{candidate.get('title')}', "
-                        f"concept '{candidate.get('concept')}'. Transcription : {candidate.get('transcript')[:2000]}"
-                    ),
-                }
-            ],
+            "content": (
+                f"Évaluez la pertinence de la vidéo '{candidate.get('title')}', "
+                f"concept '{candidate.get('concept')}'. Transcription : {candidate.get('transcript')[:2000]}"
+            ),
         },
     ]
     try:
@@ -407,15 +397,10 @@ def _build_sections_from_openrouter(analysis: Dict[str, Any], validated: List[Di
         },
         {
             "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": (
-                        "Crée une roadmap organisée par semaines/chapitres à partir des vidéos suivantes :\n"
-                        + "".join([f"- {video.get('title')} ({video.get('url')})\n" for video in validated])
-                    ),
-                }
-            ],
+            "content": (
+                "Crée une roadmap organisée par semaines/chapitres à partir des vidéos suivantes :\n"
+                + "".join([f"- {video.get('title')} ({video.get('url')})\n" for video in validated])
+            ),
         },
     ]
     try:
