@@ -1,20 +1,10 @@
 import axios from 'axios';
 
-// URLs de base pour les différentes API
-// Utilise les variables d'environnement si disponibles, sinon utilise les valeurs par défaut de production
+const LARAVEL_API_URL = import.meta.env.VITE_LARAVEL_API_URL || '/api/laravel';
+const NODE_API_URL    = import.meta.env.VITE_NODE_API_URL    || '/api/node';
+const PYTHON_API_URL  = import.meta.env.VITE_PYTHON_API_URL  || '/api/python';
+ 
 
-// URL API Node.js (Chat, Messages, Notifications)
-const NODE_API_URL = import.meta.env.VITE_NODE_API_URL || 'https://team-d-excellence-hackbyifri-2026.onrender.com/api';
-
-// URL API Laravel (Authentification, Utilisateurs, Cours)
-const LARAVEL_API_URL = import.meta.env.VITE_LARAVEL_API_URL || 'http://127.0.0.1:8000/api/v1';
-
-// URL API Python (IA: Résumés, Quiz, Exercices, Images)
-const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL || 'http://127.0.0.1:5000/api/v1';
-
-/**
- * Client pour l'API Node.js (Chat, Notifications, etc.)
- */
 const nodeApiClient = axios.create({
     baseURL: NODE_API_URL,
     headers: {

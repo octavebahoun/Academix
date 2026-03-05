@@ -1,8 +1,20 @@
 {
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "rewrites": [
+    {
+      "source": "/api/laravel/:path*",
+      "destination": "https://academix-production-bfde.up.railway.app/api/v1/:path*"
+    },
+    {
+      "source": "/api/node/:path*",
+      "destination": "https://team-d-excellence-hackbyifri-2026.onrender.com/api/:path*"
+    },
+    {
+      "source": "/api/python/:path*",
+      "destination": "https://academix-production-dd5f.up.railway.app/api/v1/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

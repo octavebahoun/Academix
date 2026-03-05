@@ -7,20 +7,24 @@ import { RangeRequestsPlugin } from 'workbox-range-requests';
 import { BackgroundSyncPlugin } from 'workbox-background-sync';
 
 
+// ── Précache + nettoyage ───────────────────────────────────────
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
 
-// Si l'utilisateur soumet un formulaire (quiz, profil…) sans connexion,
-// la requête est mise en file d'attente et rejouée automatiquement
-// dès que la connexion revient (via l'API Background Sync).
+// ── Background Sync pour les POST offline ─────────────────────
+// Les requêtes POST faites sans connexion sont mises en file
+// d'attente et rejouées automatiquement au retour du réseau.
 const bgSyncPlugin = new BackgroundSyncPlugin('post-queue', {
-    maxRetentionTime: 24 * 60, // rejouer pendant 24h max
+    maxRetentionTime: 24 * 60,
 });
 
-// On intercepte tous les POST vers notre API
 registerRoute(
-    ({ request }) => request.method === 'POST' && request.url.includes('/api/'),
+    ({ request }) => request.method === 'POST' && (
+        request.url.includes('/api/laravel/') ||
+        request.url.includes('/api/node/') ||
+        request.url.includes('/api/python/')
+    ),
     new NetworkOnly({
         plugins: [bgSyncPlugin],
     }),
@@ -28,8 +32,7 @@ registerRoute(
 );
 
 
-// NetworkFirst : essaie le réseau, sinon sert la version en cache.
-// index.html est précaché → l'app se charge toujours hors-ligne.
+// ── Navigation SPA ─────────────────────────────────────────────
 const navigationHandler = new NetworkFirst({
     cacheName: 'navigations-v1',
     plugins: [
@@ -39,28 +42,36 @@ const navigationHandler = new NetworkFirst({
 registerRoute(new NavigationRoute(navigationHandler));
 
 
-// On inclut désormais notes, emploi du temps, profil, tâches et alertes.
+// ── API Laravel — données étudiant ────────────────────────────
+// /api/laravel/student/notes
+// /api/laravel/student/emploi-temps
+// /api/laravel/student/profil
+// /api/laravel/student/moyennes
+// /api/laravel/student/taches
+// /api/laravel/student/alertes
+// /api/laravel/student/analysis
 registerRoute(
-    ({ url }) => url.pathname.match(/\/api\/v1\/student\/(notes|emploi-temps|profil|moyennes|taches|alertes|analysis)/),
+    ({ url }) => url.pathname.match(
+        /^\/api\/laravel\/student\/(notes|emploi-temps|profil|moyennes|taches|alertes|analysis)/
+    ),
     new StaleWhileRevalidate({
         cacheName: 'student-api-v1',
         plugins: [
             new CacheableResponsePlugin({ statuses: [0, 200] }),
             new ExpirationPlugin({
                 maxAgeSeconds: 7 * 24 * 60 * 60,
-                maxEntries: 100
+                maxEntries: 100,
             }),
         ],
     })
 );
 
-// Écoute le message d'invalidation envoyé depuis l'app ou le push handler
+// Invalidation manuelle du cache étudiant (depuis l'app ou un push)
 self.addEventListener('message', async (event) => {
     if (event.data?.type === 'INVALIDATE_STUDENT_CACHE') {
         const cache = await caches.open('student-api-v1');
         const keys = await cache.keys();
         await Promise.all(keys.map((req) => cache.delete(req)));
-        // Notifie tous les clients que le cache a été vidé
         const allClients = await clients.matchAll({ includeUncontrolled: true });
         allClients.forEach((client) =>
             client.postMessage({ type: 'STUDENT_CACHE_INVALIDATED' })
@@ -69,10 +80,10 @@ self.addEventListener('message', async (event) => {
 });
 
 
-
-// CacheFirst justifié : un résumé/quiz généré pour un doc donné ne change pas.
+// ── API Python — résultats IA (summary, quiz) ─────────────────
+// Ces contenus sont immuables une fois générés → CacheFirst.
 registerRoute(
-    ({ url }) => url.pathname.match(/\/api\/v1\/(summary|quiz)\/[\w-]+/),
+    ({ url }) => url.pathname.match(/^\/api\/python\/(summary|quiz)\/[\w-]+/),
     new CacheFirst({
         cacheName: 'ai-results-v1',
         plugins: [
@@ -83,8 +94,9 @@ registerRoute(
 );
 
 
+// ── API Python — exercices & images ───────────────────────────
 registerRoute(
-    ({ url }) => url.pathname.match(/\/api\/v1\/(exercises|images)\/[\w-]+/),
+    ({ url }) => url.pathname.match(/^\/api\/python\/(exercises|images)\/[\w-]+/),
     new CacheFirst({
         cacheName: 'ai-exercices-images-v1',
         plugins: [
@@ -95,10 +107,17 @@ registerRoute(
 );
 
 
+// ── API Laravel — podcasts audio ──────────────────────────────
+// Couvre : /api/laravel/podcast/download/<id>
+//          /api/laravel/podcast/stream/<id>
+// + fichiers audio par extension (mp3, wav, ogg…)
+// + request.destination === 'audio' (balise <audio> native)
+// RangeRequestsPlugin gère les requêtes partielles (HTTP 206) pour le seeking.
 registerRoute(
-    ({ request }) =>
+    ({ request, url }) =>
+        url.pathname.match(/^\/api\/laravel\/podcast\/(download|stream)\/[\w-]+/) ||
         request.destination === 'audio' ||
-        /\.(?:mp3|wav|ogg|m4a|aac)(\?.*)?$/i.test(request.url),
+        /\.(?:mp3|wav|ogg|m4a|aac)(\?.*)?$/i.test(url.pathname),
     new CacheFirst({
         cacheName: 'audio-podcasts-v1',
         plugins: [
@@ -106,14 +125,15 @@ registerRoute(
             new CacheableResponsePlugin({ statuses: [0, 200, 206] }),
             new ExpirationPlugin({
                 maxAgeSeconds: 7 * 24 * 60 * 60,
-                maxEntries: 30, // Limite le nombre de podcasts en cache
-                purgeOnQuotaError: true // Nettoie auto si l'appareil est plein
+                maxEntries: 30,
+                purgeOnQuotaError: true,
             }),
         ],
     })
 );
 
 
+// ── Push Notifications ────────────────────────────────────────
 self.addEventListener('push', (event) => {
     if (!event.data) return;
 
@@ -124,7 +144,7 @@ self.addEventListener('push', (event) => {
         data = { title: 'AcademiX', body: event.data.text() };
     }
 
-    // on invalide immédiatement le cache student avant que l'app ne refetch.
+    // Invalidation immédiate du cache si les notes ont changé
     if (data.invalidateCache === 'student') {
         event.waitUntil(
             caches.open('student-api-v1').then(async (cache) => {
@@ -139,12 +159,8 @@ self.addEventListener('push', (event) => {
         body: data.body || 'Tu as une nouvelle notification',
         icon: data.icon || '/icons/icon-192x192.svg',
         badge: data.badge || '/icons/icon-72x72.svg',
-
-        // sinon on génère un tag unique avec le timestamp.
-        // renotify: true pour que le son/vibration se déclenche à chaque notif.
         tag: data.tag || `academix-${Date.now()}`,
         renotify: true,
-
         data: { url: data.url || '/dashboard' },
         vibrate: [200, 100, 200],
     };
@@ -153,6 +169,7 @@ self.addEventListener('push', (event) => {
 });
 
 
+// ── Notification click ────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
