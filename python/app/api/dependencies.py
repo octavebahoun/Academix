@@ -46,6 +46,14 @@ async def get_db_pool():
         print(f"Erreur de connexion MySQL : {e}")
         return None
 
+async def close_db_pool():
+    """Ferme proprement le pool de base de données (utile pour Celery/asyncio.run)."""
+    global _db_pool
+    if _db_pool is not None:
+        _db_pool.close()
+        await _db_pool.wait_closed()
+        _db_pool = None
+
 async def get_current_user(authorization: str = Header(None)):
     """
     Vérifie le token Sanctum de Laravel dans la base MySQL.

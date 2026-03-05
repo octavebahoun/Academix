@@ -618,13 +618,27 @@ async def _run_pipeline(job_uuid: str, celery_id: str, attempt: int) -> None:
     )
 
 
+from app.api.dependencies import close_db_pool
+
 @celery_app.task(bind=True, autoretry_for=(Exception,), retry_backoff=True, max_retries=3)
 def roadmap_pipeline_task(self, job_uuid: str) -> None:
     attempt = self.request.retries
+    
+    async def run_and_cleanup():
+        try:
+            await _run_pipeline(job_uuid, self.request.id, attempt)
+        finally:
+            await close_db_pool()
+            
     try:
-        asyncio.run(_run_pipeline(job_uuid, self.request.id, attempt))
+        asyncio.run(run_and_cleanup())
     except Exception as exc:  # pragma: no cover
         if attempt >= self.max_retries:
-            asyncio.run(roadmap_service.mark_job_failed(job_uuid, str(exc)))
+            async def fail_and_cleanup():
+                try:
+                    await roadmap_service.mark_job_failed(job_uuid, str(exc))
+                finally:
+                    await close_db_pool()
+            asyncio.run(fail_and_cleanup())
             raise
         raise self.retry(exc=exc)
