@@ -312,6 +312,43 @@ export default function RoadmapTool() {
                   </span>
                 ))}
               </div>
+
+              {/* Sources debug : vidéos trouvées sur YouTube pendant le scraping */}
+              {status.progress?.sources?.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                    🎬 {status.progress.sources.length} source(s) trouvée(s) —
+                    transcription en cours...
+                  </p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {status.progress.sources.map((src, i) => (
+                      <div
+                        key={i}
+                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2 flex items-start gap-2"
+                      >
+                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-300 border border-violet-500/20 shrink-0">
+                          {src.concept || "—"}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <a
+                            href={src.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] font-bold text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-300 truncate block transition-colors"
+                          >
+                            {src.title || src.url}
+                          </a>
+                          {src.duration_seconds && (
+                            <span className="text-[9px] text-slate-400">
+                              {Math.round(src.duration_seconds / 60)} min
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

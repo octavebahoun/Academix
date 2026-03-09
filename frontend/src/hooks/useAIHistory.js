@@ -56,9 +56,18 @@ export function useAIHistory(type) {
 
 
     const removeItem = useCallback(async (historyId) => {
-        setItems((prev) => prev.filter((e) => e.history_id !== historyId));
+        // On retrouve le result_id AVANT de retirer l'item de la liste,
+        // car offlineStorage indexe par result_id (≠ history_id pour le podcast).
+        setItems((prev) => {
+            const item = prev.find((e) => e.history_id === historyId);
+            if (item?.result_id) {
+                offlineStorage.delete(type, item.result_id);
+            }
+            // Fallback au cas où result_id serait absent
+            offlineStorage.delete(type, historyId);
+            return prev.filter((e) => e.history_id !== historyId);
+        });
 
-        offlineStorage.delete(type, historyId);
         try {
             await aiService.deleteHistoryItem(historyId);
         } catch {

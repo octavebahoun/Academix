@@ -50,6 +50,8 @@ MIN_DURATION_SECONDS = 60  # Accept shorter videos (1 min)
 MAX_DURATION_SECONDS = 2400 # Up to 40 mins
 MIN_VIEWS = 0 # No view count floor, reliability is checked later via transcripts
 MAX_VIDEO_AGE_DAYS = 365 * 10 # 10 years
+# Limite le nb de vidéos envoyées à la transcription pour éviter les timeouts
+MAX_CANDIDATES_FOR_TRANSCRIPTION = 8
 
 
 def _safe_json_load(raw: str) -> Optional[Any]:
@@ -539,16 +541,46 @@ async def _run_pipeline(job_uuid: str, celery_id: str, attempt: int) -> None:
     raw_candidates = await asyncio.gather(*scrape_tasks, return_exceptions=True)
     candidates = [item for sub in raw_candidates if isinstance(sub, list) for item in sub]
 
+    # Debug : on expose les sources trouvées dans le progress pour les voir côté frontend
+    debug_sources = [
+        {
+            "concept": c.get("concept"),
+            "title": c.get("title"),
+            "url": c.get("url"),
+            "duration_seconds": c.get("duration_seconds"),
+            "views": c.get("views"),
+        }
+        for c in candidates
+    ]
+    logger.info("[ROADMAP DEBUG] %d vidéos trouvées sur YouTube :\n%s",
+                len(candidates),
+                "\n".join(f"  - [{c['concept']}] {c['title']} → {c['url']}" for c in debug_sources))
+
     await roadmap_service.update_job(
         job_uuid,
         status=RoadmapJobStatus.transcribing,
         current_step="transcribing",
-        progress={"stage": "transcribing", "candidates": len(candidates)},
+        progress={
+            "stage": "transcribing",
+            "candidates": len(candidates),
+            "detail": f"{len(candidates)} vidéo(s) trouvée(s), transcription en cours...",
+            "sources": debug_sources,
+        },
     )
     await roadmap_service.update_roadmap(roadmap_id, status=RoadmapJobStatus.transcribing)
 
     if not candidates:
         logger.warning("Aucun candidat vidéo trouvé sur YouTube. Vérifiez l'API Key ou les filtres.")
+
+    # On limite le nombre de vidéos à transcrire pour éviter des timeouts trop longs.
+    # On trie par vues pour garder les plus populaires en premier.
+    if len(candidates) > MAX_CANDIDATES_FOR_TRANSCRIPTION:
+        candidates_sorted = sorted(candidates, key=lambda c: c.get("views", 0), reverse=True)
+        candidates_for_transcription = candidates_sorted[:MAX_CANDIDATES_FOR_TRANSCRIPTION]
+        logger.info("[ROADMAP DEBUG] Limitation : %d/%d candidats retenus pour transcription (top vues)",
+                    len(candidates_for_transcription), len(candidates))
+    else:
+        candidates_for_transcription = candidates
         
     async def process_transcript(candidate):
         try:
@@ -562,9 +594,14 @@ async def _run_pipeline(job_uuid: str, celery_id: str, attempt: int) -> None:
             logger.warning("Erreur transcription %s: %s", candidate.get("video_id"), exc)
         return None
 
-    transcript_tasks = [process_transcript(cand) for cand in candidates]
+    transcript_tasks = [process_transcript(cand) for cand in candidates_for_transcription]
     transcribed_results = await asyncio.gather(*transcript_tasks)
     transcribed = [c for c in transcribed_results if c is not None]
+
+    logger.info("[ROADMAP DEBUG] %d/%d vidéos transcrites avec succès",
+                len(transcribed), len(candidates))
+    for c in transcribed:
+        logger.info("  ✓ [%s] %s", c.get("concept"), c.get("title"))
 
     if not transcribed:
         logger.warning("Aucune vidéo transcripte parmi les %d candidats.", len(candidates))
@@ -586,6 +623,11 @@ async def _run_pipeline(job_uuid: str, celery_id: str, attempt: int) -> None:
     evaluation_tasks = [process_evaluation(cand) for cand in transcribed]
     eval_results = await asyncio.gather(*evaluation_tasks)
     evaluations = [c for c in eval_results if c is not None]
+
+    logger.info("[ROADMAP DEBUG] %d/%d vidéos validées par l'évaluateur IA",
+                len(evaluations), len(transcribed))
+    for c in evaluations:
+        logger.info("  ✓ score=%s [%s] %s", c.get("score"), c.get("concept"), c.get("title"))
 
     if not evaluations:
         if not candidates:
